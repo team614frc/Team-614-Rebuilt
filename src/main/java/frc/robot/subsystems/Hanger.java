@@ -32,13 +32,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
+import frc.robot.Constants.HangerConstants;
 
 public class Hanger extends SubsystemBase {
     public enum Position {
-        HOMED(0),
-        EXTEND_HOPPER(2),
-        HANGING(6),
-        HUNG(0.2);
+        HOMED(HangerConstants.HOMED),
+        EXTEND_HOPPER(HangerConstants.EXTEND_HOPPER),
+        HANGING(HangerConstants.HANGING),
+        HUNG(HangerConstants.HUNG);
 
         private final double inches;
 
@@ -52,12 +53,12 @@ public class Hanger extends SubsystemBase {
         }
     }
 
-    private static final Per<DistanceUnit, AngleUnit> kHangerExtensionPerMotorAngle = Inches.of(6).div(Rotations.of(142));
-    private static final Distance kExtensionTolerance = Inches.of(1);
+    private static final Per<DistanceUnit, AngleUnit> kHangerExtensionPerMotorAngle = Inches.of(HangerConstants.MOTOR_ANGLE_DISTANCE).div(Rotations.of(HangerConstants.ROTATIONS));
+    private static final Distance kExtensionTolerance = Inches.of(HangerConstants.EXTENSION_TOLERANCE);
 
     private final TalonFX motor;
-    private final MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0).withSlot(0);
-    private final VoltageOut voltageRequest = new VoltageOut(0);
+    private final MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(HangerConstants.INITIAL_SETPOINT).withSlot(HangerConstants.NEW_SLOT);
+    private final VoltageOut voltageRequest = new VoltageOut(HangerConstants.VOLTAGE_OUT);
 
     private boolean isHomed = false;
 
@@ -72,9 +73,9 @@ public class Hanger extends SubsystemBase {
             )
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(20))
+                    .withStatorCurrentLimit(HangerConstants.STATOR_CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(70))
+                    .withSupplyCurrentLimit(HangerConstants.SUPPLY_CURRENT_LIMIT)
                     .withSupplyCurrentLimitEnable(true)
             )
             .withMotionMagic(
@@ -84,10 +85,10 @@ public class Hanger extends SubsystemBase {
             )
             .withSlot0(
                 new Slot0Configs()
-                    .withKP(10)
-                    .withKI(0)
-                    .withKD(0)
-                    .withKV(12.0 / KrakenX60.kFreeSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
+                    .withKP(HangerConstants.kP)
+                    .withKI(HangerConstants.kI)
+                    .withKD(HangerConstants.kD)
+                    .withKV(HangerConstants.MAX_VOLTAGE / KrakenX60.kFreeSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
             );
 
         motor.getConfigurator().apply(config);
@@ -104,7 +105,7 @@ public class Hanger extends SubsystemBase {
     public void setPercentOutput(double percentOutput) {
         motor.setControl(
             voltageRequest
-                .withOutput(Volts.of(percentOutput * 12.0))
+                .withOutput(Volts.of(percentOutput * HangerConstants.MAX_VOLTAGE))
         );
     }
 
@@ -115,8 +116,8 @@ public class Hanger extends SubsystemBase {
 
     public Command homingCommand() {
         return Commands.sequence(
-            runOnce(() -> setPercentOutput(-0.05)),
-            Commands.waitUntil(() -> motor.getSupplyCurrent().getValue().in(Amps) > 0.4),
+            runOnce(() -> setPercentOutput(HangerConstants.HOMING_VOLTAGE)),
+            Commands.waitUntil(() -> motor.getSupplyCurrent().getValue().in(Amps) > HangerConstants.HOMING_CURRENT_THRESHOLD),
             runOnce(() -> {
                 motor.setPosition(Position.HOMED.motorAngle());
                 isHomed = true;

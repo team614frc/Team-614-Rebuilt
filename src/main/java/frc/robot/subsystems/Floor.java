@@ -18,11 +18,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Ports;
+import frc.robot.Constants.FloorConstants;
 
 public class Floor extends SubsystemBase {
     public enum Speed {
-        STOP(0),
-        FEED(0.83);
+        STOP(FloorConstants.STOP_PERCENT_OUTPUT),
+        FEED(FloorConstants.FLOOR_PERCENT_OUTPUT);
 
         private final double percentOutput;
 
@@ -31,12 +32,12 @@ public class Floor extends SubsystemBase {
         }
 
         public Voltage voltage() {
-            return Volts.of(percentOutput * 12.0);
+            return Volts.of(percentOutput * FloorConstants.MAX_VOLTAGE);
         }
     }
 
     private final TalonFX motor;
-    private final VoltageOut voltageRequest = new VoltageOut(0);
+    private final VoltageOut voltageRequest = new VoltageOut(FloorConstants.VOLTAGE_OUT);
 
     public Floor() {
         motor = new TalonFX(Ports.kFloor, Ports.kRoboRioCANBus);
@@ -49,9 +50,9 @@ public class Floor extends SubsystemBase {
             )
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(120))
+                    .withStatorCurrentLimit(FloorConstants.STATOR_CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(30))
+                    .withSupplyCurrentLimit(FloorConstants.SUPPLY_CURRENT_LIMIT)
                     .withSupplyCurrentLimitEnable(true)
             );
 

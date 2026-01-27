@@ -17,26 +17,27 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Ports;
+import frc.robot.Constants.HoodConstants;
 
 public class Hood extends SubsystemBase {
-    private static final Distance kServoLength = Millimeters.of(100);
-    private static final LinearVelocity kMaxServoSpeed = Millimeters.of(20).per(Second);
-    private static final double kMinPosition = 0.01;
-    private static final double kMaxPosition = 0.77;
-    private static final double kPositionTolerance = 0.01;
-
+    private static final Distance kServoLength = Millimeters.of(HoodConstants.SERVO_LENGTH);
+    private static final LinearVelocity kMaxServoSpeed = Millimeters.of(HoodConstants.SERVO_SPEED).per(Second);
+    private static final double kMinPosition = HoodConstants.MIN_POSITION;
+    private static final double kMaxPosition = HoodConstants.MAX_POSITION;
+    private static final double kPositionTolerance = HoodConstants.POSITION_TOLERANCE;
+    
     private final Servo leftServo;
     private final Servo rightServo;
 
-    private double currentPosition = 0.5;
-    private double targetPosition = 0.5;
-    private Time lastUpdateTime = Seconds.of(0);
+    private double currentPosition = HoodConstants.CURRENT_POSITION;
+    private double targetPosition = HoodConstants.TARGET_POSITION;
+    private Time lastUpdateTime = Second.of(HoodConstants.LAST_UPDATE_TIME);
 
     public Hood() {
         leftServo = new Servo(Ports.kHoodLeftServo);
         rightServo = new Servo(Ports.kHoodRightServo);
-        leftServo.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
-        rightServo.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
+        leftServo.setBoundsMicroseconds(HoodConstants.MAX, HoodConstants.DEADBAND_MAX, HoodConstants.CENTER, HoodConstants.DEADBAND_MIN, HoodConstants.MIN);
+        rightServo.setBoundsMicroseconds(HoodConstants.MAX, HoodConstants.DEADBAND_MAX, HoodConstants.CENTER, HoodConstants.DEADBAND_MIN, HoodConstants.MIN);
         setPosition(currentPosition);
         SmartDashboard.putData(this);
     }

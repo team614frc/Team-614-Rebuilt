@@ -31,11 +31,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
+import frc. robot.Constants;
+import frc.robot.Constants.IntakeConstants;
+
 
 public class Intake extends SubsystemBase {
     public enum Speed {
-        STOP(0),
-        INTAKE(0.8);
+        STOP(Constants.IntakeConstants.STOP_PERCENT_OUTPUT),
+        INTAKE(Constants.IntakeConstants.INTAKE_PERCENT_OUTPUT);
 
         private final double percentOutput;
 
@@ -44,15 +47,15 @@ public class Intake extends SubsystemBase {
         }
 
         public Voltage voltage() {
-            return Volts.of(percentOutput * 12.0);
+            return Volts.of(percentOutput * IntakeConstants.MAX_VOLTAGE);
         }
     }
 
     public enum Position {
-        HOMED(110),
-        STOWED(100),
-        INTAKE(-4),
-        AGITATE(20);
+        HOMED(IntakeConstants.HOMED_ANGLE),
+        STOWED(IntakeConstants.STOWED_ANGLE),
+        INTAKE(IntakeConstants.INTAKE_ANGLE),
+        AGITATE(IntakeConstants.AGITATE);
 
         private final double degrees;
 
@@ -65,14 +68,14 @@ public class Intake extends SubsystemBase {
         }
     }
 
-    private static final double kPivotReduction = 50.0;
+    private static final double kPivotReduction = IntakeConstants.PIVOT_REDUCTION;
     private static final AngularVelocity kMaxPivotSpeed = KrakenX60.kFreeSpeed.div(kPivotReduction);
-    private static final Angle kPositionTolerance = Degrees.of(5);
+    private static final Angle kPositionTolerance = Degrees.of(IntakeConstants.POSITION_TOLERANCE);
 
     private final TalonFX pivotMotor, rollerMotor;
-    private final VoltageOut pivotVoltageRequest = new VoltageOut(0);
-    private final MotionMagicVoltage pivotMotionMagicRequest = new MotionMagicVoltage(0).withSlot(0);
-    private final VoltageOut rollerVoltageRequest = new VoltageOut(0);
+    private final VoltageOut pivotVoltageRequest = new VoltageOut(IntakeConstants.PIVOT_VOLTAGE_REQUEST);
+    private final MotionMagicVoltage pivotMotionMagicRequest = new MotionMagicVoltage(IntakeConstants.MOTION_MAGIC_VOLTAGE).withSlot(IntakeConstants.NEW_SLOT);
+    private final VoltageOut rollerVoltageRequest = new VoltageOut(IntakeConstants.ROLLER_VOLTAGE_REQUEST);
 
     private boolean isHomed = false;
 
@@ -93,9 +96,9 @@ public class Intake extends SubsystemBase {
             )
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(120))
+                    .withStatorCurrentLimit(Amps.of(IntakeConstants.STATOR_CURRENT_LIMIT))
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(70))
+                    .withSupplyCurrentLimit(Amps.of(IntakeConstants.SUPPLY_CURRENT_LIMIT))
                     .withSupplyCurrentLimitEnable(true)
             )
             .withFeedback(
@@ -110,10 +113,10 @@ public class Intake extends SubsystemBase {
             )
             .withSlot0(
                 new Slot0Configs()
-                    .withKP(300)
-                    .withKI(0)
-                    .withKD(0)
-                    .withKV(12.0 / kMaxPivotSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
+                    .withKP(IntakeConstants.KP)
+                    .withKI(IntakeConstants.KI)
+                    .withKD(IntakeConstants.KD)
+                    .withKV(IntakeConstants.MAX_VOLTAGE / kMaxPivotSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
             );
         pivotMotor.getConfigurator().apply(config);
     }
@@ -127,9 +130,9 @@ public class Intake extends SubsystemBase {
             )
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(120))
+                    .withStatorCurrentLimit(Amps.of(IntakeConstants.STATOR_CURRENT_LIMIT))
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(70))
+                    .withSupplyCurrentLimit(Amps.of(IntakeConstants.SUPPLY_CURRENT_LIMIT))
                     .withSupplyCurrentLimitEnable(true)
             );
         rollerMotor.getConfigurator().apply(config);
@@ -144,7 +147,7 @@ public class Intake extends SubsystemBase {
     private void setPivotPercentOutput(double percentOutput) {
         pivotMotor.setControl(
             pivotVoltageRequest
-                .withOutput(Volts.of(percentOutput * 12.0))
+                .withOutput(Volts.of(percentOutput * IntakeConstants.MAX_VOLTAGE))
         );
     }
 
@@ -191,7 +194,7 @@ public class Intake extends SubsystemBase {
 
     public Command homingCommand() {
         return Commands.sequence(
-            runOnce(() -> setPivotPercentOutput(0.1)),
+            runOnce(() -> setPivotPercentOutput(IntakeConstants.PIVOT_PERCENT_OUTPUT)),
             Commands.waitUntil(() -> pivotMotor.getSupplyCurrent().getValue().in(Amps) > 6),
             runOnce(() -> {
                 pivotMotor.setPosition(Position.HOMED.angle());

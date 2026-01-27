@@ -25,17 +25,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.KrakenX60;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Ports;
 
 public class Shooter extends SubsystemBase {
-    private static final AngularVelocity kVelocityTolerance = RPM.of(100);
+    private static final AngularVelocity kVelocityTolerance = RPM.of(ShooterConstants.VELOCITY_TOLERANCE);
 
     private final TalonFX leftMotor, middleMotor, rightMotor;
     private final List<TalonFX> motors;
-    private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
-    private final VoltageOut voltageRequest = new VoltageOut(0);
+    private final VelocityVoltage velocityRequest = new VelocityVoltage(ShooterConstants.VELOCITY_VOLTAGE_SLOT).withSlot(ShooterConstants.NEW_SLOT);
+    private final VoltageOut voltageRequest = new VoltageOut(ShooterConstants.VOLTAGE_OUT);
 
-    private double dashboardTargetRPM = 0.0;
+    private double dashboardTargetRPM = ShooterConstants.DASHBOARD_TARGET_RPM;
 
     public Shooter() {
         leftMotor = new TalonFX(Ports.kShooterLeft, Ports.kRoboRioCANBus);
@@ -59,21 +60,21 @@ public class Shooter extends SubsystemBase {
             )
             .withVoltage(
                 new VoltageConfigs()
-                    .withPeakReverseVoltage(Volts.of(0))
+                    .withPeakReverseVoltage(Volts.of(ShooterConstants.PEAK_REVERSE_VOLTAGE))
             )
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(120))
+                    .withStatorCurrentLimit(Amps.of(ShooterConstants.STATOR_CURRENT_LIMIT))
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(70))
+                    .withSupplyCurrentLimit(Amps.of(ShooterConstants.SUPPLY_CURRENT_LIMIT))
                     .withSupplyCurrentLimitEnable(true)
             )
             .withSlot0(
                 new Slot0Configs()
-                    .withKP(0.5)
-                    .withKI(2)
-                    .withKD(0)
-                    .withKV(12.0 / KrakenX60.kFreeSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
+                    .withKP(ShooterConstants.kP)
+                    .withKI(ShooterConstants.kI)
+                    .withKD(ShooterConstants.kD)
+                    .withKV(ShooterConstants.MAX_VOLTAGE / KrakenX60.kFreeSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
             );
         
         motor.getConfigurator().apply(config);
@@ -92,13 +93,13 @@ public class Shooter extends SubsystemBase {
         for (final TalonFX motor : motors) {
             motor.setControl(
                 voltageRequest
-                    .withOutput(Volts.of(percentOutput * 12.0))
+                    .withOutput(Volts.of(percentOutput * ShooterConstants.MAX_VOLTAGE))
             );
         }
     }
 
     public void stop() {
-        setPercentOutput(0.0);
+        setPercentOutput(ShooterConstants.STOP_PERCENT_OUTPUT);
     }
 
     public Command spinUpCommand(double rpm) {
