@@ -22,7 +22,6 @@ import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -48,20 +47,14 @@ public class Hanger extends SubsystemBase {
 
     public Angle motorAngle() {
       final Measure<AngleUnit> angleMeasure =
-          Inches.of(inches).divideRatio(kHangerExtensionPerMotorAngle);
+          Inches.of(inches).divideRatio(HangerConstants.HANGER_EXTENSION_PER_MOTOR_ANGLE);
       return Rotations.of(angleMeasure.in(Rotations)); // Promote from Measure<AngleUnit> to Angle
     }
   }
 
-  private static final Per<DistanceUnit, AngleUnit> kHangerExtensionPerMotorAngle =
-      Inches.of(HangerConstants.MOTOR_ANGLE_DISTANCE).div(Rotations.of(HangerConstants.ROTATIONS));
-  private static final Distance kExtensionTolerance =
-      Inches.of(HangerConstants.EXTENSION_TOLERANCE);
-
   private final TalonFX motor;
-  private final MotionMagicVoltage motionMagicRequest =
-      new MotionMagicVoltage(HangerConstants.INITIAL_SETPOINT).withSlot(HangerConstants.NEW_SLOT);
-  private final VoltageOut voltageRequest = new VoltageOut(HangerConstants.VOLTAGE_OUT);
+  private final MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0).withSlot(0);
+  private final VoltageOut voltageRequest = new VoltageOut(0);
 
   private boolean isHomed = false;
 
@@ -137,12 +130,12 @@ public class Hanger extends SubsystemBase {
   private boolean isExtensionWithinTolerance() {
     final Distance currentExtension = motorAngleToExtension(motor.getPosition().getValue());
     final Distance targetExtension = motorAngleToExtension(motionMagicRequest.getPositionMeasure());
-    return currentExtension.isNear(targetExtension, kExtensionTolerance);
+    return currentExtension.isNear(targetExtension, HangerConstants.EXTENSION_TOLERANCE);
   }
 
   private Distance motorAngleToExtension(Angle motorAngle) {
     final Measure<DistanceUnit> extensionMeasure =
-        motorAngle.timesRatio(kHangerExtensionPerMotorAngle);
+        motorAngle.timesRatio(HangerConstants.HANGER_EXTENSION_PER_MOTOR_ANGLE);
     return Inches.of(extensionMeasure.in(Inches)); // Promote from Measure<DistanceUnit> to Distance
   }
 

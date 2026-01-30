@@ -55,14 +55,14 @@ public class Intake extends SubsystemBase {
     INTAKE(IntakeConstants.INTAKE_ANGLE),
     AGITATE(IntakeConstants.AGITATE);
 
-    private final double degrees;
+    private final Angle angle;
 
-    private Position(double degrees) {
-      this.degrees = degrees;
+    private Position(Angle angle) {
+      this.angle = angle;
     }
 
     public Angle angle() {
-      return Degrees.of(degrees);
+      return angle;
     }
   }
 

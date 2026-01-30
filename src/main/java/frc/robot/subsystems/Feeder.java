@@ -42,10 +42,8 @@ public class Feeder extends SubsystemBase {
   }
 
   private final TalonFX motor;
-  private final VelocityVoltage velocityRequest =
-      new VelocityVoltage(FeederConstants.VELOCITY_VOLTAGE_SLOT.in(Volts))
-          .withSlot(FeederConstants.NEW_SLOT);
-  private final VoltageOut voltageRequest = new VoltageOut(FeederConstants.VOLTAGE_OUT);
+  private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
+  private final VoltageOut voltageRequest = new VoltageOut(0);
 
   public Feeder() {
     motor = new TalonFX(Ports.kFeeder, Ports.kRoboRioCANBus);
@@ -87,7 +85,7 @@ public class Feeder extends SubsystemBase {
   }
 
   public Command feedCommand() {
-    return startEnd(() -> set(Speed.FEED), () -> setPercentOutput(FeederConstants.PERCENT_OUTPUT));
+    return startEnd(() -> set(Speed.FEED), () -> setPercentOutput(0));
   }
 
   @Override

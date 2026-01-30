@@ -36,7 +36,7 @@ public class Floor extends SubsystemBase {
   }
 
   private final TalonFX motor;
-  private final VoltageOut voltageRequest = new VoltageOut(FloorConstants.VOLTAGE_OUT);
+  private final VoltageOut voltageRequest = new VoltageOut(0);
 
   public Floor() {
     motor = new TalonFX(Ports.kFloor, Ports.kRoboRioCANBus);
