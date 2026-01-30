@@ -59,7 +59,7 @@ public class Shooter extends SubsystemBase {
             )
             .withVoltage(
                 new VoltageConfigs()
-                    .withPeakReverseVoltage(Volts.of(ShooterConstants.PEAK_REVERSE_VOLTAGE))
+                    .withPeakReverseVoltage(Volts.of(ShooterConstants.PEAK_REVERSE_VOLTAGE.in(Volts)))
             )
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
@@ -73,7 +73,7 @@ public class Shooter extends SubsystemBase {
                     .withKP(ShooterConstants.kP)
                     .withKI(ShooterConstants.kI)
                     .withKD(ShooterConstants.kD)
-                    .withKV(ShooterConstants.MAX_VOLTAGE / KrakenX60.kFreeSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
+                    .withKV(ShooterConstants.MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
             );
         
         motor.getConfigurator().apply(config);
@@ -89,7 +89,7 @@ public class Shooter extends SubsystemBase {
         for (final TalonFX motor : motors) {
             motor.setControl(
                 voltageRequest
-                    .withOutput(Volts.of(percentOutput * ShooterConstants.MAX_VOLTAGE))
+                    .withOutput(Volts.of(percentOutput * ShooterConstants.MAX_VOLTAGE.in(Volts)))
             );
         }
     }

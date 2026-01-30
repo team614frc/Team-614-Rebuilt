@@ -46,7 +46,7 @@ public class Intake extends SubsystemBase {
     }
 
         public Voltage voltage() {
-            return Volts.of(percentOutput * IntakeConstants.MAX_VOLTAGE);
+            return Volts.of(percentOutput * IntakeConstants.MAX_VOLTAGE.in(Volts));
         }
     }
 
@@ -73,7 +73,7 @@ public class Intake extends SubsystemBase {
 
     private final TalonFX pivotMotor, rollerMotor;
     private final VoltageOut pivotVoltageRequest = new VoltageOut(IntakeConstants.PIVOT_VOLTAGE_REQUEST);
-    private final MotionMagicVoltage pivotMotionMagicRequest = new MotionMagicVoltage(IntakeConstants.MOTION_MAGIC_VOLTAGE).withSlot(IntakeConstants.NEW_SLOT);
+    private final MotionMagicVoltage pivotMotionMagicRequest = new MotionMagicVoltage(IntakeConstants.MOTION_MAGIC_VOLTAGE.in(Volts)).withSlot(IntakeConstants.NEW_SLOT);
     private final VoltageOut rollerVoltageRequest = new VoltageOut(IntakeConstants.ROLLER_VOLTAGE_REQUEST);
 
   private boolean isHomed = false;
@@ -113,7 +113,7 @@ public class Intake extends SubsystemBase {
                     .withKP(IntakeConstants.KP)
                     .withKI(IntakeConstants.KI)
                     .withKD(IntakeConstants.KD)
-                    .withKV(IntakeConstants.MAX_VOLTAGE / kMaxPivotSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
+                    .withKV(IntakeConstants.MAX_VOLTAGE.in(Volts) / kMaxPivotSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
             );
         pivotMotor.getConfigurator().apply(config);
     }
@@ -144,7 +144,7 @@ public class Intake extends SubsystemBase {
     private void setPivotPercentOutput(double percentOutput) {
         pivotMotor.setControl(
             pivotVoltageRequest
-                .withOutput(Volts.of(percentOutput * IntakeConstants.MAX_VOLTAGE))
+                .withOutput(Volts.of(percentOutput * IntakeConstants.MAX_VOLTAGE.in(Volts)))
         );
     }
 

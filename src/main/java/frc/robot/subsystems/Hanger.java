@@ -87,7 +87,7 @@ public class Hanger extends SubsystemBase {
                     .withKP(HangerConstants.kP)
                     .withKI(HangerConstants.kI)
                     .withKD(HangerConstants.kD)
-                    .withKV(HangerConstants.MAX_VOLTAGE / KrakenX60.kFreeSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
+                    .withKV(HangerConstants.MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
             );
 
     motor.getConfigurator().apply(config);
@@ -101,7 +101,7 @@ public class Hanger extends SubsystemBase {
     public void setPercentOutput(double percentOutput) {
         motor.setControl(
             voltageRequest
-                .withOutput(Volts.of(percentOutput * HangerConstants.MAX_VOLTAGE))
+                .withOutput(Volts.of(percentOutput * HangerConstants.MAX_VOLTAGE.in(Volts)))
         );
     }
 
@@ -112,7 +112,7 @@ public class Hanger extends SubsystemBase {
 
     public Command homingCommand() {
         return Commands.sequence(
-            runOnce(() -> setPercentOutput(HangerConstants.HOMING_VOLTAGE)),
+            runOnce(() -> setPercentOutput(HangerConstants.HOMING_VOLTAGE.in(Volts))),
             Commands.waitUntil(() -> motor.getSupplyCurrent().getValue().in(Amps) > HangerConstants.HOMING_CURRENT_THRESHOLD),
             runOnce(() -> {
                 motor.setPosition(Position.HOMED.motorAngle());

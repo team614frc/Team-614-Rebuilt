@@ -1,7 +1,9 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Minute;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -26,7 +28,7 @@ import frc.robot.Ports;
 
 public class Feeder extends SubsystemBase {
     public enum Speed {
-        FEED(Constants.FeederConstants.FEED_RPM);
+        FEED(Constants.FeederConstants.FEED_RPM.in(Rotations.per(Minute)));
 
     private final double rpm;
 
@@ -40,7 +42,7 @@ public class Feeder extends SubsystemBase {
   }
 
     private final TalonFX motor;
-    private final VelocityVoltage velocityRequest = new VelocityVoltage(FeederConstants.VELOCITY_VOLTAGE_SLOT).withSlot(FeederConstants.NEW_SLOT);
+    private final VelocityVoltage velocityRequest = new VelocityVoltage(FeederConstants.VELOCITY_VOLTAGE_SLOT.in(Volts)).withSlot(FeederConstants.NEW_SLOT);
     private final VoltageOut voltageRequest = new VoltageOut(FeederConstants.VOLTAGE_OUT);
 
   public Feeder() {
@@ -64,7 +66,7 @@ public class Feeder extends SubsystemBase {
                     .withKP(FeederConstants.kP)
                     .withKI(FeederConstants.kI)
                     .withKD(FeederConstants.kD)
-                    .withKV(FeederConstants.MAX_VOLTAGE / KrakenX60.kFreeSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
+                    .withKV(FeederConstants.MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
             );
         
         motor.getConfigurator().apply(config);
@@ -78,7 +80,7 @@ public class Feeder extends SubsystemBase {
     public void setPercentOutput(double percentOutput) {
         motor.setControl(
             voltageRequest
-                .withOutput(Volts.of(percentOutput * FeederConstants.MAX_VOLTAGE))
+                .withOutput(Volts.of(percentOutput * FeederConstants.MAX_VOLTAGE.in(Volts)))
         );
     }
 

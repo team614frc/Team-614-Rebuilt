@@ -55,16 +55,16 @@ public final class Constants {
     }
 
     public static final class FeederConstants {
-            public static final double FEED_RPM = 5000;
+            public static final AngularVelocity FEED_RPM = Revolutions.per(Minute).of(5000);
 
             //Motor Behavior
             public static final InvertedValue INVERTED = InvertedValue.CounterClockwise_Positive;
             public static final NeutralModeValue NEUTRAL_MODE =NeutralModeValue.Coast;
 
             //Voltage Limits
-            public static final double VELOCITY_VOLTAGE_SLOT = 0.0;
+            public static final Voltage VELOCITY_VOLTAGE_SLOT = Volts.of(0.0);
             public static final int NEW_SLOT = 0;
-            public static final double VOLTAGE_OUT = 0.0;
+            public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
 
             
             //Current Limits
@@ -78,8 +78,8 @@ public final class Constants {
             public static final double kD = 0.0;
 
              // Feedforward / voltage
-            public static final double MAX_VOLTAGE = 12.0;
-             public static final double kV = MAX_VOLTAGE / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
+            public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+             public static final double kV = MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
              public static final int PERCENT_OUTPUT = 0;
 
 
@@ -93,8 +93,8 @@ public final class Constants {
         
 
         //Voltage Limits
-        public static final double MAX_VOLTAGE = 12.0;
-        public static final double VOLTAGE_OUT = 0.0;
+        public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+        public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
 
         //Current Limits
         public static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
@@ -118,8 +118,8 @@ public final class Constants {
          public static final int INITIAL_SETPOINT = 0;
          public static final int NEW_SLOT = 0;
 
-         public static final double VOLTAGE_OUT = 0.0;
-         public static final double MAX_VOLTAGE = 12.0;
+         public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
+         public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
 
          //Current Limits
          public static final Current STATOR_CURRENT_LIMIT = Amps.of(20);
@@ -132,7 +132,7 @@ public final class Constants {
 
 
         //Homing Constants
-        public static final double HOMING_VOLTAGE = -0.05;
+        public static final Voltage HOMING_VOLTAGE = Volts.of(-0.05);
         public static final double HOMING_CURRENT_THRESHOLD = 0.4;
 
     }
@@ -164,12 +164,12 @@ public final class Constants {
         public static final double INTAKE_PERCENT_OUTPUT = 0.6;
 
         //Voltage Limits
-        public static final double MAX_VOLTAGE = 12.0;
-        public static final double VOLTAGE_OUT = 0.0;
-        public static final int PIVOT_VOLTAGE_REQUEST = 0;
-        public static final int MOTION_MAGIC_VOLTAGE = 0;
+        public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+        public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
+        public static final Voltage PIVOT_VOLTAGE_REQUEST = Volts.of(0);
+        public static final Voltage MOTION_MAGIC_VOLTAGE = Volts.of(0);
         public static final int NEW_SLOT = 0;
-        public static final int ROLLER_VOLTAGE_REQUEST = 0;
+        public static final Voltage ROLLER_VOLTAGE_REQUEST = Volts.of(0);
 
         //Position Constants
         public static final int HOMED_ANGLE = 110; //Degrees
@@ -203,10 +203,10 @@ public final class Constants {
         public static final int VELOCITY_TOLERANCE = 100;
         public static final int VELOCITY_VOLTAGE_SLOT = 0;
         public static final int NEW_SLOT = 0;
-        public static final int VOLTAGE_OUT = 0;
+        public static final Voltage VOLTAGE_OUT = Volts.of(0);
 
-        public static final int PEAK_REVERSE_VOLTAGE = 0;
-        public static final double MAX_VOLTAGE = 12.0;
+        public static final Voltage PEAK_REVERSE_VOLTAGE = Volts.of(0);
+        public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
 
         //Current Limits
         public static final int STATOR_CURRENT_LIMIT = 120;
