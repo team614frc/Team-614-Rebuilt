@@ -16,7 +16,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
-import frc.robot.generated.TunerConstants;
+
 
 
 /**
@@ -195,8 +195,6 @@ public final class Constants {
         public static final int KI = 0;
         public static final int KD = 0;
 
-    }
-    public static final class  VisionConstants {
     }
 
     public static final class ShooterConstants {
