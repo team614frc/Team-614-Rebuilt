@@ -147,7 +147,6 @@ public final class Constants {
     public static final int CENTER = 1500;
     public static final int DEADBAND_MIN = 1200;
     public static final int MIN = 1000;
-
   }
 
   public static final class IntakeConstants {

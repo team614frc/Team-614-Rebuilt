@@ -32,9 +32,7 @@ public class Shooter extends SubsystemBase {
 
   private final TalonFX leftMotor, middleMotor, rightMotor;
   private final List<TalonFX> motors;
-  private final VelocityVoltage velocityRequest =
-      new VelocityVoltage(0)
-          .withSlot(0);
+  private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
   private final VoltageOut voltageRequest = new VoltageOut(0);
 
   private double dashboardTargetRPM = 0;
