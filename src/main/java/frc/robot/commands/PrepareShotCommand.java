@@ -9,6 +9,7 @@ import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.Interpolator;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Landmarks;
@@ -47,7 +48,26 @@ public class PrepareShotCommand extends Command {
   }
 
   public boolean isReadyToShoot() {
-    return shooter.isVelocityWithinTolerance() && hood.isPositionWithinTolerance();
+    boolean hoodReady = hood.isPositionWithinTolerance();
+    boolean shooterReady;
+
+    // In simulation, skip the velocity check since motors don't simulate
+    if (RobotBase.isSimulation()) {
+      shooterReady = true; // Always consider shooter ready in sim
+      SmartDashboard.putBoolean("PrepareShot/Hood Ready", hoodReady);
+      SmartDashboard.putBoolean("PrepareShot/Shooter Ready (sim)", shooterReady);
+      SmartDashboard.putBoolean("PrepareShot/Ready to Shoot", hoodReady);
+      System.out.println(
+          "PrepareShot - Hood Ready: " + hoodReady + ", Ready to Shoot: " + hoodReady);
+    } else {
+      // On real robot, check both shooter velocity and hood position
+      shooterReady = shooter.isVelocityWithinTolerance();
+      SmartDashboard.putBoolean("PrepareShot/Hood Ready", hoodReady);
+      SmartDashboard.putBoolean("PrepareShot/Shooter Ready", shooterReady);
+      SmartDashboard.putBoolean("PrepareShot/Ready to Shoot", hoodReady && shooterReady);
+    }
+
+    return hoodReady && shooterReady;
   }
 
   private Distance getDistanceToHub() {
@@ -63,6 +83,8 @@ public class PrepareShotCommand extends Command {
     shooter.setRPM(shot.shooterRPM);
     hood.setPosition(shot.hoodPosition);
     SmartDashboard.putNumber("Distance to Hub (inches)", distanceToHub.in(Inches));
+    SmartDashboard.putNumber("PrepareShot/Target RPM", shot.shooterRPM);
+    SmartDashboard.putNumber("PrepareShot/Target Hood Position", shot.hoodPosition);
   }
 
   @Override
@@ -73,6 +95,7 @@ public class PrepareShotCommand extends Command {
   @Override
   public void end(boolean interrupted) {
     shooter.stop();
+    System.out.println("PrepareShot command ended - interrupted: " + interrupted);
   }
 
   public static class Shot {

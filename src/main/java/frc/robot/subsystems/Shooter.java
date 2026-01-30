@@ -15,7 +15,9 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -132,5 +134,14 @@ public class Shooter extends SubsystemBase {
         "Dashboard RPM", () -> dashboardTargetRPM, value -> dashboardTargetRPM = value);
     builder.addDoubleProperty(
         "Target RPM", () -> velocityRequest.getVelocityMeasure().in(RPM), null);
+  }
+
+  public LinearVelocity getExitVelocity() {
+    double wheelRadiusMeters = 0.05;
+    double wheelRPS = leftMotor.getVelocity().getValue().in(RotationsPerSecond);
+    double mps = 2.0 * Math.PI * wheelRadiusMeters * wheelRPS;
+
+    // NEW: use constructor with value and Units constant
+    return Units.MetersPerSecond.of(mps);
   }
 }

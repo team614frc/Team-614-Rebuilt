@@ -23,6 +23,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -80,8 +81,17 @@ public class Intake extends SubsystemBase {
     rollerMotor = new TalonFX(Ports.kIntakeRollers, Ports.kRoboRioCANBus);
     configurePivotMotor();
     configureRollerMotor();
+
+    // Auto-home in simulation
+    if (RobotBase.isSimulation()) {
+      pivotMotor.setPosition(Position.HOMED.angle());
+      isHomed = true;
+    }
+
     SmartDashboard.putData(this);
   }
+
+  // ... rest of existing code ...
 
   private void configurePivotMotor() {
     final TalonFXConfiguration config =
@@ -203,5 +213,14 @@ public class Intake extends SubsystemBase {
         "Pivot Supply Current", () -> pivotMotor.getSupplyCurrent().getValue().in(Amps), null);
     builder.addDoubleProperty(
         "Roller Supply Current", () -> rollerMotor.getSupplyCurrent().getValue().in(Amps), null);
+  }
+
+  @Override
+  public void periodic() {
+    SmartDashboard.putBoolean("Intake/Is Homed", isHomed);
+    SmartDashboard.putString(
+        "Intake/Current Command",
+        getCurrentCommand() != null ? getCurrentCommand().getName() : "none");
+    SmartDashboard.putBoolean("Intake/Command Active", getCurrentCommand() != null);
   }
 }

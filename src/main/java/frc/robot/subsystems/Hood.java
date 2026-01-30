@@ -1,11 +1,13 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Value;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
@@ -90,5 +92,13 @@ public class Hood extends SubsystemBase {
         null);
     builder.addDoubleProperty("Current Position", () -> currentPosition, null);
     builder.addDoubleProperty("Target Position", () -> targetPosition, value -> setPosition(value));
+  }
+
+  public Angle getAngle() {
+    double minAngleDeg = 10.0;
+    double maxAngleDeg = 60.0;
+    double angleDeg = minAngleDeg + (maxAngleDeg - minAngleDeg) * currentPosition;
+
+    return Degrees.of(angleDeg);
   }
 }

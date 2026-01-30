@@ -18,10 +18,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivebaseConstants;
 import java.io.File;
+import java.util.Optional;
 import java.util.function.Supplier;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveControllerConfiguration;
@@ -237,6 +241,45 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public SwerveDrive getSwerveDrive() {
     return swerveDrive;
+  }
+
+  @Override
+  public void periodic() {
+    // Normal periodic updates
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    // THIS IS THE KEY FIX:
+    // In YAGSL simulation, the actual physics pose is stored in the SwerveDrive object
+    // We need to sync our odometry with the physics simulation pose
+
+    if (RobotBase.isSimulation()) {
+      // Get the actual simulated pose (where the robot model with colliders actually is)
+      Optional<Pose2d> simPoseOptional = swerveDrive.getSimulationDriveTrainPose();
+
+      // Check if the simulation pose is present
+      if (simPoseOptional.isPresent()) {
+        Pose2d simPose = simPoseOptional.get();
+
+        // Option 1: Use vision measurement to smoothly correct (RECOMMENDED)
+        // This simulates a "perfect vision system" that keeps odometry aligned with physics
+        addVisionMeasurement(simPose, Timer.getFPGATimestamp());
+
+        // Option 2: Force reset (more aggressive, but ensures perfect sync)
+        // Uncomment this if vision correction isn't strong enough
+        // resetOdometry(simPose);
+
+        // Debug output
+        Pose2d odometryPose = getPose();
+        double error = odometryPose.getTranslation().getDistance(simPose.getTranslation());
+        SmartDashboard.putNumber("Sim Pose Error (m)", error);
+        SmartDashboard.putNumber("Sim Physics X", simPose.getX());
+        SmartDashboard.putNumber("Sim Physics Y", simPose.getY());
+        SmartDashboard.putNumber("Odometry X", odometryPose.getX());
+        SmartDashboard.putNumber("Odometry Y", odometryPose.getY());
+      }
+    }
   }
 
   /** Smoothly correct odometry with vision (avoids jumps) */

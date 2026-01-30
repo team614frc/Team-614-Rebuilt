@@ -232,6 +232,8 @@ public class VisionSubsystem extends SubsystemBase {
       if (pose2d != null) visionSim.update(pose2d);
     }
 
+    SmartDashboard.putBoolean("Vision/isAimed", isAimed());
+
     // Process latest vision results
     // Include latest if none unread. It's deprecated, but it's a great fallback
     processCamera(camera, frontPoseEstimator);
@@ -304,15 +306,13 @@ public class VisionSubsystem extends SubsystemBase {
 
               // Shooter faces the center
               Rotation2d desiredHeading =
-                  new Rotation2d(Math.atan2(toCenter.getY(), toCenter.getX()))
-                      .plus(
-                          Rotation2d.fromDegrees(180)); // Plus 180 for back of robot to face center
+                  new Rotation2d(Math.atan2(toCenter.getY(), toCenter.getX()));
 
               double headingError = desiredHeading.minus(robotPose.getRotation()).getRadians();
               headingError = Math.atan2(Math.sin(headingError), Math.cos(headingError));
 
               // Strafing compensation (keeps shots centered while moving)
-              double strafeComp = vy * 1;
+              double strafeComp = vy * 0.75;
               if (Math.abs(vx) < 0.01 && Math.abs(vy) < 0.01) {
                 strafeComp = 0.0;
               }
@@ -356,9 +356,7 @@ public class VisionSubsystem extends SubsystemBase {
     Translation2d center = maybeCenter.get();
     Translation2d toCenter = center.minus(robotPose.getTranslation());
 
-    Rotation2d desiredHeading =
-        new Rotation2d(Math.atan2(toCenter.getY(), toCenter.getX()))
-            .plus(Rotation2d.fromDegrees(180));
+    Rotation2d desiredHeading = new Rotation2d(Math.atan2(toCenter.getY(), toCenter.getX()));
 
     double headingError = desiredHeading.minus(robotPose.getRotation()).getDegrees();
     return Math.abs(headingError) < 5.0; // tolerance in degrees
