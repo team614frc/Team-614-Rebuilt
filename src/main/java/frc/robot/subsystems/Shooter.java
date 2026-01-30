@@ -27,14 +27,17 @@ import frc.robot.Ports;
 import java.util.List;
 
 public class Shooter extends SubsystemBase {
-    private static final AngularVelocity kVelocityTolerance = RPM.of(ShooterConstants.VELOCITY_TOLERANCE);
+  private static final AngularVelocity kVelocityTolerance =
+      RPM.of(ShooterConstants.VELOCITY_TOLERANCE);
 
-    private final TalonFX leftMotor, middleMotor, rightMotor;
-    private final List<TalonFX> motors;
-    private final VelocityVoltage velocityRequest = new VelocityVoltage(ShooterConstants.VELOCITY_VOLTAGE_SLOT).withSlot(ShooterConstants.NEW_SLOT);
-    private final VoltageOut voltageRequest = new VoltageOut(ShooterConstants.VOLTAGE_OUT);
+  private final TalonFX leftMotor, middleMotor, rightMotor;
+  private final List<TalonFX> motors;
+  private final VelocityVoltage velocityRequest =
+      new VelocityVoltage(ShooterConstants.VELOCITY_VOLTAGE_SLOT)
+          .withSlot(ShooterConstants.NEW_SLOT);
+  private final VoltageOut voltageRequest = new VoltageOut(ShooterConstants.VOLTAGE_OUT);
 
-    private double dashboardTargetRPM = ShooterConstants.DASHBOARD_TARGET_RPM;
+  private double dashboardTargetRPM = ShooterConstants.DASHBOARD_TARGET_RPM;
 
   public Shooter() {
     leftMotor = new TalonFX(Ports.kShooterLeft, Ports.kRoboRioCANBus);
@@ -55,29 +58,30 @@ public class Shooter extends SubsystemBase {
             .withMotorOutput(
                 new MotorOutputConfigs()
                     .withInverted(invertDirection)
-                    .withNeutralMode(NeutralModeValue.Coast)
-            )
+                    .withNeutralMode(NeutralModeValue.Coast))
             .withVoltage(
                 new VoltageConfigs()
-                    .withPeakReverseVoltage(Volts.of(ShooterConstants.PEAK_REVERSE_VOLTAGE.in(Volts)))
-            )
+                    .withPeakReverseVoltage(
+                        Volts.of(ShooterConstants.PEAK_REVERSE_VOLTAGE.in(Volts))))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(Amps.of(ShooterConstants.STATOR_CURRENT_LIMIT))
                     .withStatorCurrentLimitEnable(true)
                     .withSupplyCurrentLimit(Amps.of(ShooterConstants.SUPPLY_CURRENT_LIMIT))
-                    .withSupplyCurrentLimitEnable(true)
-            )
+                    .withSupplyCurrentLimitEnable(true))
             .withSlot0(
                 new Slot0Configs()
                     .withKP(ShooterConstants.kP)
                     .withKI(ShooterConstants.kI)
                     .withKD(ShooterConstants.kD)
-                    .withKV(ShooterConstants.MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond)) // 12 volts when requesting max RPS
-            );
-        
-        motor.getConfigurator().apply(config);
-    }
+                    .withKV(
+                        ShooterConstants.MAX_VOLTAGE.in(Volts)
+                            / KrakenX60.kFreeSpeed.in(
+                                RotationsPerSecond)) // 12 volts when requesting max RPS
+                );
+
+    motor.getConfigurator().apply(config);
+  }
 
   public void setRPM(double rpm) {
     for (final TalonFX motor : motors) {
@@ -85,18 +89,17 @@ public class Shooter extends SubsystemBase {
     }
   }
 
-    public void setPercentOutput(double percentOutput) {
-        for (final TalonFX motor : motors) {
-            motor.setControl(
-                voltageRequest
-                    .withOutput(Volts.of(percentOutput * ShooterConstants.MAX_VOLTAGE.in(Volts)))
-            );
-        }
+  public void setPercentOutput(double percentOutput) {
+    for (final TalonFX motor : motors) {
+      motor.setControl(
+          voltageRequest.withOutput(
+              Volts.of(percentOutput * ShooterConstants.MAX_VOLTAGE.in(Volts))));
     }
+  }
 
-    public void stop() {
-        setPercentOutput(ShooterConstants.STOP_PERCENT_OUTPUT);
-    }
+  public void stop() {
+    setPercentOutput(ShooterConstants.STOP_PERCENT_OUTPUT);
+  }
 
   public Command spinUpCommand(double rpm) {
     return runOnce(() -> setRPM(rpm)).andThen(Commands.waitUntil(this::isVelocityWithinTolerance));

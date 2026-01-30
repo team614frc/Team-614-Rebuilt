@@ -16,13 +16,13 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Ports;
 import frc.robot.Constants.FloorConstants;
+import frc.robot.Ports;
 
 public class Floor extends SubsystemBase {
-    public enum Speed {
-        STOP(FloorConstants.STOP_PERCENT_OUTPUT),
-        FEED(FloorConstants.FLOOR_PERCENT_OUTPUT);
+  public enum Speed {
+    STOP(FloorConstants.STOP_PERCENT_OUTPUT),
+    FEED(FloorConstants.FLOOR_PERCENT_OUTPUT);
 
     private final double percentOutput;
 
@@ -30,13 +30,13 @@ public class Floor extends SubsystemBase {
       this.percentOutput = percentOutput;
     }
 
-        public Voltage voltage() {
-            return Volts.of(percentOutput * FloorConstants.MAX_VOLTAGE.in(Volts));
-        }
+    public Voltage voltage() {
+      return Volts.of(percentOutput * FloorConstants.MAX_VOLTAGE.in(Volts));
     }
+  }
 
-    private final TalonFX motor;
-    private final VoltageOut voltageRequest = new VoltageOut(FloorConstants.VOLTAGE_OUT);
+  private final TalonFX motor;
+  private final VoltageOut voltageRequest = new VoltageOut(FloorConstants.VOLTAGE_OUT);
 
   public Floor() {
     motor = new TalonFX(Ports.kFloor, Ports.kRoboRioCANBus);
@@ -52,8 +52,7 @@ public class Floor extends SubsystemBase {
                     .withStatorCurrentLimit(FloorConstants.STATOR_CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
                     .withSupplyCurrentLimit(FloorConstants.SUPPLY_CURRENT_LIMIT)
-                    .withSupplyCurrentLimitEnable(true)
-            );
+                    .withSupplyCurrentLimitEnable(true));
 
     motor.getConfigurator().apply(config);
     SmartDashboard.putData(this);

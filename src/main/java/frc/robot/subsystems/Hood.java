@@ -16,31 +16,42 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Ports;
 import frc.robot.Constants.HoodConstants;
+import frc.robot.Ports;
 
 public class Hood extends SubsystemBase {
-    private static final Distance kServoLength = Millimeters.of(HoodConstants.SERVO_LENGTH);
-    private static final LinearVelocity kMaxServoSpeed = Millimeters.of(HoodConstants.SERVO_SPEED).per(Second);
-    private static final double kMinPosition = HoodConstants.MIN_POSITION;
-    private static final double kMaxPosition = HoodConstants.MAX_POSITION;
-    private static final double kPositionTolerance = HoodConstants.POSITION_TOLERANCE;
-    
-    private final Servo leftServo;
-    private final Servo rightServo;
+  private static final Distance kServoLength = Millimeters.of(HoodConstants.SERVO_LENGTH);
+  private static final LinearVelocity kMaxServoSpeed =
+      Millimeters.of(HoodConstants.SERVO_SPEED).per(Second);
+  private static final double kMinPosition = HoodConstants.MIN_POSITION;
+  private static final double kMaxPosition = HoodConstants.MAX_POSITION;
+  private static final double kPositionTolerance = HoodConstants.POSITION_TOLERANCE;
 
-    private double currentPosition = HoodConstants.CURRENT_POSITION;
-    private double targetPosition = HoodConstants.TARGET_POSITION;
-    private Time lastUpdateTime = Second.of(HoodConstants.LAST_UPDATE_TIME);
+  private final Servo leftServo;
+  private final Servo rightServo;
 
-    public Hood() {
-        leftServo = new Servo(Ports.kHoodLeftServo);
-        rightServo = new Servo(Ports.kHoodRightServo);
-        leftServo.setBoundsMicroseconds(HoodConstants.MAX, HoodConstants.DEADBAND_MAX, HoodConstants.CENTER, HoodConstants.DEADBAND_MIN, HoodConstants.MIN);
-        rightServo.setBoundsMicroseconds(HoodConstants.MAX, HoodConstants.DEADBAND_MAX, HoodConstants.CENTER, HoodConstants.DEADBAND_MIN, HoodConstants.MIN);
-        setPosition(currentPosition);
-        SmartDashboard.putData(this);
-    }
+  private double currentPosition = HoodConstants.CURRENT_POSITION;
+  private double targetPosition = HoodConstants.TARGET_POSITION;
+  private Time lastUpdateTime = Second.of(HoodConstants.LAST_UPDATE_TIME);
+
+  public Hood() {
+    leftServo = new Servo(Ports.kHoodLeftServo);
+    rightServo = new Servo(Ports.kHoodRightServo);
+    leftServo.setBoundsMicroseconds(
+        HoodConstants.MAX,
+        HoodConstants.DEADBAND_MAX,
+        HoodConstants.CENTER,
+        HoodConstants.DEADBAND_MIN,
+        HoodConstants.MIN);
+    rightServo.setBoundsMicroseconds(
+        HoodConstants.MAX,
+        HoodConstants.DEADBAND_MAX,
+        HoodConstants.CENTER,
+        HoodConstants.DEADBAND_MIN,
+        HoodConstants.MIN);
+    setPosition(currentPosition);
+    SmartDashboard.putData(this);
+  }
 
   /** Expects a position between 0.0 and 1.0 */
   public void setPosition(double position) {
