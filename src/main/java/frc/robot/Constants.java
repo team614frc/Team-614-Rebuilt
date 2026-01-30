@@ -5,9 +5,6 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -18,6 +15,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Voltage;
 
@@ -151,6 +149,9 @@ public final class Constants {
     public static final int CENTER = 1500;
     public static final int DEADBAND_MIN = 1200;
     public static final int MIN = 1000;
+
+    public static final LinearVelocity MAX_SERVO_SPEED =
+        Millimeters.of(HoodConstants.SERVO_SPEED).per(Second);
   }
 
   public static final class IntakeConstants {

@@ -1,13 +1,10 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Millimeters;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Value;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Servo;
@@ -20,12 +17,6 @@ import frc.robot.Constants.HoodConstants;
 import frc.robot.Ports;
 
 public class Hood extends SubsystemBase {
-  private static final Distance kServoLength = Millimeters.of(HoodConstants.SERVO_LENGTH);
-  private static final LinearVelocity kMaxServoSpeed =
-      Millimeters.of(HoodConstants.SERVO_SPEED).per(Second);
-  private static final double kMinPosition = HoodConstants.MIN_POSITION;
-  private static final double kMaxPosition = HoodConstants.MAX_POSITION;
-  private static final double kPositionTolerance = HoodConstants.POSITION_TOLERANCE;
 
   private final Servo leftServo;
   private final Servo rightServo;
@@ -55,7 +46,8 @@ public class Hood extends SubsystemBase {
 
   /** Expects a position between 0.0 and 1.0 */
   public void setPosition(double position) {
-    final double clampedPosition = MathUtil.clamp(position, kMinPosition, kMaxPosition);
+    final double clampedPosition =
+        MathUtil.clamp(position, HoodConstants.MIN_POSITION, HoodConstants.MAX_POSITION);
     leftServo.set(clampedPosition);
     rightServo.set(clampedPosition);
     targetPosition = clampedPosition;
@@ -68,7 +60,7 @@ public class Hood extends SubsystemBase {
   }
 
   public boolean isPositionWithinTolerance() {
-    return MathUtil.isNear(targetPosition, currentPosition, kPositionTolerance);
+    return MathUtil.isNear(targetPosition, currentPosition, HoodConstants.POSITION_TOLERANCE);
   }
 
   private void updateCurrentPosition() {
@@ -81,8 +73,9 @@ public class Hood extends SubsystemBase {
       return;
     }
 
-    final Distance maxDistanceTraveled = kMaxServoSpeed.times(elapsedTime);
-    final double maxPercentageTraveled = maxDistanceTraveled.div(kServoLength).in(Value);
+    final Distance maxDistanceTraveled = HoodConstants.MAX_SERVO_SPEED.times(elapsedTime);
+    final double maxPercentageTraveled =
+        maxDistanceTraveled.div(HoodConstants.SERVO_LENGTH).in(Millimeters);
     currentPosition =
         targetPosition > currentPosition
             ? Math.min(targetPosition, currentPosition + maxPercentageTraveled)
