@@ -66,7 +66,7 @@ public class Intake extends SubsystemBase {
     }
   }
 
-  private static final double kPivotReduction = IntakeConstants.PIVOT_REDUCTION;
+  private static final double kPivotReduction = IntakeConstants.PIVOT_REDUCTION.in(Degrees);
   private static final AngularVelocity kMaxPivotSpeed = KrakenX60.kFreeSpeed.div(kPivotReduction);
   private static final Angle kPositionTolerance = Degrees.of(IntakeConstants.POSITION_TOLERANCE);
 
@@ -98,9 +98,9 @@ public class Intake extends SubsystemBase {
                     .withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(IntakeConstants.STATOR_CURRENT_LIMIT))
+                    .withStatorCurrentLimit(Amps.of(IntakeConstants.STATOR_CURRENT_LIMIT.in(Amps)))
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(IntakeConstants.SUPPLY_CURRENT_LIMIT))
+                    .withSupplyCurrentLimit(Amps.of(IntakeConstants.SUPPLY_CURRENT_LIMIT.in(Amps)))
                     .withSupplyCurrentLimitEnable(true))
             .withFeedback(
                 new FeedbackConfigs()
@@ -132,9 +132,9 @@ public class Intake extends SubsystemBase {
                     .withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(IntakeConstants.STATOR_CURRENT_LIMIT))
+                    .withStatorCurrentLimit(Amps.of(IntakeConstants.STATOR_CURRENT_LIMIT.in(Amps)))
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(IntakeConstants.SUPPLY_CURRENT_LIMIT))
+                    .withSupplyCurrentLimit(Amps.of(IntakeConstants.SUPPLY_CURRENT_LIMIT.in(Amps)))
                     .withSupplyCurrentLimitEnable(true));
     rollerMotor.getConfigurator().apply(config);
   }

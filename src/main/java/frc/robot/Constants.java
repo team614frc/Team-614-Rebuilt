@@ -133,15 +133,13 @@ public final class Constants {
   public static final class HoodConstants {
 
     // Position Constants
-    public static final int SERVO_LENGTH = 150;
-    public static final int SERVO_SPEED = 20;
+    public static final Distance SERVO_LENGTH = Millimeters.of(100);
+    public static final LinearVelocity MAX_SERVO_SPEED = Millimeters.of(20).per(Second);
     public static final double MIN_POSITION = 0.01;
     public static final double MAX_POSITION = 0.77;
     public static final double POSITION_TOLERANCE = 0.01;
-
     public static final double CURRENT_POSITION = 0.5;
     public static final double TARGET_POSITION = 0.5;
-    public static final int LAST_UPDATE_TIME = 0;
 
     // deadband and proportional band constants
     public static final int MAX = 2000;
@@ -150,8 +148,6 @@ public final class Constants {
     public static final int DEADBAND_MIN = 1200;
     public static final int MIN = 1000;
 
-    public static final LinearVelocity MAX_SERVO_SPEED =
-        Millimeters.of(HoodConstants.SERVO_SPEED).per(Second);
   }
 
   public static final class IntakeConstants {
@@ -174,14 +170,13 @@ public final class Constants {
     public static final Angle AGITATE = Degree.of(20);
 
     // Pivot Constants
-    public static final double PIVOT_REDUCTION = 50.0; // Degrees
+    public static final Angle PIVOT_REDUCTION = Degree.of(50.0);
     public static final int POSITION_TOLERANCE = 5;
     public static final double PIVOT_PERCENT_OUTPUT = 0.1;
-    // public static final Current PIVOT_HOMING_CURRENT_THRESHOLD = Amp.of(6);
 
     // Current Limits
-    public static final int STATOR_CURRENT_LIMIT = 120;
-    public static final int SUPPLY_CURRENT_LIMIT = 70;
+    public static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
+    public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
 
     // PID Constants
     public static final int KP = 300;
@@ -203,9 +198,6 @@ public final class Constants {
     // Current Limits
     public static final int STATOR_CURRENT_LIMIT = 120;
     public static final int SUPPLY_CURRENT_LIMIT = 70;
-
-    // RPM Constants
-    public static final double DASHBOARD_TARGET_RPM = 0.0;
 
     // PID Constants
     public static final double kP = 0.5;

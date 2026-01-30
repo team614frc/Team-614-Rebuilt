@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Millimeters;
 import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Value;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Distance;
@@ -75,7 +76,7 @@ public class Hood extends SubsystemBase {
 
     final Distance maxDistanceTraveled = HoodConstants.MAX_SERVO_SPEED.times(elapsedTime);
     final double maxPercentageTraveled =
-        maxDistanceTraveled.div(HoodConstants.SERVO_LENGTH).in(Millimeters);
+        maxDistanceTraveled.div(HoodConstants.SERVO_LENGTH).in(Value);
     currentPosition =
         targetPosition > currentPosition
             ? Math.min(targetPosition, currentPosition + maxPercentageTraveled)
