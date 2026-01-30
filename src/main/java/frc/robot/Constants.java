@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Amps;
@@ -11,6 +12,7 @@ import static edu.wpi.first.units.Units.Amps;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -26,11 +28,27 @@ import frc.robot.generated.TunerConstants;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    public static class Driving {
-        public static final LinearVelocity kMaxSpeed = TunerConstants.kSpeedAt12Volts;
-        public static final AngularVelocity kMaxRotationalRate = RotationsPerSecond.of(1);
-        public static final AngularVelocity kPIDRotationDeadband = kMaxRotationalRate.times(0.005);
-    }
+  public static final class DrivebaseConstants {
+    public static final double MAX_SPEED = Units.feetToMeters(17.5);
+  }
+
+  public static final class OperatorConstants {
+    // Port constants for driver and operator controllers. These should match the
+    // values in the Joystick tab of the Driver Station software
+    public static final int DRIVER_CONTROLLER_PORT = 0;
+    public static final int OPERATOR_CONTROLLER_PORT = 1;
+    public static final double DEADBAND = 0.1;
+  }
+
+  public static final class VisionConstants {
+    // Gains for alignment
+    public static final double ROTATION_KP = 1.75;
+    public static final double MAX_ANGULAR_SPEED_RAD_PER_SEC = 5; // 3.75
+    public static final double MIN_ANGULAR_SPEED_RAD_PER_SEC = 0.35;
+    public static final double ANGLE_TOLERANCE_DEGREES = 2.75; // 3
+    public static final double MIN_VISION_FUSE_PERIOD = 0.06; // ~16 Hz
+    public static double lastVisionFuseTime = 0.0;
+  }
 
     public static class KrakenX60 {
         public static final AngularVelocity kFreeSpeed = RPM.of(6000);

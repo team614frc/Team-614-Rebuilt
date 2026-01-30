@@ -14,7 +14,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -29,30 +28,30 @@ public class Feeder extends SubsystemBase {
     public enum Speed {
         FEED(Constants.FeederConstants.FEED_RPM);
 
-        private final double rpm;
+    private final double rpm;
 
-        private Speed(double rpm) {
-            this.rpm = rpm;
-        }
-
-        public AngularVelocity angularVelocity() {
-            return RPM.of(rpm);
-        }
+    private Speed(double rpm) {
+      this.rpm = rpm;
     }
+
+    public AngularVelocity angularVelocity() {
+      return RPM.of(rpm);
+    }
+  }
 
     private final TalonFX motor;
     private final VelocityVoltage velocityRequest = new VelocityVoltage(FeederConstants.VELOCITY_VOLTAGE_SLOT).withSlot(FeederConstants.NEW_SLOT);
     private final VoltageOut voltageRequest = new VoltageOut(FeederConstants.VOLTAGE_OUT);
 
-    public Feeder() {
-        motor = new TalonFX(Ports.kFeeder, Ports.kRoboRioCANBus);
+  public Feeder() {
+    motor = new TalonFX(Ports.kFeeder, Ports.kRoboRioCANBus);
 
-        final TalonFXConfiguration config = new TalonFXConfiguration()
+    final TalonFXConfiguration config =
+        new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
                     .withInverted(InvertedValue.CounterClockwise_Positive)
-                    .withNeutralMode(NeutralModeValue.Coast)
-            )
+                    .withNeutralMode(NeutralModeValue.Coast))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(FeederConstants.STATOR_CURRENT_LIMIT)
@@ -72,12 +71,9 @@ public class Feeder extends SubsystemBase {
         SmartDashboard.putData(this);
     }
 
-    public void set(Speed speed) {
-        motor.setControl(
-            velocityRequest
-                .withVelocity(speed.angularVelocity())
-        );
-    }
+  public void set(Speed speed) {
+    motor.setControl(velocityRequest.withVelocity(speed.angularVelocity()));
+  }
 
     public void setPercentOutput(double percentOutput) {
         motor.setControl(
@@ -90,11 +86,16 @@ public class Feeder extends SubsystemBase {
         return startEnd(() -> set(Speed.FEED), () -> setPercentOutput(FeederConstants.PERCENT_OUTPUT));
     }
 
-    @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.addStringProperty("Command", () -> getCurrentCommand() != null ? getCurrentCommand().getName() : "null", null);
-        builder.addDoubleProperty("RPM", () -> motor.getVelocity().getValue().in(RPM), null);
-        builder.addDoubleProperty("Stator Current", () -> motor.getStatorCurrent().getValue().in(Amps), null);
-        builder.addDoubleProperty("Supply Current", () -> motor.getSupplyCurrent().getValue().in(Amps), null);
-    }
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    builder.addStringProperty(
+        "Command",
+        () -> getCurrentCommand() != null ? getCurrentCommand().getName() : "null",
+        null);
+    builder.addDoubleProperty("RPM", () -> motor.getVelocity().getValue().in(RPM), null);
+    builder.addDoubleProperty(
+        "Stator Current", () -> motor.getStatorCurrent().getValue().in(Amps), null);
+    builder.addDoubleProperty(
+        "Supply Current", () -> motor.getSupplyCurrent().getValue().in(Amps), null);
+  }
 }
