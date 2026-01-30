@@ -52,7 +52,7 @@ public final class Constants {
   }
 
   public static final class FeederConstants {
-    public static final AngularVelocity FEED_RPM = Revolutions.per(Minute).of(5000);
+    public static final AngularVelocity FEED_SPEED = Revolutions.per(Minute).of(5000);
 
     // Motor Behavior
     public static final InvertedValue INVERTED = InvertedValue.CounterClockwise_Positive;

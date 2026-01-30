@@ -28,7 +28,7 @@ import frc.robot.Ports;
 
 public class Feeder extends SubsystemBase {
   public enum Speed {
-    FEED(Constants.FeederConstants.FEED_RPM.in(Rotations.per(Minute)));
+    FEED(Constants.FeederConstants.FEED_SPEED.in(Rotations.per(Minute)));
 
     private final double rpm;
 
