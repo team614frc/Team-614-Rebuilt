@@ -80,7 +80,7 @@ public class Hanger extends SubsystemBase {
 
     public Angle motorAngle() {
       final Measure<AngleUnit> angleMeasure =
-         distance.divideRatio(HANGER_EXTENSION_PER_MOTOR_ANGLE);
+          distance.divideRatio(HANGER_EXTENSION_PER_MOTOR_ANGLE);
       return Rotations.of(angleMeasure.in(Rotations)); // Promote from Measure<AngleUnit> to Angle
     }
   }

@@ -27,7 +27,6 @@ public class Hood extends SubsystemBase {
   public static final double MAX_POSITION = 0.77;
   public static final double POSITION_TOLERANCE = 0.01;
 
-
   // deadband and proportional band constants
   public static final int MAX = 2000;
   public static final int DEADBAND_MAX = 1800;

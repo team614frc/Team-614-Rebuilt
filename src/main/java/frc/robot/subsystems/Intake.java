@@ -63,10 +63,8 @@ public class Intake extends SubsystemBase {
   public static final double KI = 0.0;
   public static final double KD = 0.0;
   public static final double KV = 0.0;
-  
 
-   public static final int NEW_SLOT = 0;
-
+  public static final int NEW_SLOT = 0;
 
   public enum Speed {
     STOP(0.0),
@@ -214,7 +212,8 @@ public class Intake extends SubsystemBase {
   public Command homingCommand() {
     return Commands.sequence(
             runOnce(() -> setPivotPercentOutput(PIVOT_PERCENT_OUTPUT)),
-            Commands.waitUntil(() -> pivotMotor.getSupplyCurrent().getValue().gt(HOMING_CURRENT_THRESHOLD)),
+            Commands.waitUntil(
+                () -> pivotMotor.getSupplyCurrent().getValue().gt(HOMING_CURRENT_THRESHOLD)),
             runOnce(
                 () -> {
                   pivotMotor.setPosition(Position.HOMED.angle());

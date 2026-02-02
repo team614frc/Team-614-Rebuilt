@@ -46,7 +46,6 @@ public class Shooter extends SubsystemBase {
   public static final double kI = 2.0;
   public static final double kD = 0.0;
 
-
   private final TalonFX leftMotor, middleMotor, rightMotor;
   private final List<TalonFX> motors;
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);

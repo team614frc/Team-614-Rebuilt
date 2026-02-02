@@ -86,12 +86,7 @@ public class Feeder extends SubsystemBase {
                     .withStatorCurrentLimitEnable(true)
                     .withSupplyCurrentLimit(SUPPLY_CURRENT_LIMIT)
                     .withSupplyCurrentLimitEnable(true))
-            .withSlot0(
-                new Slot0Configs()
-                    .withKP(kP)
-                    .withKI(kI)
-                    .withKD(kD)
-                    .withKV(kV));
+            .withSlot0(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD).withKV(kV));
 
     motor.getConfigurator().apply(config);
     SmartDashboard.putData(this);
