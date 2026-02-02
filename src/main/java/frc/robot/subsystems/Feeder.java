@@ -92,11 +92,7 @@ public class Feeder extends SubsystemBase {
                     .withKP(kP)
                     .withKI(kI)
                     .withKD(kD)
-                    .withKV(
-                        MAX_VOLTAGE.in(Volts)
-                            / KrakenX60.kFreeSpeed.in(
-                                RotationsPerSecond)) // 12 volts when requesting max RPS
-                );
+                    .withKV(kV));
 
     motor.getConfigurator().apply(config);
     SmartDashboard.putData(this);
