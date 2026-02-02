@@ -27,27 +27,14 @@ import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 
 public class Feeder extends SubsystemBase {
-  public static final AngularVelocity FEED_SPEED = RPM.of(5000);
-
-  // Motor Behavior
-  public static final InvertedValue INVERTED = InvertedValue.CounterClockwise_Positive;
-  public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Coast;
-
-  // Voltage Limits
-
-  // Current Limits
-  public static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
-  public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(50);
-
-  // Feedforward / voltage
-  public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
-
-  // PID Constants
-  public static final int PID_SLOT = 0;
-  public static final double kP = 1.0;
-  public static final double kI = 0.0;
-  public static final double kD = 0.0;
-  public static final double kV =
+  private static final AngularVelocity FEED_SPEED = RPM.of(5000);
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(50);
+  private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+  private static final double kP = 1.0;
+  private static final double kI = 0.0;
+  private static final double kD = 0.0;
+  private static final double kV =
       MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
 
   public enum Speed {

@@ -35,33 +35,23 @@ import frc.robot.Ports;
 
 public class Hanger extends SubsystemBase {
 
-  // Position Constants
-  public static final Distance HANGER_EXTEND_HOPPER = Inches.of(2);
-  public static final Distance HANGER_HANGING = Inches.of(6);
-  public static final Distance HANGER_HUNG = Inches.of(0.2);
-
-  // Voltage Limits
-
-  public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
-  public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
-
-  // Current Limits
-  public static final Current STATOR_CURRENT_LIMIT = Amps.of(20);
-  public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
-
-  // PID Constants
-  public static final double kP = 10.0;
-  public static final double kI = 0.0;
-  public static final double kD = 0.0;
-  public static final double kV = 12;
+  private static final Distance HANGER_EXTEND_HOPPER = Inches.of(2);
+  private static final Distance HANGER_HANGING = Inches.of(6);
+  private static final Distance HANGER_HUNG = Inches.of(0.2);
+  private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(20);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
+  private static final double kP = 10.0;
+  private static final double kI = 0.0;
+  private static final double kD = 0.0;
+  private static final double kV = 12;
 
   // Homing Constants
-  public static final double HOMING_PERCENT_OUTPUT = -0.05 * 12.0;
-  public static final Current HOMING_CURRENT_THRESHOLD = Amps.of(0.4);
-
-  public static Per<DistanceUnit, AngleUnit> HANGER_EXTENSION_PER_MOTOR_ANGLE =
+  private static final double HOMING_PERCENT_OUTPUT = -0.05 * 12.0;
+  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(0.4);
+  private static final Per<DistanceUnit, AngleUnit> HANGER_EXTENSION_PER_MOTOR_ANGLE =
       Inches.of(6).div(Rotations.of(142));
-  public static Distance EXTENSION_TOLERANCE = Inches.of(1);
+  private static final Distance EXTENSION_TOLERANCE = Inches.of(1);
 
   public enum Position {
     HOMED(Inches.of(0)),

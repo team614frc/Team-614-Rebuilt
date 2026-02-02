@@ -29,24 +29,15 @@ import java.util.List;
 
 public class Shooter extends SubsystemBase {
 
-  // Voltage Limits
-  public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(100);
-  public static final VelocityVoltage VELOCITY_VOLTAGE_SLOT = new VelocityVoltage(0);
-  public static final Voltage VOLTAGE_OUT = Volts.of(0);
-
-  public static final Voltage PEAK_REVERSE_VOLTAGE = Volts.of(0);
-  public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
-
-  // Current Limits
-  public static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
-  public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
-
-  // PID Constants
-  public static final double kP = 0.5;
-  public static final double kI = 2.0;
-  public static final double kD = 0.0;
-  public static final double kV = 12.0 / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
-
+  private static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(100);
+  private static final Voltage PEAK_REVERSE_VOLTAGE = Volts.of(0);
+  private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
+  private static final double kP = 0.5;
+  private static final double kI = 2.0;
+  private static final double kD = 0.0;
+  private static final double kV = 12.0 / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
   private final TalonFX leftMotor, middleMotor, rightMotor;
   private final List<TalonFX> motors;
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);

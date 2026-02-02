@@ -20,23 +20,18 @@ import frc.robot.Ports;
 
 public class Hood extends SubsystemBase {
 
-  // Position Constants
-  public static final Distance SERVO_LENGTH = Millimeters.of(100);
-  public static final LinearVelocity MAX_SERVO_SPEED = Millimeters.of(20).per(Second);
-  public static final double MIN_POSITION = 0.01;
-  public static final double MAX_POSITION = 0.77;
-  public static final double POSITION_TOLERANCE = 0.01;
-
-  // deadband and proportional band constants
-  public static final int MAX = 2000;
-  public static final int DEADBAND_MAX = 1800;
-  public static final int CENTER = 1500;
-  public static final int DEADBAND_MIN = 1200;
-  public static final int MIN = 1000;
-
+  private static final Distance SERVO_LENGTH = Millimeters.of(100);
+  private static final LinearVelocity MAX_SERVO_SPEED = Millimeters.of(20).per(Second);
+  private static final double MIN_POSITION = 0.01;
+  private static final double MAX_POSITION = 0.77;
+  private static final double POSITION_TOLERANCE = 0.01;
+  private static final int MAX = 2000;
+  private static final int DEADBAND_MAX = 1800;
+  private static final int CENTER = 1500;
+  private static final int DEADBAND_MIN = 1200;
+  private static final int MIN = 1000;
   private final Servo leftServo;
   private final Servo rightServo;
-
   private double currentPosition = 0.5;
   private double targetPosition = 0.5;
   private Time lastUpdateTime = Seconds.of(0);
