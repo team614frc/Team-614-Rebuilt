@@ -27,7 +27,6 @@ import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 
 public class Feeder extends SubsystemBase {
-  private static final AngularVelocity FEED_SPEED = RPM.of(5000);
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
   private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(50);
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
@@ -38,12 +37,12 @@ public class Feeder extends SubsystemBase {
       MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
 
   public enum Speed {
-    FEED(FEED_SPEED.in(Rotations.per(Minute)));
+    FEED(RPM.of(500));
 
     private final AngularVelocity velocity;
 
-    private Speed(double rpm) {
-      this.velocity = RPM.of(rpm);
+    private Speed(AngularVelocity velocity) {
+      this.velocity = velocity;
     }
 
     public AngularVelocity angularVelocity() {
@@ -81,7 +80,7 @@ public class Feeder extends SubsystemBase {
   }
 
   public void setPercentOutput(double percentOutput) {
-    motor.setControl(voltageRequest.withOutput(Volts.of(percentOutput * MAX_VOLTAGE.in(Volts))));
+      motor.setControl(voltageRequest.withOutput(MAX_VOLTAGE.times(percentOutput)));
   }
 
   public Command feedCommand() {

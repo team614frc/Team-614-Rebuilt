@@ -87,7 +87,7 @@ public class Shooter extends SubsystemBase {
 
   public void setPercentOutput(double percentOutput) {
     for (final TalonFX motor : motors) {
-      motor.setControl(voltageRequest.withOutput(Volts.of(percentOutput * MAX_VOLTAGE.in(Volts))));
+      motor.setControl(voltageRequest.withOutput(MAX_VOLTAGE.times(percentOutput)));
     }
   }
 

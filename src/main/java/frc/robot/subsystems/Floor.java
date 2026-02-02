@@ -37,7 +37,7 @@ public class Floor extends SubsystemBase {
     }
 
     public Voltage voltage() {
-      return Volts.of(percentOutput * MAX_VOLTAGE.in(Volts));
+      return MAX_VOLTAGE.times(percentOutput);
     }
   }
 

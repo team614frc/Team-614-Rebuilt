@@ -68,7 +68,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Voltage voltage() {
-      return Volts.of(percentOutput * MAX_VOLTAGE.in(Volts));
+        return MAX_VOLTAGE.times(percentOutput);
     }
   }
 
@@ -153,8 +153,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void setPivotPercentOutput(double percentOutput) {
-    pivotMotor.setControl(
-        pivotVoltageRequest.withOutput(Volts.of(percentOutput * MAX_VOLTAGE.in(Volts))));
+    pivotMotor.setControl(pivotVoltageRequest.withOutput(MAX_VOLTAGE.times(percentOutput)));
   }
 
   public void set(Position position) {

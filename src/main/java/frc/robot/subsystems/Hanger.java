@@ -109,7 +109,7 @@ public class Hanger extends SubsystemBase {
   }
 
   public void setPercentOutput(double percentOutput) {
-    motor.setControl(voltageRequest.withOutput(Volts.of(percentOutput * MAX_VOLTAGE.in(Volts))));
+      motor.setControl(voltageRequest.withOutput(MAX_VOLTAGE.times(percentOutput)));
   }
 
   public Command positionCommand(Position position) {
