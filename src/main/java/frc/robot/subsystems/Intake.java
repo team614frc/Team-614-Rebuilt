@@ -28,15 +28,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 
 public class Intake extends SubsystemBase {
   public enum Speed {
-    STOP(Constants.IntakeConstants.STOP_PERCENT_OUTPUT),
-    INTAKE(Constants.IntakeConstants.INTAKE_PERCENT_OUTPUT);
+    STOP(IntakeConstants.STOP_PERCENT_OUTPUT),
+    INTAKE(IntakeConstants.INTAKE_PERCENT_OUTPUT);
 
     private final double percentOutput;
 
