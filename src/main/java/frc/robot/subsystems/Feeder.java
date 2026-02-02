@@ -52,7 +52,6 @@ public class Feeder extends SubsystemBase {
   public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
   public static final double kV =
       MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
-  public static final int PERCENT_OUTPUT = 0;
 
   public enum Speed {
     FEED(FEED_SPEED.in(Rotations.per(Minute)));
