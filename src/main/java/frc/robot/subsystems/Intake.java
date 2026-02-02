@@ -34,7 +34,6 @@ import frc.robot.Ports;
 
 public class Intake extends SubsystemBase {
   // Speed Constants
-  public static final double STOP_PERCENT_OUTPUT = 0.0;
   public static final double INTAKE_PERCENT_OUTPUT = 0.6;
 
   // Voltage Limits
@@ -64,12 +63,14 @@ public class Intake extends SubsystemBase {
   public static final double KP = 300.0;
   public static final double KI = 0.0;
   public static final double KD = 0.0;
+  public static final double KV = 0.0;
+  
 
    public static final int NEW_SLOT = 0;
 
 
   public enum Speed {
-    STOP(STOP_PERCENT_OUTPUT),
+    STOP(0.0),
     INTAKE(INTAKE_PERCENT_OUTPUT);
 
     private final double percentOutput;
@@ -146,10 +147,7 @@ public class Intake extends SubsystemBase {
                     .withKP(KP)
                     .withKI(KI)
                     .withKD(KD)
-                    .withKV(
-                        MAX_VOLTAGE.in(Volts)
-                            / kMaxPivotSpeed.in(
-                                RotationsPerSecond)) // 12 volts when requesting max RPS
+                    .withKV(KV) // 12 volts when requesting max RPS
                 );
     pivotMotor.getConfigurator().apply(config);
   }

@@ -31,7 +31,6 @@ public class Shooter extends SubsystemBase {
 
   // Voltage Limits
   public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(100);
-  public static final Current VELOCITY_SLOT = Amps.of(0);
   public static final VelocityVoltage VELOCITY_VOLTAGE_SLOT = new VelocityVoltage(0);
   public static final Voltage VOLTAGE_OUT = Volts.of(0);
 
@@ -47,7 +46,6 @@ public class Shooter extends SubsystemBase {
   public static final double kI = 2.0;
   public static final double kD = 0.0;
 
-  public static final double STOP_PERCENT_OUTPUT = 0.0;
 
   private final TalonFX leftMotor, middleMotor, rightMotor;
   private final List<TalonFX> motors;
@@ -112,7 +110,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void stop() {
-    setPercentOutput(STOP_PERCENT_OUTPUT);
+    setPercentOutput(0.0);
   }
 
   public Command spinUpCommand(double rpm) {
