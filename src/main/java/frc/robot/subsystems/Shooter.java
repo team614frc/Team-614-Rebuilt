@@ -45,6 +45,7 @@ public class Shooter extends SubsystemBase {
   public static final double kP = 0.5;
   public static final double kI = 2.0;
   public static final double kD = 0.0;
+  public static final double kV = 12;
 
   private final TalonFX leftMotor, middleMotor, rightMotor;
   private final List<TalonFX> motors;
@@ -87,11 +88,7 @@ public class Shooter extends SubsystemBase {
                     .withKP(kP)
                     .withKI(kI)
                     .withKD(kD)
-                    .withKV(
-                        MAX_VOLTAGE.in(Volts)
-                            / KrakenX60.kFreeSpeed.in(
-                                RotationsPerSecond)) // 12 volts when requesting max RPS
-                );
+                    .withKV(kV));
 
     motor.getConfigurator().apply(config);
   }
