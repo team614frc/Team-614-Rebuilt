@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Minute;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Revolutions;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -28,7 +27,7 @@ import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 
 public class Feeder extends SubsystemBase {
-  public static final AngularVelocity FEED_SPEED = Revolutions.per(Minute).of(5000);
+  public static final AngularVelocity FEED_SPEED = RPM.of(5000);
 
   // Motor Behavior
   public static final InvertedValue INVERTED = InvertedValue.CounterClockwise_Positive;
