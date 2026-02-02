@@ -122,8 +122,8 @@ public final class Constants {
     public static final double kD = 0.0;
 
     // Homing Constants
-    public static final Voltage HOMING_VOLTAGE = Volts.of(-0.05);
-    public static final double HOMING_CURRENT_THRESHOLD = 0.4;
+    public static final double HOMING_VOLTAGE = -0.05 * 12.0;
+    public static final Current HOMING_CURRENT_THRESHOLD = Amps.of(0.4);
 
     public static Per<DistanceUnit, AngleUnit> HANGER_EXTENSION_PER_MOTOR_ANGLE =
         Inches.of(6).div(Rotations.of(142));
