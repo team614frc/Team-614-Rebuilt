@@ -100,7 +100,7 @@ public class Intake extends SubsystemBase {
 
   private static final double kPivotReduction = PIVOT_REDUCTION.in(Degrees);
   private static final AngularVelocity kMaxPivotSpeed = KrakenX60.kFreeSpeed.div(kPivotReduction);
-  private static final Angle kPositionTolerance = Degrees.of(POSITION_TOLERANCE);
+  private static final Angle kPositionTolerance = Degrees.of(5);
 
   private final TalonFX pivotMotor, rollerMotor;
   private final VoltageOut pivotVoltageRequest = new VoltageOut(PIVOT_VOLTAGE_REQUEST);
