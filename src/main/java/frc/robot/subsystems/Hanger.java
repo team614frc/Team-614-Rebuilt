@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -57,9 +56,10 @@ public class Hanger extends SubsystemBase {
   public static final double kP = 10.0;
   public static final double kI = 0.0;
   public static final double kD = 0.0;
+  public static final double kV = 12;
 
   // Homing Constants
-  public static final double HOMING_VOLTAGE = -0.05 * 12.0;
+  public static final double HOMING_PERCENT_OUTPUT = -0.05 * 12.0;
   public static final Current HOMING_CURRENT_THRESHOLD = Amps.of(0.4);
 
   public static Per<DistanceUnit, AngleUnit> HANGER_EXTENSION_PER_MOTOR_ANGLE =
@@ -110,16 +110,7 @@ public class Hanger extends SubsystemBase {
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(KrakenX60.kFreeSpeed)
                     .withMotionMagicAcceleration(KrakenX60.kFreeSpeed.per(Second)))
-            .withSlot0(
-                new Slot0Configs()
-                    .withKP(kP)
-                    .withKI(kI)
-                    .withKD(kD)
-                    .withKV(
-                        MAX_VOLTAGE.in(Volts)
-                            / KrakenX60.kFreeSpeed.in(
-                                RotationsPerSecond)) // 12 volts when requesting max RPS
-                );
+            .withSlot0(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD).withKV(kV));
 
     motor.getConfigurator().apply(config);
     SmartDashboard.putData(this);
@@ -140,7 +131,7 @@ public class Hanger extends SubsystemBase {
 
   public Command homingCommand() {
     return Commands.sequence(
-            runOnce(() -> setPercentOutput(HOMING_VOLTAGE)),
+            runOnce(() -> setPercentOutput(HOMING_PERCENT_OUTPUT)),
             Commands.waitUntil(
                 () ->
                     motor.getSupplyCurrent().getValue().in(Amps)
