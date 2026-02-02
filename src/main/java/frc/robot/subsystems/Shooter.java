@@ -16,19 +16,38 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.KrakenX60;
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.Ports;
 import java.util.List;
 
 public class Shooter extends SubsystemBase {
-  private static final AngularVelocity kVelocityTolerance =
-      RPM.of(ShooterConstants.VELOCITY_TOLERANCE);
+
+  // Voltage Limits
+  public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(100);
+  public static final Current VELOCITY_SLOT = Amps.of(0);
+  public static final VelocityVoltage VELOCITY_VOLTAGE_SLOT = new VelocityVoltage(0);
+  public static final Voltage VOLTAGE_OUT = Volts.of(0);
+
+  public static final Voltage PEAK_REVERSE_VOLTAGE = Volts.of(0);
+  public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+
+  // Current Limits
+  public static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
+  public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
+
+  // PID Constants
+  public static final double kP = 0.5;
+  public static final double kI = 2.0;
+  public static final double kD = 0.0;
+
+  public static final double STOP_PERCENT_OUTPUT = 0.0;
 
   private final TalonFX leftMotor, middleMotor, rightMotor;
   private final List<TalonFX> motors;
@@ -59,21 +78,20 @@ public class Shooter extends SubsystemBase {
                     .withNeutralMode(NeutralModeValue.Coast))
             .withVoltage(
                 new VoltageConfigs()
-                    .withPeakReverseVoltage(
-                        Volts.of(ShooterConstants.PEAK_REVERSE_VOLTAGE.in(Volts))))
+                    .withPeakReverseVoltage(Volts.of(PEAK_REVERSE_VOLTAGE.in(Volts))))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(ShooterConstants.STATOR_CURRENT_LIMIT))
+                    .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(ShooterConstants.SUPPLY_CURRENT_LIMIT))
+                    .withSupplyCurrentLimit(SUPPLY_CURRENT_LIMIT)
                     .withSupplyCurrentLimitEnable(true))
             .withSlot0(
                 new Slot0Configs()
-                    .withKP(ShooterConstants.kP)
-                    .withKI(ShooterConstants.kI)
-                    .withKD(ShooterConstants.kD)
+                    .withKP(kP)
+                    .withKI(kI)
+                    .withKD(kD)
                     .withKV(
-                        ShooterConstants.MAX_VOLTAGE.in(Volts)
+                        MAX_VOLTAGE.in(Volts)
                             / KrakenX60.kFreeSpeed.in(
                                 RotationsPerSecond)) // 12 volts when requesting max RPS
                 );
@@ -89,14 +107,12 @@ public class Shooter extends SubsystemBase {
 
   public void setPercentOutput(double percentOutput) {
     for (final TalonFX motor : motors) {
-      motor.setControl(
-          voltageRequest.withOutput(
-              Volts.of(percentOutput * ShooterConstants.MAX_VOLTAGE.in(Volts))));
+      motor.setControl(voltageRequest.withOutput(Volts.of(percentOutput * MAX_VOLTAGE.in(Volts))));
     }
   }
 
   public void stop() {
-    setPercentOutput(ShooterConstants.STOP_PERCENT_OUTPUT);
+    setPercentOutput(STOP_PERCENT_OUTPUT);
   }
 
   public Command spinUpCommand(double rpm) {
@@ -114,7 +130,7 @@ public class Shooter extends SubsystemBase {
               final boolean isInVelocityMode = motor.getAppliedControl().equals(velocityRequest);
               final AngularVelocity currentVelocity = motor.getVelocity().getValue();
               final AngularVelocity targetVelocity = velocityRequest.getVelocityMeasure();
-              return isInVelocityMode && currentVelocity.isNear(targetVelocity, kVelocityTolerance);
+              return isInVelocityMode && currentVelocity.isNear(targetVelocity, VELOCITY_TOLERANCE);
             });
   }
 
