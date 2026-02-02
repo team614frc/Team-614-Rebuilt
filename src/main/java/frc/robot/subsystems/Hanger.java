@@ -35,6 +35,7 @@ import frc.robot.Ports;
 
 public class Hanger extends SubsystemBase {
 
+  private static final Distance HANGER_HOMED = Inches.of(0);
   private static final Distance HANGER_EXTEND_HOPPER = Inches.of(2);
   private static final Distance HANGER_HANGING = Inches.of(6);
   private static final Distance HANGER_HUNG = Inches.of(0.2);
@@ -54,7 +55,7 @@ public class Hanger extends SubsystemBase {
   private static final Distance EXTENSION_TOLERANCE = Inches.of(1);
 
   public enum Position {
-    HOMED(Inches.of(0)),
+    HOMED(HANGER_HOMED),
     EXTEND_HOPPER(HANGER_EXTEND_HOPPER),
     HANGING(HANGER_HANGING),
     HUNG(HANGER_HUNG);

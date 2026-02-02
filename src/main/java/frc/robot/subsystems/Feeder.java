@@ -40,14 +40,14 @@ public class Feeder extends SubsystemBase {
   public enum Speed {
     FEED(FEED_SPEED.in(Rotations.per(Minute)));
 
-    private final double rpm;
+    private final AngularVelocity velocity;
 
     private Speed(double rpm) {
-      this.rpm = rpm;
+      this.velocity = RPM.of(rpm);
     }
 
     public AngularVelocity angularVelocity() {
-      return RPM.of(rpm);
+      return this.velocity;
     }
   }
 
