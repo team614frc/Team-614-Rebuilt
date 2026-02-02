@@ -36,14 +36,11 @@ import frc.robot.Ports;
 public class Hanger extends SubsystemBase {
 
   // Position Constants
-  public static final Distance HANGER_HOMED = Inches.of(0);
   public static final Distance HANGER_EXTEND_HOPPER = Inches.of(2);
   public static final Distance HANGER_HANGING = Inches.of(6);
   public static final Distance HANGER_HUNG = Inches.of(0.2);
 
   // Voltage Limits
-  public static final int INITIAL_SETPOINT = 0;
-  public static final int NEW_SLOT = 0;
 
   public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
   public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
@@ -67,7 +64,7 @@ public class Hanger extends SubsystemBase {
   public static Distance EXTENSION_TOLERANCE = Inches.of(1);
 
   public enum Position {
-    HOMED(HANGER_HOMED),
+    HOMED(Inches.of(0)),
     EXTEND_HOPPER(HANGER_EXTEND_HOPPER),
     HANGING(HANGER_HANGING),
     HUNG(HANGER_HUNG);

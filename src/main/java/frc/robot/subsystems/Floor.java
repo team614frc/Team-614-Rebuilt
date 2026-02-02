@@ -22,19 +22,17 @@ import frc.robot.Ports;
 public class Floor extends SubsystemBase {
 
   // Speed Constants
-  public static final double STOP_PERCENT_OUTPUT = 0.0;
   public static final double FLOOR_PERCENT_OUTPUT = 0.83;
 
   // Voltage Limits
   public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
-  public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
 
   // Current Limits
   public static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
   public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(30);
 
   public enum Speed {
-    STOP(STOP_PERCENT_OUTPUT),
+    STOP(0),
     FEED(FLOOR_PERCENT_OUTPUT);
 
     private final double percentOutput;

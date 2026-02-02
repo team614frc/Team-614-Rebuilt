@@ -34,22 +34,19 @@ public class Feeder extends SubsystemBase {
   public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Coast;
 
   // Voltage Limits
-  public static final Voltage VELOCITY_VOLTAGE_SLOT = Volts.of(0.0);
-  public static final int NEW_SLOT = 0;
-  public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
 
   // Current Limits
   public static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
   public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(50);
+
+  // Feedforward / voltage
+  public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
 
   // PID Constants
   public static final int PID_SLOT = 0;
   public static final double kP = 1.0;
   public static final double kI = 0.0;
   public static final double kD = 0.0;
-
-  // Feedforward / voltage
-  public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
   public static final double kV =
       MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
 
