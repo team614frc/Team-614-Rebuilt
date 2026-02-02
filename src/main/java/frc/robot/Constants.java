@@ -100,10 +100,10 @@ public final class Constants {
   public static final class HangerConstants {
 
     // Position Constants
-    public static final int HOMED = 0; // Inches
-    public static final int EXTEND_HOPPER = 2; // Inches
-    public static final int HANGING = 6; // Inches
-    public static final double HUNG = 0.2; // Inches
+    public static final Distance HOMED = Inches.of(0);
+    public static final Distance EXTEND_HOPPER = Inches.of(2);
+    public static final Distance HANGING = Inches.of(6);
+    public static final Distance HUNG = Inches.of(0.2);
 
     // Voltage Limits
     public static final int INITIAL_SETPOINT = 0;

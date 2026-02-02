@@ -34,10 +34,10 @@ import frc.robot.Ports;
 
 public class Hanger extends SubsystemBase {
   public enum Position {
-    HOMED(HangerConstants.HOMED),
-    EXTEND_HOPPER(HangerConstants.EXTEND_HOPPER),
-    HANGING(HangerConstants.HANGING),
-    HUNG(HangerConstants.HUNG);
+    HOMED(HangerConstants.HOMED.in(Inches)),
+    EXTEND_HOPPER(HangerConstants.EXTEND_HOPPER.in(Inches)),
+    HANGING(HangerConstants.HANGING.in(Inches)),
+    HUNG(HangerConstants.HUNG.in(Inches));
 
     private final double inches;
 
