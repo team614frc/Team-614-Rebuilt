@@ -67,20 +67,20 @@ public class Hanger extends SubsystemBase {
   public static Distance EXTENSION_TOLERANCE = Inches.of(1);
 
   public enum Position {
-    HOMED(HANGER_HOMED.in(Inches)),
-    EXTEND_HOPPER(HANGER_EXTEND_HOPPER.in(Inches)),
-    HANGING(HANGER_HANGING.in(Inches)),
-    HUNG(HANGER_HUNG.in(Inches));
+    HOMED(HANGER_HOMED),
+    EXTEND_HOPPER(HANGER_EXTEND_HOPPER),
+    HANGING(HANGER_HANGING),
+    HUNG(HANGER_HUNG);
 
-    private final double inches;
+    private final Distance distance;
 
-    private Position(double inches) {
-      this.inches = inches;
+    private Position(Distance inches) {
+      this.distance = inches;
     }
 
     public Angle motorAngle() {
       final Measure<AngleUnit> angleMeasure =
-          Inches.of(inches).divideRatio(HANGER_EXTENSION_PER_MOTOR_ANGLE);
+         distance.divideRatio(HANGER_EXTENSION_PER_MOTOR_ANGLE);
       return Rotations.of(angleMeasure.in(Rotations)); // Promote from Measure<AngleUnit> to Angle
     }
   }
