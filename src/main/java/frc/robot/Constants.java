@@ -6,17 +6,12 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Voltage;
 
 /**
@@ -52,82 +47,6 @@ public final class Constants {
 
   public static class KrakenX60 {
     public static final AngularVelocity kFreeSpeed = RPM.of(6000);
-  }
-
-  public static final class FeederConstants {
-    public static final AngularVelocity FEED_SPEED = Revolutions.per(Minute).of(5000);
-
-    // Motor Behavior
-    public static final InvertedValue INVERTED = InvertedValue.CounterClockwise_Positive;
-    public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Coast;
-
-    // Voltage Limits
-    public static final Voltage VELOCITY_VOLTAGE_SLOT = Volts.of(0.0);
-    public static final int NEW_SLOT = 0;
-    public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
-
-    // Current Limits
-    public static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
-    public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(50);
-
-    // PID Constants
-    public static final int PID_SLOT = 0;
-    public static final double kP = 1.0;
-    public static final double kI = 0.0;
-    public static final double kD = 0.0;
-
-    // Feedforward / voltage
-    public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
-    public static final double kV =
-        MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
-    public static final int PERCENT_OUTPUT = 0;
-  }
-
-  public static final class FloorConstants {
-    // Speed Constants
-    public static final double STOP_PERCENT_OUTPUT = 0.0;
-    public static final double FLOOR_PERCENT_OUTPUT = 0.83;
-
-    // Voltage Limits
-    public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
-    public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
-
-    // Current Limits
-    public static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
-    public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(30);
-  }
-
-  public static final class HangerConstants {
-
-    // Position Constants
-    public static final Distance HOMED = Inches.of(0);
-    public static final Distance EXTEND_HOPPER = Inches.of(2);
-    public static final Distance HANGING = Inches.of(6);
-    public static final Distance HUNG = Inches.of(0.2);
-
-    // Voltage Limits
-    public static final int INITIAL_SETPOINT = 0;
-    public static final int NEW_SLOT = 0;
-
-    public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
-    public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
-
-    // Current Limits
-    public static final Current STATOR_CURRENT_LIMIT = Amps.of(20);
-    public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
-
-    // PID Constants
-    public static final double kP = 10.0;
-    public static final double kI = 0.0;
-    public static final double kD = 0.0;
-
-    // Homing Constants
-    public static final double HOMING_VOLTAGE = -0.05 * 12.0;
-    public static final Current HOMING_CURRENT_THRESHOLD = Amps.of(0.4);
-
-    public static Per<DistanceUnit, AngleUnit> HANGER_EXTENSION_PER_MOTOR_ANGLE =
-        Inches.of(6).div(Rotations.of(142));
-    public static Distance EXTENSION_TOLERANCE = Inches.of(1);
   }
 
   public static final class HoodConstants {

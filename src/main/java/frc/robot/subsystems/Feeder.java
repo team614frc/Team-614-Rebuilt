@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Minute;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Revolutions;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -17,17 +18,45 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.FeederConstants;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 
 public class Feeder extends SubsystemBase {
+  public static final AngularVelocity FEED_SPEED = Revolutions.per(Minute).of(5000);
+
+  // Motor Behavior
+  public static final InvertedValue INVERTED = InvertedValue.CounterClockwise_Positive;
+  public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Coast;
+
+  // Voltage Limits
+  public static final Voltage VELOCITY_VOLTAGE_SLOT = Volts.of(0.0);
+  public static final int NEW_SLOT = 0;
+  public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
+
+  // Current Limits
+  public static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
+  public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(50);
+
+  // PID Constants
+  public static final int PID_SLOT = 0;
+  public static final double kP = 1.0;
+  public static final double kI = 0.0;
+  public static final double kD = 0.0;
+
+  // Feedforward / voltage
+  public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+  public static final double kV =
+      MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
+  public static final int PERCENT_OUTPUT = 0;
+
   public enum Speed {
-    FEED(FeederConstants.FEED_SPEED.in(Rotations.per(Minute)));
+    FEED(FEED_SPEED.in(Rotations.per(Minute)));
 
     private final double rpm;
 
@@ -55,17 +84,17 @@ public class Feeder extends SubsystemBase {
                     .withNeutralMode(NeutralModeValue.Coast))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(FeederConstants.STATOR_CURRENT_LIMIT)
+                    .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(FeederConstants.SUPPLY_CURRENT_LIMIT)
+                    .withSupplyCurrentLimit(SUPPLY_CURRENT_LIMIT)
                     .withSupplyCurrentLimitEnable(true))
             .withSlot0(
                 new Slot0Configs()
-                    .withKP(FeederConstants.kP)
-                    .withKI(FeederConstants.kI)
-                    .withKD(FeederConstants.kD)
+                    .withKP(kP)
+                    .withKI(kI)
+                    .withKD(kD)
                     .withKV(
-                        FeederConstants.MAX_VOLTAGE.in(Volts)
+                        MAX_VOLTAGE.in(Volts)
                             / KrakenX60.kFreeSpeed.in(
                                 RotationsPerSecond)) // 12 volts when requesting max RPS
                 );
@@ -79,8 +108,7 @@ public class Feeder extends SubsystemBase {
   }
 
   public void setPercentOutput(double percentOutput) {
-    motor.setControl(
-        voltageRequest.withOutput(Volts.of(percentOutput * FeederConstants.MAX_VOLTAGE.in(Volts))));
+    motor.setControl(voltageRequest.withOutput(Volts.of(percentOutput * MAX_VOLTAGE.in(Volts))));
   }
 
   public Command feedCommand() {

@@ -21,23 +21,56 @@ import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Per;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.HangerConstants;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 
 public class Hanger extends SubsystemBase {
+
+  // Position Constants
+  public static final Distance HANGER_HOMED = Inches.of(0);
+  public static final Distance HANGER_EXTEND_HOPPER = Inches.of(2);
+  public static final Distance HANGER_HANGING = Inches.of(6);
+  public static final Distance HANGER_HUNG = Inches.of(0.2);
+
+  // Voltage Limits
+  public static final int INITIAL_SETPOINT = 0;
+  public static final int NEW_SLOT = 0;
+
+  public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
+  public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+
+  // Current Limits
+  public static final Current STATOR_CURRENT_LIMIT = Amps.of(20);
+  public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
+
+  // PID Constants
+  public static final double kP = 10.0;
+  public static final double kI = 0.0;
+  public static final double kD = 0.0;
+
+  // Homing Constants
+  public static final double HOMING_VOLTAGE = -0.05 * 12.0;
+  public static final Current HOMING_CURRENT_THRESHOLD = Amps.of(0.4);
+
+  public static Per<DistanceUnit, AngleUnit> HANGER_EXTENSION_PER_MOTOR_ANGLE =
+      Inches.of(6).div(Rotations.of(142));
+  public static Distance EXTENSION_TOLERANCE = Inches.of(1);
+
   public enum Position {
-    HOMED(HangerConstants.HOMED.in(Inches)),
-    EXTEND_HOPPER(HangerConstants.EXTEND_HOPPER.in(Inches)),
-    HANGING(HangerConstants.HANGING.in(Inches)),
-    HUNG(HangerConstants.HUNG.in(Inches));
+    HOMED(HANGER_HOMED.in(Inches)),
+    EXTEND_HOPPER(HANGER_EXTEND_HOPPER.in(Inches)),
+    HANGING(HANGER_HANGING.in(Inches)),
+    HUNG(HANGER_HUNG.in(Inches));
 
     private final double inches;
 
@@ -47,7 +80,7 @@ public class Hanger extends SubsystemBase {
 
     public Angle motorAngle() {
       final Measure<AngleUnit> angleMeasure =
-          Inches.of(inches).divideRatio(HangerConstants.HANGER_EXTENSION_PER_MOTOR_ANGLE);
+          Inches.of(inches).divideRatio(HANGER_EXTENSION_PER_MOTOR_ANGLE);
       return Rotations.of(angleMeasure.in(Rotations)); // Promote from Measure<AngleUnit> to Angle
     }
   }
@@ -69,9 +102,9 @@ public class Hanger extends SubsystemBase {
                     .withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(HangerConstants.STATOR_CURRENT_LIMIT)
+                    .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(HangerConstants.SUPPLY_CURRENT_LIMIT)
+                    .withSupplyCurrentLimit(SUPPLY_CURRENT_LIMIT)
                     .withSupplyCurrentLimitEnable(true))
             .withMotionMagic(
                 new MotionMagicConfigs()
@@ -79,11 +112,11 @@ public class Hanger extends SubsystemBase {
                     .withMotionMagicAcceleration(KrakenX60.kFreeSpeed.per(Second)))
             .withSlot0(
                 new Slot0Configs()
-                    .withKP(HangerConstants.kP)
-                    .withKI(HangerConstants.kI)
-                    .withKD(HangerConstants.kD)
+                    .withKP(kP)
+                    .withKI(kI)
+                    .withKD(kD)
                     .withKV(
-                        HangerConstants.MAX_VOLTAGE.in(Volts)
+                        MAX_VOLTAGE.in(Volts)
                             / KrakenX60.kFreeSpeed.in(
                                 RotationsPerSecond)) // 12 volts when requesting max RPS
                 );
@@ -97,8 +130,7 @@ public class Hanger extends SubsystemBase {
   }
 
   public void setPercentOutput(double percentOutput) {
-    motor.setControl(
-        voltageRequest.withOutput(Volts.of(percentOutput * HangerConstants.MAX_VOLTAGE.in(Volts))));
+    motor.setControl(voltageRequest.withOutput(Volts.of(percentOutput * MAX_VOLTAGE.in(Volts))));
   }
 
   public Command positionCommand(Position position) {
@@ -108,11 +140,11 @@ public class Hanger extends SubsystemBase {
 
   public Command homingCommand() {
     return Commands.sequence(
-            runOnce(() -> setPercentOutput(HangerConstants.HOMING_VOLTAGE)),
+            runOnce(() -> setPercentOutput(HOMING_VOLTAGE)),
             Commands.waitUntil(
                 () ->
                     motor.getSupplyCurrent().getValue().in(Amps)
-                        > HangerConstants.HOMING_CURRENT_THRESHOLD.in(Amps)),
+                        > HOMING_CURRENT_THRESHOLD.in(Amps)),
             runOnce(
                 () -> {
                   motor.setPosition(Position.HOMED.motorAngle());
@@ -130,12 +162,12 @@ public class Hanger extends SubsystemBase {
   private boolean isExtensionWithinTolerance() {
     final Distance currentExtension = motorAngleToExtension(motor.getPosition().getValue());
     final Distance targetExtension = motorAngleToExtension(motionMagicRequest.getPositionMeasure());
-    return currentExtension.isNear(targetExtension, HangerConstants.EXTENSION_TOLERANCE);
+    return currentExtension.isNear(targetExtension, EXTENSION_TOLERANCE);
   }
 
   private Distance motorAngleToExtension(Angle motorAngle) {
     final Measure<DistanceUnit> extensionMeasure =
-        motorAngle.timesRatio(HangerConstants.HANGER_EXTENSION_PER_MOTOR_ANGLE);
+        motorAngle.timesRatio(HANGER_EXTENSION_PER_MOTOR_ANGLE);
     return Inches.of(extensionMeasure.in(Inches)); // Promote from Measure<DistanceUnit> to Distance
   }
 
