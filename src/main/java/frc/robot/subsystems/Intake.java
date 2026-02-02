@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -33,36 +34,38 @@ import frc.robot.Ports;
 
 public class Intake extends SubsystemBase {
   // Speed Constants
-  public static final double INTAKE_PERCENT_OUTPUT = 0.6;
+  private static final double INTAKE_PERCENT_OUTPUT = 0.6;
 
   // Voltage Limits
-  public static final Voltage MAX_VOLTAGE = Volts.of(12.0);
-  public static final Voltage VOLTAGE_OUT = Volts.of(0.0);
-  public static final Voltage PIVOT_VOLTAGE_REQUEST = Volts.of(0);
-  public static final Voltage MOTION_MAGIC_VOLTAGE = Volts.of(0);
-  public static final Voltage ROLLER_VOLTAGE_REQUEST = Volts.of(0);
+  private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+  private static final Voltage PIVOT_VOLTAGE_REQUEST = Volts.of(0);
+  private static final Voltage MOTION_MAGIC_VOLTAGE = Volts.of(0);
+  private static final Voltage ROLLER_VOLTAGE_REQUEST = Volts.of(0);
 
   // Position Constants
-  public static final Angle HOMED_ANGLE = Degrees.of(110);
-  public static final Angle STOWED_ANGLE = Degrees.of(100);
-  public static final Angle INTAKE_ANGLE = Degrees.of(-4);
-  public static final Angle INTAKE_AGITATE = Degrees.of(20);
+  private static final Angle HOMED_ANGLE = Degrees.of(110);
+  private static final Angle STOWED_ANGLE = Degrees.of(100);
+  private static final Angle INTAKE_ANGLE = Degrees.of(-4);
+  private static final Angle INTAKE_AGITATE = Degrees.of(20);
 
   // Pivot Constants
-  public static final Angle PIVOT_REDUCTION = Degrees.of(50.0);
-  public static final int POSITION_TOLERANCE = 5;
-  public static final double PIVOT_PERCENT_OUTPUT = 0.1;
+  private static final Angle PIVOT_REDUCTION = Degrees.of(50.0);
+  private static final double PIVOT_PERCENT_OUTPUT = 0.1;
 
   // Current Limits
-  public static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
-  public static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
-  public static final Current HOMING_CURRENT_THRESHOLD = Amps.of(6);
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
+  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(6);
 
   // PID Constants
-  public static final double KP = 300.0;
-  public static final double KI = 0.0;
-  public static final double KD = 0.0;
-  public static final double KV = 0.0;
+  private static final double kPivotReduction = PIVOT_REDUCTION.in(Degrees);
+  private static final AngularVelocity kMaxPivotSpeed = KrakenX60.kFreeSpeed.div(kPivotReduction);
+  private static final Angle kPositionTolerance = Degrees.of(5);
+
+  private static final double KP = 300.0;
+  private static final double KI = 0.0;
+  private static final double KD = 0.0;
+  private static final double KV = 12.0 / kMaxPivotSpeed.in(RotationsPerSecond);
 
   public static final int NEW_SLOT = 0;
 
@@ -98,9 +101,6 @@ public class Intake extends SubsystemBase {
     }
   }
 
-  private static final double kPivotReduction = PIVOT_REDUCTION.in(Degrees);
-  private static final AngularVelocity kMaxPivotSpeed = KrakenX60.kFreeSpeed.div(kPivotReduction);
-  private static final Angle kPositionTolerance = Degrees.of(5);
 
   private final TalonFX pivotMotor, rollerMotor;
   private final VoltageOut pivotVoltageRequest = new VoltageOut(PIVOT_VOLTAGE_REQUEST);
@@ -144,7 +144,7 @@ public class Intake extends SubsystemBase {
                     .withKP(KP)
                     .withKI(KI)
                     .withKD(KD)
-                    .withKV(KV) // 12 volts when requesting max RPS
+                    .withKV(KV)
                 );
     pivotMotor.getConfigurator().apply(config);
   }
