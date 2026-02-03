@@ -46,8 +46,7 @@ public class Intake extends SubsystemBase {
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
   private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
   private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(6);
-  private static final double kPivotReduction = PIVOT_REDUCTION.in(Degrees);
-  private static final AngularVelocity kMaxPivotSpeed = KrakenX60.kFreeSpeed.div(kPivotReduction);
+  private static final AngularVelocity kMaxPivotSpeed = KrakenX60.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
   private static final Angle kPositionTolerance = Degrees.of(5);
   private static final double KP = 300.0;
   private static final double KI = 0.0;
@@ -119,7 +118,7 @@ public class Intake extends SubsystemBase {
             .withFeedback(
                 new FeedbackConfigs()
                     .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
-                    .withSensorToMechanismRatio(kPivotReduction))
+                    .withSensorToMechanismRatio(PIVOT_REDUCTION.in(Degrees)))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(kMaxPivotSpeed)
