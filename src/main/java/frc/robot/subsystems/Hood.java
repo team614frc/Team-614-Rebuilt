@@ -21,7 +21,7 @@ import frc.robot.Ports;
 public class Hood extends SubsystemBase {
 
   private static final Distance SERVO_LENGTH = Millimeters.of(100);
-  private static final LinearVelocity MAX_SERVO_SPEED = Millimeters.of(20).per(Second);
+  private static final LinearVelocity MAX_SERVO_SPEED = Millimeters.per(Second).of(20);
   private static final double MIN_POSITION = 0.01;
   private static final double MAX_POSITION = 0.77;
   private static final double POSITION_TOLERANCE = 0.01;
