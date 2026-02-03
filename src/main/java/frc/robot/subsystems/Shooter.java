@@ -44,7 +44,7 @@ public class Shooter extends SubsystemBase {
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
   private final VoltageOut voltageRequest = new VoltageOut(0);
 
-  private double dashboardTargetRPM = 0;
+  private double dashboardTargetRPM = 0.0;
 
   public Shooter() {
     leftMotor = new TalonFX(Ports.kShooterLeft, Ports.kRoboRioCANBus);
