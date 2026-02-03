@@ -35,8 +35,6 @@ import frc.robot.Ports;
 public class Intake extends SubsystemBase {
 
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
-  private static final Voltage MOTION_MAGIC_VOLTAGE = Volts.of(0);
-  // private static final Voltage ROLLER_VOLTAGE_REQUEST = Volts.of(0);
   private static final Angle PIVOT_REDUCTION = Degrees.of(50.0);
   private static final double PIVOT_PERCENT_OUTPUT = 0.1;
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
@@ -49,7 +47,6 @@ public class Intake extends SubsystemBase {
   private static final double kI = 0.0;
   private static final double kD = 0.0;
   private static final double kV = MAX_VOLTAGE.in(Volts) / kMaxPivotSpeed.in(RotationsPerSecond);
-  private static final int NEW_SLOT = 0;
 
   public enum Speed {
     STOP(0.0),
