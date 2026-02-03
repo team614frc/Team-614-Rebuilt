@@ -37,7 +37,8 @@ public class Shooter extends SubsystemBase {
   private static final double kP = 0.5;
   private static final double kI = 2.0;
   private static final double kD = 0.0;
-  private static final double kV = MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
+  private static final double kV =
+      MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
   private final TalonFX leftMotor, middleMotor, rightMotor;
   private final List<TalonFX> motors;
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);

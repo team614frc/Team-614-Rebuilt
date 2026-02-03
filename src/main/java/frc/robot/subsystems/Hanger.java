@@ -41,7 +41,8 @@ public class Hanger extends SubsystemBase {
   private static final double kP = 10.0;
   private static final double kI = 0.0;
   private static final double kD = 0.0;
-  private static final double kV = MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(Rotations.per(Second));
+  private static final double kV =
+      MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(Rotations.per(Second));
 
   // Homing Constants
   private static final double HOMING_PERCENT_OUTPUT = -0.05 * 12.0;
