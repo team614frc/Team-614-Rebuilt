@@ -33,7 +33,6 @@ import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 
 public class Intake extends SubsystemBase {
-
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
   private static final Angle PIVOT_REDUCTION = Degrees.of(50.0);
   private static final double PIVOT_PERCENT_OUTPUT = 0.1;
