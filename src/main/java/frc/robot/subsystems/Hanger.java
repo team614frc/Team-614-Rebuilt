@@ -35,16 +35,13 @@ import frc.robot.Ports;
 
 public class Hanger extends SubsystemBase {
 
-  private static final Distance HANGER_EXTEND_HOPPER = Inches.of(2);
-  private static final Distance HANGER_HANGING = Inches.of(6);
-  private static final Distance HANGER_HUNG = Inches.of(0.2);
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(20);
   private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
   private static final double kP = 10.0;
   private static final double kI = 0.0;
   private static final double kD = 0.0;
-  private static final double kV = 12;
+  private static final double kV = MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(Rotations.per(Second));
 
   // Homing Constants
   private static final double HOMING_PERCENT_OUTPUT = -0.05 * 12.0;
@@ -55,9 +52,9 @@ public class Hanger extends SubsystemBase {
 
   public enum Position {
     HOMED(Inches.of(0)),
-    EXTEND_HOPPER(HANGER_EXTEND_HOPPER),
-    HANGING(HANGER_HANGING),
-    HUNG(HANGER_HUNG);
+    EXTEND_HOPPER(Inches.of(2)),
+    HANGING(Inches.of(6)), //
+    HUNG(Inches.of(0.2));
 
     private final Distance distance;
 

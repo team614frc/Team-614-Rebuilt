@@ -38,9 +38,6 @@ public class Intake extends SubsystemBase {
   private static final Voltage PIVOT_VOLTAGE_REQUEST = Volts.of(0);
   private static final Voltage MOTION_MAGIC_VOLTAGE = Volts.of(0);
   private static final Voltage ROLLER_VOLTAGE_REQUEST = Volts.of(0);
-  private static final Angle STOWED_ANGLE = Degrees.of(100);
-  private static final Angle INTAKE_ANGLE = Degrees.of(-4);
-  private static final Angle INTAKE_AGITATE = Degrees.of(20);
   private static final Angle PIVOT_REDUCTION = Degrees.of(50.0);
   private static final double PIVOT_PERCENT_OUTPUT = 0.1;
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
@@ -49,10 +46,10 @@ public class Intake extends SubsystemBase {
   private static final AngularVelocity kMaxPivotSpeed =
       KrakenX60.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
   private static final Angle kPositionTolerance = Degrees.of(5);
-  private static final double KP = 300.0;
-  private static final double KI = 0.0;
-  private static final double KD = 0.0;
-  private static final double KV = 12.0 / kMaxPivotSpeed.in(RotationsPerSecond);
+  private static final double kP = 300.0;
+  private static final double kI = 0.0;
+  private static final double kD = 0.0;
+  private static final double kV = MAX_VOLTAGE.in(Volts) / kMaxPivotSpeed.in(RotationsPerSecond);
   private static final int NEW_SLOT = 0;
 
   public enum Speed {
@@ -72,9 +69,9 @@ public class Intake extends SubsystemBase {
 
   public enum Position {
     HOMED(Degrees.of(110)),
-    STOWED(STOWED_ANGLE),
-    INTAKE(INTAKE_ANGLE),
-    AGITATE(INTAKE_AGITATE);
+    STOWED(Degrees.of(100)),
+    INTAKE(Degrees.of(-4)),
+    AGITATE(Degrees.of(20));
 
     private final Angle angle;
 
@@ -124,7 +121,7 @@ public class Intake extends SubsystemBase {
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(kMaxPivotSpeed)
                     .withMotionMagicAcceleration(kMaxPivotSpeed.per(Second)))
-            .withSlot0(new Slot0Configs().withKP(KP).withKI(KI).withKD(KD).withKV(KV));
+            .withSlot0(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD).withKV(kV));
     pivotMotor.getConfigurator().apply(config);
   }
 
