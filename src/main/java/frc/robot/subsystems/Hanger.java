@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -34,7 +35,6 @@ import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 
 public class Hanger extends SubsystemBase {
-
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(20);
   private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
@@ -42,7 +42,7 @@ public class Hanger extends SubsystemBase {
   private static final double kI = 0.0;
   private static final double kD = 0.0;
   private static final double kV =
-      MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(Rotations.per(Second));
+      MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
 
   // Homing Constants
   private static final double HOMING_PERCENT_OUTPUT = -0.05 * 12.0;
@@ -54,13 +54,13 @@ public class Hanger extends SubsystemBase {
   public enum Position {
     HOMED(Inches.of(0)),
     EXTEND_HOPPER(Inches.of(2)),
-    HANGING(Inches.of(6)), //
+    HANGING(Inches.of(6)), 
     HUNG(Inches.of(0.2));
 
     private final Distance distance;
 
-    private Position(Distance inches) {
-      this.distance = inches;
+    private Position(Distance distance) {
+      this.distance = distance;
     }
 
     public Angle motorAngle() {
