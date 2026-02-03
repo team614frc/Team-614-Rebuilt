@@ -1,9 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Minute;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -80,7 +78,7 @@ public class Feeder extends SubsystemBase {
   }
 
   public void setPercentOutput(double percentOutput) {
-      motor.setControl(voltageRequest.withOutput(MAX_VOLTAGE.times(percentOutput)));
+    motor.setControl(voltageRequest.withOutput(MAX_VOLTAGE.times(percentOutput)));
   }
 
   public Command feedCommand() {

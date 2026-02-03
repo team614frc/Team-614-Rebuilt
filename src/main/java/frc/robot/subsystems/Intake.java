@@ -68,7 +68,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Voltage voltage() {
-        return MAX_VOLTAGE.times(percentOutput);
+      return MAX_VOLTAGE.times(percentOutput);
     }
   }
 
