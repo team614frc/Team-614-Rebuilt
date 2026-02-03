@@ -30,7 +30,6 @@ import java.util.List;
 public class Shooter extends SubsystemBase {
 
   private static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(100);
-  private static final Voltage PEAK_REVERSE_VOLTAGE = Volts.of(0);
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
   private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
@@ -66,9 +65,7 @@ public class Shooter extends SubsystemBase {
                 new MotorOutputConfigs()
                     .withInverted(invertDirection)
                     .withNeutralMode(NeutralModeValue.Coast))
-            .withVoltage(
-                new VoltageConfigs()
-                    .withPeakReverseVoltage(Volts.of(PEAK_REVERSE_VOLTAGE.in(Volts))))
+            .withVoltage(new VoltageConfigs().withPeakReverseVoltage(Volts.of(0)))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
