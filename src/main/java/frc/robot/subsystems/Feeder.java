@@ -35,7 +35,7 @@ public class Feeder extends SubsystemBase {
       MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
 
   public enum Speed {
-    FEED(RPM.of(500));
+    FEED(RPM.of(5000));
 
     private final AngularVelocity velocity;
 
