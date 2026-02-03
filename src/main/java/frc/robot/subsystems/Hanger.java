@@ -54,7 +54,7 @@ public class Hanger extends SubsystemBase {
   public enum Position {
     HOMED(Inches.of(0)),
     EXTEND_HOPPER(Inches.of(2)),
-    HANGING(Inches.of(6)), 
+    HANGING(Inches.of(6)),
     HUNG(Inches.of(0.2));
 
     private final Distance distance;
