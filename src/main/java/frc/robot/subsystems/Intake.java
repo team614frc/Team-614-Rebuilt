@@ -36,7 +36,7 @@ public class Intake extends SubsystemBase {
 
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
   private static final Voltage MOTION_MAGIC_VOLTAGE = Volts.of(0);
-  //private static final Voltage ROLLER_VOLTAGE_REQUEST = Volts.of(0);
+  // private static final Voltage ROLLER_VOLTAGE_REQUEST = Volts.of(0);
   private static final Angle PIVOT_REDUCTION = Degrees.of(50.0);
   private static final double PIVOT_PERCENT_OUTPUT = 0.1;
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
@@ -85,8 +85,7 @@ public class Intake extends SubsystemBase {
 
   private final TalonFX pivotMotor, rollerMotor;
   private final VoltageOut pivotVoltageRequest = new VoltageOut(Volts.of(0));
-  private final MotionMagicVoltage pivotMotionMagicRequest =
-      new MotionMagicVoltage(0).withSlot(0);
+  private final MotionMagicVoltage pivotMotionMagicRequest = new MotionMagicVoltage(0).withSlot(0);
   private final VoltageOut rollerVoltageRequest = new VoltageOut(Volts.of(0));
 
   private boolean isHomed = false;
