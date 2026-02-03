@@ -40,13 +40,13 @@ public class Intake extends SubsystemBase {
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
   private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
   private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(6);
-  private static final AngularVelocity kMaxPivotSpeed =
+  private static final AngularVelocity MAX_PIVOT_SPEED =
       KrakenX60.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
   private static final Angle kPositionTolerance = Degrees.of(5);
   private static final double kP = 300.0;
   private static final double kI = 0.0;
   private static final double kD = 0.0;
-  private static final double kV = MAX_VOLTAGE.in(Volts) / kMaxPivotSpeed.in(RotationsPerSecond);
+  private static final double kV = MAX_VOLTAGE.in(Volts) / MAX_PIVOT_SPEED.in(RotationsPerSecond);
 
   public enum Speed {
     STOP(0.0),
@@ -104,9 +104,9 @@ public class Intake extends SubsystemBase {
                     .withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit((STATOR_CURRENT_LIMIT))
+                    .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit((SUPPLY_CURRENT_LIMIT))
+                    .withSupplyCurrentLimit(SUPPLY_CURRENT_LIMIT)
                     .withSupplyCurrentLimitEnable(true))
             .withFeedback(
                 new FeedbackConfigs()
@@ -114,8 +114,8 @@ public class Intake extends SubsystemBase {
                     .withSensorToMechanismRatio(PIVOT_REDUCTION.in(Degrees)))
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicCruiseVelocity(kMaxPivotSpeed)
-                    .withMotionMagicAcceleration(kMaxPivotSpeed.per(Second)))
+                    .withMotionMagicCruiseVelocity(MAX_PIVOT_SPEED)
+                    .withMotionMagicAcceleration(MAX_PIVOT_SPEED.per(Second)))
             .withSlot0(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD).withKV(kV));
     pivotMotor.getConfigurator().apply(config);
   }
