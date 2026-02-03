@@ -112,9 +112,9 @@ public class Intake extends SubsystemBase {
                     .withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(STATOR_CURRENT_LIMIT.in(Amps)))
+                    .withStatorCurrentLimit((STATOR_CURRENT_LIMIT))
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(SUPPLY_CURRENT_LIMIT.in(Amps)))
+                    .withSupplyCurrentLimit((SUPPLY_CURRENT_LIMIT))
                     .withSupplyCurrentLimitEnable(true))
             .withFeedback(
                 new FeedbackConfigs()
