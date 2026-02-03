@@ -34,12 +34,10 @@ import frc.robot.Ports;
 
 public class Intake extends SubsystemBase {
 
-  private static final double INTAKE_PERCENT_OUTPUT = 0.6;
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
   private static final Voltage PIVOT_VOLTAGE_REQUEST = Volts.of(0);
   private static final Voltage MOTION_MAGIC_VOLTAGE = Volts.of(0);
   private static final Voltage ROLLER_VOLTAGE_REQUEST = Volts.of(0);
-  private static final Angle HOMED_ANGLE = Degrees.of(110);
   private static final Angle STOWED_ANGLE = Degrees.of(100);
   private static final Angle INTAKE_ANGLE = Degrees.of(-4);
   private static final Angle INTAKE_AGITATE = Degrees.of(20);
@@ -59,7 +57,7 @@ public class Intake extends SubsystemBase {
 
   public enum Speed {
     STOP(0.0),
-    INTAKE(INTAKE_PERCENT_OUTPUT);
+    INTAKE(0.6);
 
     private final double percentOutput;
 
@@ -73,7 +71,7 @@ public class Intake extends SubsystemBase {
   }
 
   public enum Position {
-    HOMED(HOMED_ANGLE),
+    HOMED(Degrees.of(110)),
     STOWED(STOWED_ANGLE),
     INTAKE(INTAKE_ANGLE),
     AGITATE(INTAKE_AGITATE);
