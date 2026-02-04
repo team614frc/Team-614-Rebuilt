@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Ports;
 
 public class Floor extends SubsystemBase {
-
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
   private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(30);
