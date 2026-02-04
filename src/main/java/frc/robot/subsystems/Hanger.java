@@ -117,9 +117,7 @@ public class Hanger extends SubsystemBase {
     return Commands.sequence(
             runOnce(() -> setPercentOutput(HOMING_PERCENT_OUTPUT)),
             Commands.waitUntil(
-                () ->
-                    motor.getSupplyCurrent().getValue().in(Amps)
-                        > HOMING_CURRENT_THRESHOLD.in(Amps)),
+                () -> motor.getSupplyCurrent().getValue().gt(HOMING_CURRENT_THRESHOLD)),
             runOnce(
                 () -> {
                   motor.setPosition(Position.HOMED.motorAngle());

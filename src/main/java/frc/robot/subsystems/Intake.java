@@ -42,7 +42,7 @@ public class Intake extends SubsystemBase {
   private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(6);
   private static final AngularVelocity MAX_PIVOT_SPEED =
       KrakenX60.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
-  private static final Angle kPositionTolerance = Degrees.of(5);
+  private static final Angle POSITION_TOLERANCE = Degrees.of(5);
   private static final double kP = 300.0;
   private static final double kI = 0.0;
   private static final double kD = 0.0;
@@ -129,9 +129,9 @@ public class Intake extends SubsystemBase {
                     .withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(STATOR_CURRENT_LIMIT.in(Amps)))
+                    .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(SUPPLY_CURRENT_LIMIT.in(Amps)))
+                    .withSupplyCurrentLimit(SUPPLY_CURRENT_LIMIT)
                     .withSupplyCurrentLimitEnable(true));
     rollerMotor.getConfigurator().apply(config);
   }
@@ -139,7 +139,7 @@ public class Intake extends SubsystemBase {
   private boolean isPositionWithinTolerance() {
     final Angle currentPosition = pivotMotor.getPosition().getValue();
     final Angle targetPosition = pivotMotionMagicRequest.getPositionMeasure();
-    return currentPosition.isNear(targetPosition, kPositionTolerance);
+    return currentPosition.isNear(targetPosition, POSITION_TOLERANCE);
   }
 
   private void setPivotPercentOutput(double percentOutput) {
