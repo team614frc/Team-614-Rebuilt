@@ -20,6 +20,7 @@ import frc.robot.subsystems.Floor;
 import frc.robot.subsystems.Hanger;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -42,6 +43,7 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter();
   private final Hood hood = new Hood();
   private final Hanger hanger = new Hanger();
+  private final LEDs leds = new LEDs();
   private final VisionSubsystem vision = new VisionSubsystem(swerve);
 
   private final AllianceShiftMonitor shiftMonitor;
@@ -92,7 +94,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    shiftMonitor = new AllianceShiftMonitor(driverXbox);
+    shiftMonitor = new AllianceShiftMonitor(driverXbox, leds);
     configureBindings();
     DriverStation.silenceJoystickConnectionWarning(true);
 

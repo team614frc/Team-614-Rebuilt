@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.LEDs;
 
 public class AllianceShiftMonitor {
 
@@ -23,6 +24,7 @@ public class AllianceShiftMonitor {
   private static final double RUMBLE_GAP = 0.15;
 
   private final CommandXboxController driverController;
+  private final LEDs leds;
 
   private boolean gameDataReceived = false;
   private boolean isRedAlliance = false;
@@ -39,8 +41,9 @@ public class AllianceShiftMonitor {
   @SuppressWarnings("unused")
   private boolean endRumbleTriggered = false;
 
-  public AllianceShiftMonitor(CommandXboxController driverController) {
+  public AllianceShiftMonitor(CommandXboxController driverController, LEDs leds) {
     this.driverController = driverController;
+    this.leds = leds;
   }
 
   public void periodic() {
@@ -49,6 +52,7 @@ public class AllianceShiftMonitor {
 
     if (!DriverStation.isTeleopEnabled()) {
       stopContinuousRumble();
+      leds.disabled();
       updateDashboard();
       return;
     }
@@ -82,6 +86,13 @@ public class AllianceShiftMonitor {
     if (!gameDataReceived) return;
 
     double shiftEnd = getNextShiftTime(currentShift);
+
+    // Default state
+    if (isHubActiveNow()) {
+      leds.hubActive();
+    } else {
+      leds.opponentHub();
+    }
 
     // CASE 1: We're currently in OPPONENT'S shift, but OUR shift is coming up next
     // Triple rumble 5s before OUR shift starts
@@ -124,8 +135,10 @@ public class AllianceShiftMonitor {
 
       if (ourShiftNext) {
         rumbleTriple();
+        leds.hubStartingSoon();
       } else {
         startContinuousRumble();
+        leds.opponentHub();
       }
 
       transitionHandled = true;
