@@ -6,7 +6,6 @@ import com.ctre.phoenix6.signals.RGBWColor;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class LEDs extends SubsystemBase {
-
   private final CANdle candle;
 
   public LEDs() {
@@ -14,8 +13,8 @@ public class LEDs extends SubsystemBase {
     candle = new CANdle(0, "rio");
   }
 
-  public void setColor(HubState state) {
-    candle.setControl(new SolidColor(8, 399).withColor(new RGBWColor(state.r, state.g, state.b)));
+  public void setState(HubState state) {
+    candle.setControl(new SolidColor(8, 399).withColor(state.color));
   }
 
   public enum HubState {
@@ -26,14 +25,10 @@ public class LEDs extends SubsystemBase {
     TRANSITION(0, 0, 255), // Blue
     DISABLED(40, 40, 40); // Dim white
 
-    public final int r;
-    public final int g;
-    public final int b;
+    private final RGBWColor color;
 
-    HubState(int r, int g, int b) {
-      this.r = r;
-      this.g = g;
-      this.b = b;
+    private HubState(int r, int g, int b) {
+      color = new RGBWColor(r, g, b);
     }
   }
 }

@@ -53,7 +53,7 @@ public class AllianceShiftMonitor {
 
     if (!DriverStation.isTeleopEnabled()) {
       stopContinuousRumble();
-      leds.setColor(HubState.DISABLED);
+      leds.setState(HubState.DISABLED);
       ;
       updateDashboard();
       return;
@@ -91,9 +91,9 @@ public class AllianceShiftMonitor {
 
     // Default state
     if (isHubActiveNow()) {
-      leds.setColor(HubState.HUB_ACTIVE);
+      leds.setState(HubState.HUB_ACTIVE);
     } else {
-      leds.setColor(HubState.OPPONENT_HUB);
+      leds.setState(HubState.OPPONENT_HUB);
     }
 
     // CASE 1: We're currently in OPPONENT'S shift, but OUR shift is coming up next
@@ -137,10 +137,10 @@ public class AllianceShiftMonitor {
 
       if (ourShiftNext) {
         rumbleTriple();
-        leds.setColor(HubState.HUB_STARTING_SOON);
+        leds.setState(HubState.HUB_STARTING_SOON);
       } else {
         startContinuousRumble();
-        leds.setColor(HubState.OPPONENT_HUB);
+        leds.setState(HubState.OPPONENT_HUB);
       }
 
       transitionHandled = true;
