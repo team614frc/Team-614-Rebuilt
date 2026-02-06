@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.LEDs;
+import frc.robot.subsystems.LEDs.HubState;
 
 public class AllianceShiftMonitor {
 
@@ -52,7 +53,7 @@ public class AllianceShiftMonitor {
 
     if (!DriverStation.isTeleopEnabled()) {
       stopContinuousRumble();
-      leds.disabled();
+      leds.setColor(HubState.DISABLED);;
       updateDashboard();
       return;
     }
@@ -89,9 +90,9 @@ public class AllianceShiftMonitor {
 
     // Default state
     if (isHubActiveNow()) {
-      leds.hubActive();
+      leds.setColor(HubState.HUB_ACTIVE);
     } else {
-      leds.opponentHub();
+      leds.setColor(HubState.OPPONENT_HUB);
     }
 
     // CASE 1: We're currently in OPPONENT'S shift, but OUR shift is coming up next
@@ -135,10 +136,10 @@ public class AllianceShiftMonitor {
 
       if (ourShiftNext) {
         rumbleTriple();
-        leds.hubStartingSoon();
+        leds.setColor(HubState.HUB_STARTING_SOON);
       } else {
         startContinuousRumble();
-        leds.opponentHub();
+        leds.setColor(HubState.OPPONENT_HUB);
       }
 
       transitionHandled = true;

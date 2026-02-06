@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class LEDs extends SubsystemBase {
@@ -14,38 +15,26 @@ public class LEDs extends SubsystemBase {
     candle = new CANdle(0, "rio");
   }
 
-  private SolidColor SolidColorWithColor(int red, int green, int blue) {
-    RGBWColor color = new RGBWColor(red, green, blue);
-    return new SolidColor(8, 399).withColor(color);
+  public void setColor(HubState state) {
+    candle.setControl(new SolidColor(8, 399).withColor(new RGBWColor(state.r, state.g, state.b)));
   }
 
-  public void hubActive() {
-    // Solid green = OUR HUB ACTIVE
-    candle.setControl(SolidColorWithColor(0, 255, 0));
-  }
+  public enum HubState {
+    HUB_ACTIVE(0, 255, 0), // Green
+    OPPONENT_HUB(255, 0, 0), // Red
+    HUB_STARTING_SOON(255, 255, 0), // Yellow
+    HUB_ENDING_SOON(160, 0, 255), // Purple
+    TRANSITION(0, 0, 255), // Blue
+    DISABLED(40, 40, 40); // Dim white
 
-  public void opponentHub() {
-    // Solid red = OPPONENT HUB ACTIVE
-    candle.setControl(SolidColorWithColor(255, 0, 0));
-  }
+    public final int r;
+    public final int g;
+    public final int b;
 
-  public void hubStartingSoon() {
-    // Yellow = 5 second warning before OUR hub
-    candle.setControl(SolidColorWithColor(255, 255, 0));
-  }
-
-  public void hubEndingSoon() {
-    // Purple = 5 second warning before OUR hub ends
-    candle.setControl(SolidColorWithColor(160, 0, 255));
-  }
-
-  public void transition() {
-    // Blue during transition
-    candle.setControl(SolidColorWithColor(0, 0, 255));
-  }
-
-  public void disabled() {
-    // Dim white when disabled
-    candle.setControl(SolidColorWithColor(40, 40, 40));
+    HubState(int r, int g, int b) {
+      this.r = r;
+      this.g = g;
+      this.b = b;
+    }
   }
 }
