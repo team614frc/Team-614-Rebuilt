@@ -101,12 +101,13 @@ public class Hanger extends SubsystemBase {
   }
 
   public void set(Position position) {
-
     motor.setControl(motionMagicRequest.withPosition(position.motorAngle()));
+    simState.setRawRotorPosition(position.motorAngle());
   }
 
   public void setPercentOutput(double percentOutput) {
     motor.setControl(voltageRequest.withOutput(Volts.of(percentOutput * 12.0)));
+    simState.setSupplyVoltage(Volts.of(percentOutput * 12.0));
   }
 
   public Command positionCommand(Position position) {
