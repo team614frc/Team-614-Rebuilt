@@ -145,22 +145,6 @@ public class Hanger extends SubsystemBase {
     return Inches.of(extensionMeasure.in(Inches)); // Promote from Measure<DistanceUnit> to Distance
   }
 
-  private double simRotorPosition = 0.0;
-
-  @Override
-  public void simulationPeriodic() {
-    simState.setSupplyVoltage(12.0);
-
-    double motorVoltage = simState.getMotorVoltage();
-
-    double velocityRPS = motorVoltage / 12.0 * KrakenX60.kFreeSpeed.in(RotationsPerSecond);
-
-    simRotorPosition += velocityRPS * 0.02;
-
-    simState.setRotorVelocity(velocityRPS);
-    simState.setRawRotorPosition(simRotorPosition);
-  }
-
   @Override
   public void initSendable(SendableBuilder builder) {
     builder.addStringProperty(
