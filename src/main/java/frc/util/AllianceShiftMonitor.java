@@ -53,7 +53,8 @@ public class AllianceShiftMonitor {
 
     if (!DriverStation.isTeleopEnabled()) {
       stopContinuousRumble();
-      leds.setColor(HubState.DISABLED);;
+      leds.setColor(HubState.DISABLED);
+      ;
       updateDashboard();
       return;
     }
