@@ -17,6 +17,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.sim.TalonFXSimState; // Added
 import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.Measure;
@@ -46,6 +47,7 @@ public class Hanger extends SubsystemBase {
     }
 
     public Angle motorAngle() {
+      System.out.println(inches);
       final Measure<AngleUnit> angleMeasure =
           Inches.of(inches).divideRatio(kHangerExtensionPerMotorAngle);
       return Rotations.of(angleMeasure.in(Rotations)); // Promote from Measure<AngleUnit> to Angle
@@ -59,11 +61,13 @@ public class Hanger extends SubsystemBase {
   private final TalonFX motor;
   private final MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0).withSlot(0);
   private final VoltageOut voltageRequest = new VoltageOut(0);
+  private final TalonFXSimState simState;
 
   private boolean isHomed = false;
 
   public Hanger() {
     motor = new TalonFX(Ports.kHanger, Ports.kRoboRioCANBus);
+    simState = motor.getSimState(); // added
 
     final TalonFXConfiguration config =
         new TalonFXConfiguration()
@@ -97,6 +101,7 @@ public class Hanger extends SubsystemBase {
   }
 
   public void set(Position position) {
+
     motor.setControl(motionMagicRequest.withPosition(position.motorAngle()));
   }
 
@@ -137,6 +142,22 @@ public class Hanger extends SubsystemBase {
     final Measure<DistanceUnit> extensionMeasure =
         motorAngle.timesRatio(kHangerExtensionPerMotorAngle);
     return Inches.of(extensionMeasure.in(Inches)); // Promote from Measure<DistanceUnit> to Distance
+  }
+
+  private double simRotorPosition = 0.0;
+
+  @Override
+  public void simulationPeriodic() {
+    simState.setSupplyVoltage(12.0);
+
+    double motorVoltage = simState.getMotorVoltage();
+
+    double velocityRPS = motorVoltage / 12.0 * KrakenX60.kFreeSpeed.in(RotationsPerSecond);
+
+    simRotorPosition += velocityRPS * 0.02;
+
+    simState.setRotorVelocity(velocityRPS);
+    simState.setRawRotorPosition(simRotorPosition);
   }
 
   @Override
