@@ -10,7 +10,7 @@ public class LEDs extends SubsystemBase {
 
   public LEDs() {
     // CHANGE CAN ID LATER
-    candle = new CANdle(0, "rio");
+    candle = new CANdle(31, "rio");
   }
 
   public void setState(HubState state) {
