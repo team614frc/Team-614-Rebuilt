@@ -21,8 +21,10 @@ import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Per;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,28 +35,39 @@ import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 
 public class Hanger extends SubsystemBase {
+  private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(20);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
+  private static final double kP = 10.0;
+  private static final double kI = 0.0;
+  private static final double kD = 0.0;
+  private static final double kV =
+      MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
+
+  private static final double HOMING_PERCENT_OUTPUT = -0.05;
+  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(0.4);
+  private static final Per<DistanceUnit, AngleUnit> HANGER_EXTENSION_PER_MOTOR_ANGLE =
+      Inches.of(6).div(Rotations.of(142));
+  private static final Distance EXTENSION_TOLERANCE = Inches.of(1);
+
   public enum Position {
-    HOMED(0),
-    EXTEND_HOPPER(2),
-    HANGING(6),
-    HUNG(0.2);
+    HOMED(Inches.of(0)),
+    EXTEND_HOPPER(Inches.of(2)),
+    HANGING(Inches.of(6)),
+    HUNG(Inches.of(0.2));
 
-    private final double inches;
+    private final Distance distance;
 
-    private Position(double inches) {
-      this.inches = inches;
+    private Position(Distance distance) {
+      this.distance = distance;
     }
 
     public Angle motorAngle() {
       final Measure<AngleUnit> angleMeasure =
-          Inches.of(inches).divideRatio(kHangerExtensionPerMotorAngle);
+          distance.divideRatio(HANGER_EXTENSION_PER_MOTOR_ANGLE);
       return Rotations.of(angleMeasure.in(Rotations)); // Promote from Measure<AngleUnit> to Angle
     }
   }
-
-  private static final Per<DistanceUnit, AngleUnit> kHangerExtensionPerMotorAngle =
-      Inches.of(6).div(Rotations.of(142));
-  private static final Distance kExtensionTolerance = Inches.of(1);
 
   private final TalonFX motor;
   private final MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0).withSlot(0);
@@ -73,24 +86,15 @@ public class Hanger extends SubsystemBase {
                     .withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(20))
+                    .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(70))
+                    .withSupplyCurrentLimit(SUPPLY_CURRENT_LIMIT)
                     .withSupplyCurrentLimitEnable(true))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(KrakenX60.kFreeSpeed)
                     .withMotionMagicAcceleration(KrakenX60.kFreeSpeed.per(Second)))
-            .withSlot0(
-                new Slot0Configs()
-                    .withKP(10)
-                    .withKI(0)
-                    .withKD(0)
-                    .withKV(
-                        12.0
-                            / KrakenX60.kFreeSpeed.in(
-                                RotationsPerSecond)) // 12 volts when requesting max RPS
-                );
+            .withSlot0(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD).withKV(kV));
 
     motor.getConfigurator().apply(config);
     SmartDashboard.putData(this);
@@ -101,7 +105,7 @@ public class Hanger extends SubsystemBase {
   }
 
   public void setPercentOutput(double percentOutput) {
-    motor.setControl(voltageRequest.withOutput(Volts.of(percentOutput * 12.0)));
+    motor.setControl(voltageRequest.withOutput(MAX_VOLTAGE.times(percentOutput)));
   }
 
   public Command positionCommand(Position position) {
@@ -111,8 +115,9 @@ public class Hanger extends SubsystemBase {
 
   public Command homingCommand() {
     return Commands.sequence(
-            runOnce(() -> setPercentOutput(-0.05)),
-            Commands.waitUntil(() -> motor.getSupplyCurrent().getValue().in(Amps) > 0.4),
+            runOnce(() -> setPercentOutput(HOMING_PERCENT_OUTPUT)),
+            Commands.waitUntil(
+                () -> motor.getSupplyCurrent().getValue().gt(HOMING_CURRENT_THRESHOLD)),
             runOnce(
                 () -> {
                   motor.setPosition(Position.HOMED.motorAngle());
@@ -130,12 +135,12 @@ public class Hanger extends SubsystemBase {
   private boolean isExtensionWithinTolerance() {
     final Distance currentExtension = motorAngleToExtension(motor.getPosition().getValue());
     final Distance targetExtension = motorAngleToExtension(motionMagicRequest.getPositionMeasure());
-    return currentExtension.isNear(targetExtension, kExtensionTolerance);
+    return currentExtension.isNear(targetExtension, EXTENSION_TOLERANCE);
   }
 
   private Distance motorAngleToExtension(Angle motorAngle) {
     final Measure<DistanceUnit> extensionMeasure =
-        motorAngle.timesRatio(kHangerExtensionPerMotorAngle);
+        motorAngle.timesRatio(HANGER_EXTENSION_PER_MOTOR_ANGLE);
     return Inches.of(extensionMeasure.in(Inches)); // Promote from Measure<DistanceUnit> to Distance
   }
 

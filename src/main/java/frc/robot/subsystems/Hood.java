@@ -19,15 +19,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Ports;
 
 public class Hood extends SubsystemBase {
-  private static final Distance kServoLength = Millimeters.of(100);
-  private static final LinearVelocity kMaxServoSpeed = Millimeters.of(20).per(Second);
-  private static final double kMinPosition = 0.01;
-  private static final double kMaxPosition = 0.77;
-  private static final double kPositionTolerance = 0.01;
 
+  private static final Distance SERVO_LENGTH = Millimeters.of(100);
+  private static final LinearVelocity MAX_SERVO_SPEED = Millimeters.per(Second).of(20);
+  private static final double MIN_POSITION = 0.01;
+  private static final double MAX_POSITION = 0.77;
+  private static final double POSITION_TOLERANCE = 0.01;
+  private static final int MAX = 2000;
+  private static final int DEADBAND_MAX = 1800;
+  private static final int CENTER = 1500;
+  private static final int DEADBAND_MIN = 1200;
+  private static final int MIN = 1000;
   private final Servo leftServo;
   private final Servo rightServo;
-
   private double currentPosition = 0.5;
   private double targetPosition = 0.5;
   private Time lastUpdateTime = Seconds.of(0);
@@ -35,15 +39,15 @@ public class Hood extends SubsystemBase {
   public Hood() {
     leftServo = new Servo(Ports.kHoodLeftServo);
     rightServo = new Servo(Ports.kHoodRightServo);
-    leftServo.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
-    rightServo.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
+    leftServo.setBoundsMicroseconds(MAX, DEADBAND_MAX, CENTER, DEADBAND_MIN, MIN);
+    rightServo.setBoundsMicroseconds(MAX, DEADBAND_MAX, CENTER, DEADBAND_MIN, MIN);
     setPosition(currentPosition);
     SmartDashboard.putData(this);
   }
 
   /** Expects a position between 0.0 and 1.0 */
   public void setPosition(double position) {
-    final double clampedPosition = MathUtil.clamp(position, kMinPosition, kMaxPosition);
+    final double clampedPosition = MathUtil.clamp(position, MIN_POSITION, MAX_POSITION);
     leftServo.set(clampedPosition);
     rightServo.set(clampedPosition);
     targetPosition = clampedPosition;
@@ -56,7 +60,7 @@ public class Hood extends SubsystemBase {
   }
 
   public boolean isPositionWithinTolerance() {
-    return MathUtil.isNear(targetPosition, currentPosition, kPositionTolerance);
+    return MathUtil.isNear(targetPosition, currentPosition, POSITION_TOLERANCE);
   }
 
   private void updateCurrentPosition() {
@@ -69,8 +73,8 @@ public class Hood extends SubsystemBase {
       return;
     }
 
-    final Distance maxDistanceTraveled = kMaxServoSpeed.times(elapsedTime);
-    final double maxPercentageTraveled = maxDistanceTraveled.div(kServoLength).in(Value);
+    final Distance maxDistanceTraveled = MAX_SERVO_SPEED.times(elapsedTime);
+    final double maxPercentageTraveled = maxDistanceTraveled.div(SERVO_LENGTH).in(Value);
     currentPosition =
         targetPosition > currentPosition
             ? Math.min(targetPosition, currentPosition + maxPercentageTraveled)
