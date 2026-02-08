@@ -15,12 +15,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 public class AllianceShiftMonitor {
 
   private enum Phase {
-    TRANSITION(130),
-    SHIFT_1(105),
-    SHIFT_2(80),
-    SHIFT_3(55),
-    SHIFT_4(30),
-    END_GAME(0);
+    TRANSITION(130), // 2:10 remaining (after 20s AUTO)
+    SHIFT_1(105), // 1:45 remaining
+    SHIFT_2(80), // 1:20 remaining
+    SHIFT_3(55), // 0:55 remaining
+    SHIFT_4(30), // 0:30 remaining
+    END_GAME(0); // 0:00 remaining
 
     private final double seconds;
 
@@ -40,8 +40,6 @@ public class AllianceShiftMonitor {
   private static final Time SHIFT_QUIET = Seconds.of(20);
   private static final Time RUMBLE_PULSE = Seconds.of(0.3);
   private static final Time RUMBLE_GAP = Seconds.of(0.15);
-  private static final Time TRIPLE_RUMBLE = RUMBLE_PULSE.times(3).plus(RUMBLE_GAP.times(2));
-  private static final Time POST_TRIPLE_GAP = WARNING.minus(TRIPLE_RUMBLE);
 
   private static final double RUMBLE_INTENSITY = 0.7;
 
@@ -78,68 +76,42 @@ public class AllianceShiftMonitor {
     updateDashboard();
   }
 
-  /**
-   * Loser: odd shifts (1, 3) are ours.
-   *
-   * <pre>
-   * rumble3x      -> transition: our shift 1 coming
-   * wait 3.8s     -> finish transition
-   * wait 20s      -> shift 1 (ours): quiet
-   * rumble 5s     -> shift 1 ending
-   * wait 20s      -> shift 2 (opponent): quiet
-   * rumble3x      -> our shift 3 coming
-   * wait 3.8s     -> finish shift 2
-   * wait 20s      -> shift 3 (ours): quiet
-   * rumble 5s     -> shift 3 ending
-   * wait 20s      -> shift 4 (opponent): quiet
-   * rumble3x      -> end game coming
-   * </pre>
-   */
+  /** Loser: odd shifts (1, 3) are ours. */
   private Command buildLoserCommand() {
     return Commands.sequence(
-        rumble3x(),
-        wait(POST_TRIPLE_GAP),
+        // TRANSITION: 10s total, rumble3x at 5s mark
+        Commands.deadline(wait(Seconds.of(10)), Commands.sequence(wait(WARNING), rumble3x())),
+        // SHIFT 1 (ours): 20s quiet + 5s rumble = 25s total
+        wait((SHIFT_QUIET)),
+        rumble((WARNING)),
+        // SHIFT 2 (opponent): 25s total, rumble3x at 20s mark
+        Commands.deadline(wait(Seconds.of(25)), Commands.sequence(wait(SHIFT_QUIET), rumble3x())),
+        // SHIFT 3 (ours): 20s quiet + 5s rumble = 25s total
         wait(SHIFT_QUIET),
         rumble(WARNING),
-        wait(SHIFT_QUIET),
-        rumble3x(),
-        wait(POST_TRIPLE_GAP),
-        wait(SHIFT_QUIET),
-        rumble(WARNING),
-        wait(SHIFT_QUIET),
-        rumble3x());
+        // SHIFT 4 (opponent): 25s total, rumble3x at 20s mark
+        Commands.deadline(wait(Seconds.of(25)), Commands.sequence(wait(SHIFT_QUIET), rumble3x()))
+        // Total: 10 + 25 + 25 + 25 + 25 = 110s (+ 20s AUTO = 130s)
+        );
   }
 
-  /**
-   * Winner: even shifts (2, 4) are ours.
-   *
-   * <pre>
-   * rumble 5s     -> transition: scoring window ending
-   * wait 20s      -> shift 1 (opponent): quiet
-   * rumble3x      -> our shift 2 coming
-   * wait 3.8s     -> finish shift 1
-   * wait 20s      -> shift 2 (ours): quiet
-   * rumble 5s     -> shift 2 ending
-   * wait 20s      -> shift 3 (opponent): quiet
-   * rumble3x      -> our shift 4 coming
-   * wait 3.8s     -> finish shift 3
-   * wait 20s      -> shift 4 (ours): quiet
-   * rumble 5s     -> shift 4 ending
-   * </pre>
-   */
+  /** Winner: even shifts (2, 4) are ours. */
   private Command buildWinnerCommand() {
     return Commands.sequence(
+        // TRANSITION: 10s total, rumble at 5s mark (transition ending soon)
+        Commands.deadline(wait(Seconds.of(10)), Commands.sequence(wait(WARNING), rumble(WARNING))),
+        // SHIFT 1 (opponent): 25s total, rumble3x at 20s mark (for our shift 2)
+        Commands.deadline(wait(Seconds.of(25)), Commands.sequence(wait(SHIFT_QUIET), rumble3x())),
+        // SHIFT 2 (ours): 20s quiet + 5s rumble = 25s total
+        wait(SHIFT_QUIET),
         rumble(WARNING),
+        // SHIFT 3 (opponent): 25s total, rumble3x at 20s mark (for our shift 4)
+        Commands.deadline(wait(Seconds.of(25)), Commands.sequence(wait(SHIFT_QUIET), rumble3x())),
+        // SHIFT 4 (ours): 20s quiet + 5s rumble = 25s total
         wait(SHIFT_QUIET),
-        rumble3x(),
-        wait(POST_TRIPLE_GAP),
-        wait(SHIFT_QUIET),
-        rumble(WARNING),
-        wait(SHIFT_QUIET),
-        rumble3x(),
-        wait(POST_TRIPLE_GAP),
-        wait(SHIFT_QUIET),
-        rumble(WARNING));
+        rumble(WARNING)
+        // Total: 10 + 25 + 25 + 25 + 25 = 110s (+ 20s AUTO = 130s)
+        );
   }
 
   private Command wait(Time duration) {
