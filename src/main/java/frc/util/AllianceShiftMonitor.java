@@ -63,6 +63,22 @@ public class AllianceShiftMonitor {
     updateDashboard();
   }
 
+  private Command rumble(Time duration) {
+    return new RunCommand(
+            () -> driverController.getHID().setRumble(RumbleType.kBothRumble, RUMBLE_INTENSITY))
+        .finallyDo(i -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0))
+        .withTimeout(duration.in(Seconds));
+  }
+
+  private Command rumble3x() {
+    return Commands.sequence(
+        rumble(RUMBLE_PULSE),
+        Commands.waitSeconds(RUMBLE_GAP.in(Seconds)),
+        rumble(RUMBLE_PULSE),
+        Commands.waitSeconds(RUMBLE_GAP.in(Seconds)),
+        rumble(RUMBLE_PULSE));
+  }
+
   private void getGameData() {
     if (hasGameData) return;
     String data = DriverStation.getGameSpecificMessage();
@@ -122,21 +138,5 @@ public class AllianceShiftMonitor {
       firedPhases[i] = false;
     }
     driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-  }
-
-  private Command rumble(Time duration) {
-    return new RunCommand(
-            () -> driverController.getHID().setRumble(RumbleType.kBothRumble, RUMBLE_INTENSITY))
-        .finallyDo(i -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0))
-        .withTimeout(duration.in(Seconds));
-  }
-
-  private Command rumble3x() {
-    return Commands.sequence(
-        rumble(RUMBLE_PULSE),
-        Commands.waitSeconds(RUMBLE_GAP.in(Seconds)),
-        rumble(RUMBLE_PULSE),
-        Commands.waitSeconds(RUMBLE_GAP.in(Seconds)),
-        rumble(RUMBLE_PULSE));
   }
 }
