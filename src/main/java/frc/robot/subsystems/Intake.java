@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
+import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
@@ -101,8 +102,6 @@ public class Intake extends SubsystemBase {
 
     SmartDashboard.putData(this);
   }
-
-  // ... rest of existing code ...
 
   private void configurePivotMotor() {
     final TalonFXConfiguration config =
@@ -220,10 +219,18 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putBoolean("Intake/Is Homed", isHomed);
-    SmartDashboard.putString(
+    Logger.recordOutput("Intake/Is Homed", isHomed);
+    Logger.recordOutput(
         "Intake/Current Command",
         getCurrentCommand() != null ? getCurrentCommand().getName() : "none");
-    SmartDashboard.putBoolean("Intake/Command Active", getCurrentCommand() != null);
+
+    Logger.recordOutput("Intake/Pivot/AngleDeg", pivotMotor.getPosition().getValue().in(Degrees));
+    Logger.recordOutput(
+        "Intake/Pivot/SupplyCurrentAmps", pivotMotor.getSupplyCurrent().getValue().in(Amps));
+
+    // Roller
+    Logger.recordOutput("Intake/Roller/RPM", rollerMotor.getVelocity().getValue().in(RPM));
+    Logger.recordOutput(
+        "Intake/Roller/SupplyCurrentAmps", rollerMotor.getSupplyCurrent().getValue().in(Amps));
   }
 }

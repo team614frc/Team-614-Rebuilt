@@ -1,7 +1,5 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -79,7 +77,6 @@ public class RobotContainer {
           .scaleTranslation(0.95)
           .allianceRelativeControl(true);
 
-  // CHANGE: Don't initialize here - move to constructor
   private final SubsystemCommands subsystemCommands;
 
   private void configureFuelSim() {
@@ -122,7 +119,7 @@ public class RobotContainer {
 
     instance.start();
 
-    // Test buttons
+    // Test buttons for FuelSim
     SmartDashboard.putData(
         Commands.runOnce(
                 () -> {
@@ -156,9 +153,8 @@ public class RobotContainer {
     System.out.println("=== FUELSIM COMPLETE ===");
   }
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Initialize shooter visualizer FIRST (only matters in simulation)
+    // Initialize shooter visualizer
     if (RobotBase.isSimulation()) {
       shooterVisualizer =
           new ShooterVisualizer(
@@ -166,11 +162,12 @@ public class RobotContainer {
               () -> hood.getAngle(),
               () -> shooter.getExitVelocity() // already matches 3-param constructor
               );
+      configureFuelSim();
     } else {
       shooterVisualizer = null;
     }
 
-    // NOW initialize subsystemCommands with the shooterVisualizer
+    // Initialize subsystemCommands with the shooterVisualizer
     subsystemCommands =
         new SubsystemCommands(
             swerve,
@@ -185,13 +182,13 @@ public class RobotContainer {
             () -> driverXbox.getLeftY(),
             () -> driverXbox.getLeftX());
 
-    configureBindings();
-    configureFuelSim();
     DriverStation.silenceJoystickConnectionWarning(true);
 
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
+
+    configureBindings();
   }
 
   /**

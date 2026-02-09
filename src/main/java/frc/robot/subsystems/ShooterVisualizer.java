@@ -24,24 +24,23 @@ import java.util.function.Supplier;
  */
 public class ShooterVisualizer {
 
-  /* ---------------- Geometry (meters) ---------------- */
+  // Geometry (Meters)
   private static final double SHOOTER_HEIGHT = 0.705;
   private static final double SHOOTER_FORWARD_OFFSET = -0.3; // Shooter is behind robot center
   private static final double SHOOTER_LATERAL_SPACING = 0.13;
 
   private static final int MAX_FUEL_CAPACITY = 54;
 
-  /* ---------------- Hood angle mapping ---------------- */
+  // Hood Angle Mapping
   private static final double MIN_ANGLE_DEG = 42.0;
   private static final double MAX_ANGLE_DEG = 65.0;
 
-  /* ---------------- Shooter speed limits ---------------- */
+  // Shooter Speed Limits
   // ADJUSTED: Increased speeds to compensate for shooter being 0.3m behind center
   private static final double MIN_SPEED = 6.5; // close shots (was 6.0)
   private static final double MAX_SPEED = 10.0; // far shots (was 9.0)
 
-  /* ---------------- Visual randomness ---------------- */
-  private static final double LATERAL_RANDOM_SPREAD = 0.02;
+  // Visual Randomness
   private static final double VELOCITY_REL_VARIATION = 0.05;
 
   private final Supplier<Pose2d> robotPoseSupplier;
@@ -62,7 +61,7 @@ public class ShooterVisualizer {
     SmartDashboard.putNumber("Sim/Fuel Stored", fuelStored);
   }
 
-  /* ---------------- Intake simulation ---------------- */
+  // Intake simulation
   public void simIntake() {
     if (fuelStored < MAX_FUEL_CAPACITY) {
       fuelStored++;
@@ -74,7 +73,7 @@ public class ShooterVisualizer {
     return fuelStored < MAX_FUEL_CAPACITY;
   }
 
-  /* ---------------- Shooting simulation ---------------- */
+  // Shooting simulation
   public void launchFuel() {
     if (fuelStored <= 0) return;
 
@@ -85,14 +84,14 @@ public class ShooterVisualizer {
     Angle hoodAngle = hoodAngleSupplier.get();
     LinearVelocity shooterVel = shooterVelocitySupplier.get();
 
-    /* ----- Hood normalization ----- */
+    // Hood Normalization
     double hoodDeg = mapHoodAngleToDegrees(hoodAngle);
     double hoodT = MathUtil.inverseInterpolate(MIN_ANGLE_DEG, MAX_ANGLE_DEG, hoodDeg);
 
     SmartDashboard.putNumber("Sim/Hood_mapped_deg", hoodDeg);
     SmartDashboard.putNumber("Sim/Hood_t", hoodT);
 
-    /* ----- Distance to high goal ----- */
+    // Distance to High Goal
     Translation2d goalPos = Landmarks.hubPosition();
     double distance = pose.getTranslation().getDistance(goalPos);
 
@@ -104,13 +103,13 @@ public class ShooterVisualizer {
     SmartDashboard.putNumber("Sim/Distance_m", distance);
     SmartDashboard.putNumber("Sim/Effective_Distance_m", effectiveDistance);
 
-    /* ----- Base shooter speed (simulating real power adjustment) ----- */
+    // Base shooter speed (simulating real power adjustment)
     double baseSpeed = MathUtil.clamp(shooterVel.in(MetersPerSecond), MIN_SPEED, MAX_SPEED);
     baseSpeed = MathUtil.interpolate(MIN_SPEED, MAX_SPEED, distanceFactor);
 
     SmartDashboard.putNumber("Sim/BaseSpeed_mps", baseSpeed);
 
-    /* ----- Blend horizontal and vertical scaling based on distance & hood ----- */
+    // Blend horizontal and vertical scaling based on distance & hood
     double blendFactor = 0.5 * distanceFactor + 0.5 * hoodT;
 
     double verticalScale = MathUtil.interpolate(1.0, 3.0, blendFactor); // close=low, far=high
@@ -129,7 +128,6 @@ public class ShooterVisualizer {
       double lateralOffset =
           (barrel == 0) ? -SHOOTER_LATERAL_SPACING : (barrel == 2 ? SHOOTER_LATERAL_SPACING : 0.0);
 
-      double lateralJitter = (Math.random() - 0.5) * 2.0 * LATERAL_RANDOM_SPREAD;
       double velMult = 1.0 + (Math.random() - 0.5) * 2.0 * VELOCITY_REL_VARIATION;
 
       double speed = baseSpeed * velMult;
@@ -159,7 +157,7 @@ public class ShooterVisualizer {
     SmartDashboard.putNumber("Sim/Fuel Stored", fuelStored);
   }
 
-  /* ---------------- Hood mapping ---------------- */
+  // Hood mapping
   private double mapHoodAngleToDegrees(Angle hoodAngle) {
     double maybeDeg = hoodAngle.in(Degrees);
 
@@ -172,7 +170,7 @@ public class ShooterVisualizer {
     return MathUtil.clamp(maybeDeg, MIN_ANGLE_DEG, MAX_ANGLE_DEG);
   }
 
-  /* ---------------- Utility ---------------- */
+  // Utility
   public int getFuelCount() {
     return fuelStored;
   }

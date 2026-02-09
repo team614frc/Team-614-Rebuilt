@@ -70,7 +70,6 @@ public final class SubsystemCommands {
   public Command aimAndShoot() {
     return Commands.defer(
         () -> {
-          System.out.println("=== aimAndShoot: Command starting ===");
           final PrepareShotCommand prepareShotCommand =
               new PrepareShotCommand(shooter, hood, () -> swerve.getPose());
 
@@ -82,11 +81,6 @@ public final class SubsystemCommands {
                       () -> {
                         boolean aimed = vision.isAimed();
                         boolean ready = prepareShotCommand.isReadyToShoot();
-                        if (RobotBase.isSimulation()) {
-                          System.out.println("Waiting (sim)... Ready: " + ready);
-                        } else {
-                          System.out.println("Waiting... Aimed: " + aimed + ", Ready: " + ready);
-                        }
                         return aimed && ready;
                       }),
                   // SIMULATION: Continuously fire while held
@@ -108,8 +102,7 @@ public final class SubsystemCommands {
                       : Commands.sequence(
                           Commands.runOnce(
                               () -> System.out.println("=== WAIT COMPLETE - FEEDING ===")),
-                          feed(),
-                          Commands.runOnce(() -> System.out.println("=== FEED COMPLETE ===")))));
+                          feed())));
         },
         Set.of(vision, shooter, hood));
   }
