@@ -139,10 +139,6 @@ public class RobotContainer {
     return autoChooser.getSelected();
   }
 
-  public void periodic() {
-    shiftMonitor.periodic();
-  }
-
   /** Call from Robot.autonomousInit() */
   public void resetShiftMonitor() {
     shiftMonitor.reset();

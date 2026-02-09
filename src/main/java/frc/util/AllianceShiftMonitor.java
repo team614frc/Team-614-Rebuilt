@@ -9,9 +9,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
-public class AllianceShiftMonitor {
+public class AllianceShiftMonitor extends SubsystemBase {
 
   private enum Phase {
     TRANSITION(130), // 2:10 remaining (after 20s AUTO)
@@ -57,6 +58,7 @@ public class AllianceShiftMonitor {
     this.driverController = driverController;
   }
 
+  @Override
   public void periodic() {
     getGameData();
     handleShiftWarnings();
@@ -64,19 +66,25 @@ public class AllianceShiftMonitor {
   }
 
   private Command rumble(Time duration) {
-    return new RunCommand(
-            () -> driverController.getHID().setRumble(RumbleType.kBothRumble, RUMBLE_INTENSITY))
-        .finallyDo(i -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0))
-        .withTimeout(duration.in(Seconds));
+    Command cmd =
+        new RunCommand(
+                () -> driverController.getHID().setRumble(RumbleType.kBothRumble, RUMBLE_INTENSITY))
+            .finallyDo(i -> driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0))
+            .withTimeout(duration.in(Seconds));
+    cmd.addRequirements(this);
+    return cmd;
   }
 
   private Command rumble3x() {
-    return Commands.sequence(
-        rumble(RUMBLE_PULSE),
-        Commands.waitSeconds(RUMBLE_GAP.in(Seconds)),
-        rumble(RUMBLE_PULSE),
-        Commands.waitSeconds(RUMBLE_GAP.in(Seconds)),
-        rumble(RUMBLE_PULSE));
+    Command cmd =
+        Commands.sequence(
+            rumble(RUMBLE_PULSE),
+            Commands.waitSeconds(RUMBLE_GAP.in(Seconds)),
+            rumble(RUMBLE_PULSE),
+            Commands.waitSeconds(RUMBLE_GAP.in(Seconds)),
+            rumble(RUMBLE_PULSE));
+    cmd.addRequirements(this);
+    return cmd;
   }
 
   private void getGameData() {
