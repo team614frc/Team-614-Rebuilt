@@ -203,6 +203,41 @@ public class Intake extends SubsystemBase {
   }
 
   @Override
+  public void periodic() {
+    // Log pivot data
+    Logger.recordOutput("Intake/Pivot/AngleDegrees", pivotMotor.getPosition().getValueAsDouble());
+    Logger.recordOutput("Intake/Pivot/TargetAngleDegrees", pivotMotionMagicRequest.Position);
+    Logger.recordOutput(
+        "Intake/Pivot/SupplyCurrentAmps", pivotMotor.getSupplyCurrent().getValueAsDouble());
+    Logger.recordOutput(
+        "Intake/Pivot/StatorCurrentAmps", pivotMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput(
+        "Intake/Pivot/AppliedVoltage", pivotMotor.getMotorVoltage().getValueAsDouble());
+    Logger.recordOutput(
+        "Intake/Pivot/TemperatureCelsius", pivotMotor.getDeviceTemp().getValueAsDouble());
+
+    // Log roller data
+    Logger.recordOutput(
+        "Intake/Roller/VelocityRPM", rollerMotor.getVelocity().getValueAsDouble() * 60.0);
+    Logger.recordOutput(
+        "Intake/Roller/SupplyCurrentAmps", rollerMotor.getSupplyCurrent().getValueAsDouble());
+    Logger.recordOutput(
+        "Intake/Roller/StatorCurrentAmps", rollerMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput(
+        "Intake/Roller/AppliedVoltage", rollerMotor.getMotorVoltage().getValueAsDouble());
+    Logger.recordOutput(
+        "Intake/Roller/TemperatureCelsius", rollerMotor.getDeviceTemp().getValueAsDouble());
+
+    // Log state
+    Logger.recordOutput("Intake/IsHomed", isHomed);
+    Logger.recordOutput("Intake/AtSetpoint", isPositionWithinTolerance());
+    Logger.recordOutput("Intake/CommandActive", getCurrentCommand() != null);
+    if (getCurrentCommand() != null) {
+      Logger.recordOutput("Intake/CommandName", getCurrentCommand().getName());
+    }
+  }
+
+  @Override
   public void initSendable(SendableBuilder builder) {
     builder.addStringProperty(
         "Command",
@@ -215,22 +250,5 @@ public class Intake extends SubsystemBase {
         "Pivot Supply Current", () -> pivotMotor.getSupplyCurrent().getValue().in(Amps), null);
     builder.addDoubleProperty(
         "Roller Supply Current", () -> rollerMotor.getSupplyCurrent().getValue().in(Amps), null);
-  }
-
-  @Override
-  public void periodic() {
-    Logger.recordOutput("Intake/Is Homed", isHomed);
-    Logger.recordOutput(
-        "Intake/Current Command",
-        getCurrentCommand() != null ? getCurrentCommand().getName() : "none");
-
-    Logger.recordOutput("Intake/Pivot/AngleDeg", pivotMotor.getPosition().getValue().in(Degrees));
-    Logger.recordOutput(
-        "Intake/Pivot/SupplyCurrentAmps", pivotMotor.getSupplyCurrent().getValue().in(Amps));
-
-    // Roller
-    Logger.recordOutput("Intake/Roller/RPM", rollerMotor.getVelocity().getValue().in(RPM));
-    Logger.recordOutput(
-        "Intake/Roller/SupplyCurrentAmps", rollerMotor.getSupplyCurrent().getValue().in(Amps));
   }
 }

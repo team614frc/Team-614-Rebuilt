@@ -20,13 +20,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivebaseConstants;
 import java.io.File;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveControllerConfiguration;
 import swervelib.parser.SwerveDriveConfiguration;
@@ -273,11 +273,11 @@ public class SwerveSubsystem extends SubsystemBase {
         // Debug output
         Pose2d odometryPose = getPose();
         double error = odometryPose.getTranslation().getDistance(simPose.getTranslation());
-        SmartDashboard.putNumber("Sim Pose Error (m)", error);
-        SmartDashboard.putNumber("Sim Physics X", simPose.getX());
-        SmartDashboard.putNumber("Sim Physics Y", simPose.getY());
-        SmartDashboard.putNumber("Odometry X", odometryPose.getX());
-        SmartDashboard.putNumber("Odometry Y", odometryPose.getY());
+        Logger.recordOutput("Sim Pose Error (m)", error);
+        Logger.recordOutput("Sim Physics X", simPose.getX());
+        Logger.recordOutput("Sim Physics Y", simPose.getY());
+        Logger.recordOutput("Odometry X", odometryPose.getX());
+        Logger.recordOutput("Odometry Y", odometryPose.getY());
       }
     }
   }

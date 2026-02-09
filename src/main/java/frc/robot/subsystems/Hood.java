@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Ports;
+import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
 
@@ -86,6 +87,19 @@ public class Hood extends SubsystemBase {
   @Override
   public void periodic() {
     updateCurrentPosition();
+
+    // Log hood state
+    Logger.recordOutput("Hood/CurrentPosition", currentPosition);
+    Logger.recordOutput("Hood/TargetPosition", targetPosition);
+    Logger.recordOutput("Hood/AngleDegrees", getAngle().in(Degrees));
+    Logger.recordOutput("Hood/AtSetpoint", isPositionWithinTolerance());
+    Logger.recordOutput("Hood/LeftServoPosition", leftServo.get());
+    Logger.recordOutput("Hood/RightServoPosition", rightServo.get());
+
+    Logger.recordOutput("Hood/CommandActive", getCurrentCommand() != null);
+    if (getCurrentCommand() != null) {
+      Logger.recordOutput("Hood/CommandName", getCurrentCommand().getName());
+    }
   }
 
   @Override

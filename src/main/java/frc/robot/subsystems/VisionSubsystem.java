@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -35,6 +36,7 @@ import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 /**
  * VisionSubsystem
@@ -69,6 +71,13 @@ public class VisionSubsystem extends SubsystemBase {
   // Last estimated pose & timestamp
   private Optional<Pose2d> lastEstimatedPose = Optional.empty();
   private double lastEstimatedTimestamp = 0.0;
+
+  // Track last accepted vision measurement for logging
+  private boolean lastMeasurementAccepted = false;
+  private int frontCameraTagCount = 0;
+  private int rearCameraTagCount = 0;
+  private double frontCameraAvgDistance = 0.0;
+  private double rearCameraAvgDistance = 0.0;
 
   public VisionSubsystem(SwerveSubsystem drivebase) {
     this.drivebase = drivebase;
@@ -157,6 +166,8 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     cameraSim.enableDrawWireframe(true);
+    // Field2d is a Sendable; record it to SmartDashboard instead of Logger which doesn't accept
+    // Field2d
     SmartDashboard.putData("Vision Field", visionSim.getDebugField());
   }
 
@@ -169,6 +180,15 @@ public class VisionSubsystem extends SubsystemBase {
             .mapToDouble(t -> t.getBestCameraToTarget().getTranslation().getNorm())
             .average()
             .orElse(999.0);
+
+    // Store for logging
+    if (cam == camera) {
+      frontCameraTagCount = tagCount;
+      frontCameraAvgDistance = avgDistance;
+    } else {
+      rearCameraTagCount = tagCount;
+      rearCameraAvgDistance = avgDistance;
+    }
 
     // Reject garbage
     if (tagCount == 0) return false;
@@ -188,9 +208,23 @@ public class VisionSubsystem extends SubsystemBase {
   }
 
   private void processCamera(PhotonCamera cam, PhotonPoseEstimator estimator) {
+    String cameraName = (cam == camera) ? "Front" : "Rear";
 
     List<PhotonPipelineResult> results = cam.getAllUnreadResults();
     results.add(cam.getLatestResult());
+
+    // Log camera connection and latest result
+    PhotonPipelineResult latestResult = cam.getLatestResult();
+    Logger.recordOutput("Vision/" + cameraName + "/Connected", cam.isConnected());
+    Logger.recordOutput("Vision/" + cameraName + "/HasTargets", latestResult.hasTargets());
+    Logger.recordOutput("Vision/" + cameraName + "/TargetCount", latestResult.getTargets().size());
+
+    // Log visible tag IDs
+    if (latestResult.hasTargets()) {
+      int[] tagIds =
+          latestResult.getTargets().stream().mapToInt(PhotonTrackedTarget::getFiducialId).toArray();
+      Logger.recordOutput("Vision/" + cameraName + "/VisibleTagIDs", tagIds);
+    }
 
     for (PhotonPipelineResult result : results) {
       if (!result.hasTargets()) continue;
@@ -206,22 +240,40 @@ public class VisionSubsystem extends SubsystemBase {
             double now = Timer.getFPGATimestamp();
 
             if (now - VisionConstants.lastVisionFuseTime < VisionConstants.MIN_VISION_FUSE_PERIOD) {
+              lastMeasurementAccepted = false;
+              Logger.recordOutput("Vision/" + cameraName + "/RejectionReason", "RateLimited");
               return;
             }
 
             if (!isVisionMeasurementTrusted(est, cam)) {
+              lastMeasurementAccepted = false;
+              Logger.recordOutput(
+                  "Vision/" + cameraName + "/RejectionReason", "UntrustedMeasurement");
               return;
             }
 
             VisionConstants.lastVisionFuseTime = now;
             drivebase.addVisionMeasurement(est2d, est.timestampSeconds);
+            lastMeasurementAccepted = true;
 
-            SmartDashboard.putBoolean("Vision/HasPose", true);
-            SmartDashboard.putNumber("Vision/PoseX", est2d.getX());
-            SmartDashboard.putNumber("Vision/PoseY", est2d.getY());
-            SmartDashboard.putNumber("Vision/PoseRotDeg", est2d.getRotation().getDegrees());
+            // Log accepted measurement
+            Logger.recordOutput("Vision/" + cameraName + "/AcceptedPose", est2d);
+            Logger.recordOutput("Vision/" + cameraName + "/RejectionReason", "None");
+
+            Logger.recordOutput("Vision/HasPose", true);
+            Logger.recordOutput("Vision/PoseX", est2d.getX());
+            Logger.recordOutput("Vision/PoseY", est2d.getY());
+            Logger.recordOutput("Vision/PoseRotDeg", est2d.getRotation().getDegrees());
           });
     }
+
+    // Log measurement quality metrics
+    Logger.recordOutput(
+        "Vision/" + cameraName + "/TagCount",
+        cam == camera ? frontCameraTagCount : rearCameraTagCount);
+    Logger.recordOutput(
+        "Vision/" + cameraName + "/AvgDistanceMeters",
+        cam == camera ? frontCameraAvgDistance : rearCameraAvgDistance);
   }
 
   @Override
@@ -232,12 +284,45 @@ public class VisionSubsystem extends SubsystemBase {
       if (pose2d != null) visionSim.update(pose2d);
     }
 
-    SmartDashboard.putBoolean("Vision/isAimed", isAimed());
+    Logger.recordOutput("Vision/isAimed", isAimed());
 
     // Process latest vision results
-    // Include latest if none unread. It's deprecated, but it's a great fallback
     processCamera(camera, frontPoseEstimator);
     processCamera(rearCamera, rearPoseEstimator);
+
+    // Log overall vision state
+    Logger.recordOutput("Vision/HasEstimatedPose", lastEstimatedPose.isPresent());
+    Logger.recordOutput("Vision/LastMeasurementAccepted", lastMeasurementAccepted);
+    Logger.recordOutput("Vision/IsAimed", isAimed());
+    Logger.recordOutput("Vision/SimEnabled", simEnabled);
+
+    if (lastEstimatedPose.isPresent()) {
+      Pose2d pose = lastEstimatedPose.get();
+      Logger.recordOutput("Vision/EstimatedPose", pose);
+      Logger.recordOutput("Vision/EstimatedPoseX", pose.getX());
+      Logger.recordOutput("Vision/EstimatedPoseY", pose.getY());
+      Logger.recordOutput("Vision/EstimatedPoseRotationDeg", pose.getRotation().getDegrees());
+      Logger.recordOutput("Vision/EstimatedPoseTimestamp", lastEstimatedTimestamp);
+    }
+
+    // Log scoring center calculation
+    Optional<Translation2d> scoringCenter = getScoringCenter();
+    Logger.recordOutput("Vision/HasScoringCenter", scoringCenter.isPresent());
+    if (scoringCenter.isPresent()) {
+      Logger.recordOutput("Vision/ScoringCenterX", scoringCenter.get().getX());
+      Logger.recordOutput("Vision/ScoringCenterY", scoringCenter.get().getY());
+    }
+
+    // Log alliance
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    if (alliance.isPresent()) {
+      Logger.recordOutput("Vision/Alliance", alliance.get().toString());
+    }
+
+    // Log timing
+    Logger.recordOutput("Vision/LastVisionFuseTime", VisionConstants.lastVisionFuseTime);
+    Logger.recordOutput(
+        "Vision/TimeSinceLastFuse", Timer.getFPGATimestamp() - VisionConstants.lastVisionFuseTime);
   }
 
   // Returns the last vision-estimated Pose2d (field-relative) if available
@@ -296,6 +381,7 @@ public class VisionSubsystem extends SubsystemBase {
               if (maybeCenter.isEmpty()) {
                 drivebase.drive(
                     ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, 0.0, robotPose.getRotation()));
+                Logger.recordOutput("Vision/Alignment/Active", false);
                 return;
               }
 
@@ -335,13 +421,22 @@ public class VisionSubsystem extends SubsystemBase {
                   ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, robotPose.getRotation()));
 
               // Debug output
-              SmartDashboard.putNumber(
-                  "Vision/ScoringCenterErrorDeg", Math.toDegrees(headingError));
-              SmartDashboard.putNumber("Vision/Omega", omega);
+              Logger.recordOutput("Vision/ScoringCenterErrorDeg", Math.toDegrees(headingError));
+              Logger.recordOutput("Vision/Omega", omega);
+
+              // Log alignment details
+              Logger.recordOutput("Vision/Alignment/Active", true);
+              Logger.recordOutput("Vision/Alignment/HeadingErrorDeg", Math.toDegrees(headingError));
+              Logger.recordOutput("Vision/Alignment/OmegaRadPerSec", omega);
+              Logger.recordOutput("Vision/Alignment/StrafeCompensation", strafeComp);
+              Logger.recordOutput(
+                  "Vision/Alignment/DesiredHeadingDeg", desiredHeading.getDegrees());
+              Logger.recordOutput("Vision/Alignment/DistanceToCenter", toCenter.getNorm());
             })
         .finallyDo(
             () -> {
               drivebase.drive(new ChassisSpeeds(0, 0, 0));
+              Logger.recordOutput("Vision/Alignment/Active", false);
             });
   }
 

@@ -9,10 +9,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Landmarks;
 import frc.util.FuelSim;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Shooter visualizer for simulation.
@@ -58,14 +58,14 @@ public class ShooterVisualizer {
     this.hoodAngleSupplier = hoodAngleSupplier;
     this.shooterVelocitySupplier = shooterVelocitySupplier;
 
-    SmartDashboard.putNumber("Sim/Fuel Stored", fuelStored);
+    Logger.recordOutput("Sim/Fuel Stored", fuelStored);
   }
 
   // Intake simulation
   public void simIntake() {
     if (fuelStored < MAX_FUEL_CAPACITY) {
       fuelStored++;
-      SmartDashboard.putNumber("Sim/Fuel Stored", fuelStored);
+      Logger.recordOutput("Sim/Fuel Stored", fuelStored);
     }
   }
 
@@ -88,8 +88,8 @@ public class ShooterVisualizer {
     double hoodDeg = mapHoodAngleToDegrees(hoodAngle);
     double hoodT = MathUtil.inverseInterpolate(MIN_ANGLE_DEG, MAX_ANGLE_DEG, hoodDeg);
 
-    SmartDashboard.putNumber("Sim/Hood_mapped_deg", hoodDeg);
-    SmartDashboard.putNumber("Sim/Hood_t", hoodT);
+    Logger.recordOutput("Sim/Hood_mapped_deg", hoodDeg);
+    Logger.recordOutput("Sim/Hood_t", hoodT);
 
     // Distance to High Goal
     Translation2d goalPos = Landmarks.hubPosition();
@@ -100,14 +100,14 @@ public class ShooterVisualizer {
     double effectiveDistance = distance + Math.abs(SHOOTER_FORWARD_OFFSET);
     double distanceFactor = Math.min(effectiveDistance / 8.5, 1.0); // 0 = close, 1 = far
 
-    SmartDashboard.putNumber("Sim/Distance_m", distance);
-    SmartDashboard.putNumber("Sim/Effective_Distance_m", effectiveDistance);
+    Logger.recordOutput("Sim/Distance_m", distance);
+    Logger.recordOutput("Sim/Effective_Distance_m", effectiveDistance);
 
     // Base shooter speed (simulating real power adjustment)
     double baseSpeed = MathUtil.clamp(shooterVel.in(MetersPerSecond), MIN_SPEED, MAX_SPEED);
     baseSpeed = MathUtil.interpolate(MIN_SPEED, MAX_SPEED, distanceFactor);
 
-    SmartDashboard.putNumber("Sim/BaseSpeed_mps", baseSpeed);
+    Logger.recordOutput("Sim/BaseSpeed_mps", baseSpeed);
 
     // Blend horizontal and vertical scaling based on distance & hood
     double blendFactor = 0.5 * distanceFactor + 0.5 * hoodT;
@@ -116,8 +116,8 @@ public class ShooterVisualizer {
     double horizontalScale =
         MathUtil.interpolate(0.5, 0.2, blendFactor); // close=more horiz, far=less
 
-    SmartDashboard.putNumber("Sim/VertScale", verticalScale);
-    SmartDashboard.putNumber("Sim/HorizScale", horizontalScale);
+    Logger.recordOutput("Sim/VertScale", verticalScale);
+    Logger.recordOutput("Sim/HorizScale", horizontalScale);
 
     double angleRad = Math.toRadians(hoodDeg);
 
@@ -154,7 +154,7 @@ public class ShooterVisualizer {
       FuelSim.getInstance().spawnFuel(spawnPos, spawnVel);
     }
 
-    SmartDashboard.putNumber("Sim/Fuel Stored", fuelStored);
+    Logger.recordOutput("Sim/Fuel Stored", fuelStored);
   }
 
   // Hood mapping
@@ -177,7 +177,7 @@ public class ShooterVisualizer {
 
   public void setFuelCount(int count) {
     fuelStored = Math.max(0, Math.min(count, MAX_FUEL_CAPACITY));
-    SmartDashboard.putNumber("Sim/Fuel Stored", fuelStored);
+    Logger.recordOutput("Sim/Fuel Stored", fuelStored);
   }
 
   public void resetFuel() {
@@ -185,10 +185,10 @@ public class ShooterVisualizer {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Score/Blue Hub", FuelSim.Hub.BLUE_HUB.getScore());
-    SmartDashboard.putNumber("Score/Red Hub", FuelSim.Hub.RED_HUB.getScore());
-    SmartDashboard.putNumber(
+    Logger.recordOutput("Score/Blue Hub", FuelSim.Hub.BLUE_HUB.getScore());
+    Logger.recordOutput("Score/Red Hub", FuelSim.Hub.RED_HUB.getScore());
+    Logger.recordOutput(
         "Score/Total", FuelSim.Hub.BLUE_HUB.getScore() + FuelSim.Hub.RED_HUB.getScore());
-    SmartDashboard.putNumber("Sim/Fuel Stored", fuelStored);
+    Logger.recordOutput("Sim/Fuel Stored", fuelStored);
   }
 }

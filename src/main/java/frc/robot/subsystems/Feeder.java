@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
+import org.littletonrobotics.junction.Logger;
 
 public class Feeder extends SubsystemBase {
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
@@ -83,6 +84,25 @@ public class Feeder extends SubsystemBase {
 
   public Command feedCommand() {
     return startEnd(() -> set(Speed.FEED), () -> setPercentOutput(0));
+  }
+
+  @Override
+  public void periodic() {
+    // Log all inputs
+    Logger.recordOutput("Feeder/VelocityRPM", motor.getVelocity().getValueAsDouble() * 60.0);
+    Logger.recordOutput("Feeder/TargetVelocityRPM", velocityRequest.Velocity * 60.0);
+    Logger.recordOutput("Feeder/StatorCurrentAmps", motor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput("Feeder/SupplyCurrentAmps", motor.getSupplyCurrent().getValueAsDouble());
+    Logger.recordOutput("Feeder/AppliedVoltage", motor.getMotorVoltage().getValueAsDouble());
+    Logger.recordOutput("Feeder/TemperatureCelsius", motor.getDeviceTemp().getValueAsDouble());
+
+    // Log control state
+    boolean isVelocityMode = motor.getAppliedControl().getName().equals("VelocityVoltage");
+    Logger.recordOutput("Feeder/ControlMode", isVelocityMode ? "Velocity" : "Voltage");
+    Logger.recordOutput("Feeder/CommandActive", getCurrentCommand() != null);
+    if (getCurrentCommand() != null) {
+      Logger.recordOutput("Feeder/CommandName", getCurrentCommand().getName());
+    }
   }
 
   @Override
