@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -110,9 +111,9 @@ public class AllianceShiftMonitor extends SubsystemBase {
       firedPhases[i] = true;
       boolean isOurShiftNext = (i % 2 == 0) == isOddShiftsOurs;
       if (isOurShiftNext) {
-        rumble3x().schedule();
+        CommandScheduler.getInstance().schedule(rumble3x());
       } else {
-        rumble(RUMBLE_DURATION).schedule();
+        CommandScheduler.getInstance().schedule(rumble(RUMBLE_DURATION));
       }
     }
   }
