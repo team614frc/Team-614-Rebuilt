@@ -23,6 +23,7 @@ import frc.robot.subsystems.ShooterVisualizer;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.util.FuelSim;
+import frc.util.AllianceShiftMonitor;
 import java.io.File;
 import swervelib.SwerveInputStream;
 
@@ -45,6 +46,8 @@ public class RobotContainer {
 
   // Shooter visualizer for simulation (only used in sim)
   private final ShooterVisualizer shooterVisualizer;
+
+  private final AllianceShiftMonitor shiftMonitor;
 
   // The driver's controller
   private final CommandXboxController driverXbox =
@@ -182,6 +185,7 @@ public class RobotContainer {
             () -> driverXbox.getLeftY(),
             () -> driverXbox.getLeftX());
 
+    shiftMonitor = new AllianceShiftMonitor(driverXbox);
     DriverStation.silenceJoystickConnectionWarning(true);
 
     // Build an auto chooser. This will use Commands.none() as the default option.
@@ -230,5 +234,11 @@ public class RobotContainer {
 
   public void periodic() {
     shooterVisualizer.periodic();
+    shiftMonitor.periodic();
+  }
+
+  /** Call from Robot.autonomousInit() */
+  public void resetShiftMonitor() {
+    shiftMonitor.reset();
   }
 }
