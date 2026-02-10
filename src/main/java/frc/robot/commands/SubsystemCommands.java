@@ -24,7 +24,7 @@ public final class SubsystemCommands {
   private final Hood hood;
   private final Hanger hanger;
   private final VisionSubsystem vision;
-  private final ShooterVisualizer shooterVisualizer; // Add this field
+  private final ShooterVisualizer shooterVisualizer;
 
   private final DoubleSupplier forwardInput;
   private final DoubleSupplier leftInput;
@@ -38,7 +38,7 @@ public final class SubsystemCommands {
       Hood hood,
       Hanger hanger,
       VisionSubsystem vision,
-      ShooterVisualizer shooterVisualizer, // Add this parameter
+      ShooterVisualizer shooterVisualizer,
       DoubleSupplier forwardInput,
       DoubleSupplier leftInput) {
     this.swerve = swerve;
@@ -49,7 +49,7 @@ public final class SubsystemCommands {
     this.hood = hood;
     this.hanger = hanger;
     this.vision = vision;
-    this.shooterVisualizer = shooterVisualizer; // Assign it
+    this.shooterVisualizer = shooterVisualizer;
 
     this.forwardInput = forwardInput;
     this.leftInput = leftInput;
