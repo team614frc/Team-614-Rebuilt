@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -15,7 +16,11 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,10 +29,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 import java.util.List;
+import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
-  private static final AngularVelocity kVelocityTolerance = RPM.of(100);
 
+  private static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(100);
+  private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
+  private static final double kP = 0.5;
+  private static final double kI = 2.0;
+  private static final double kD = 0.0;
+  private static final double kV =
+      MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
   private final TalonFX leftMotor, middleMotor, rightMotor;
   private final List<TalonFX> motors;
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
@@ -58,20 +72,11 @@ public class Shooter extends SubsystemBase {
             .withVoltage(new VoltageConfigs().withPeakReverseVoltage(Volts.of(0)))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(120))
+                    .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(70))
+                    .withSupplyCurrentLimit(SUPPLY_CURRENT_LIMIT)
                     .withSupplyCurrentLimitEnable(true))
-            .withSlot0(
-                new Slot0Configs()
-                    .withKP(0.5)
-                    .withKI(2)
-                    .withKD(0)
-                    .withKV(
-                        12.0
-                            / KrakenX60.kFreeSpeed.in(
-                                RotationsPerSecond)) // 12 volts when requesting max RPS
-                );
+            .withSlot0(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD).withKV(kV));
 
     motor.getConfigurator().apply(config);
   }
@@ -84,7 +89,7 @@ public class Shooter extends SubsystemBase {
 
   public void setPercentOutput(double percentOutput) {
     for (final TalonFX motor : motors) {
-      motor.setControl(voltageRequest.withOutput(Volts.of(percentOutput * 12.0)));
+      motor.setControl(voltageRequest.withOutput(MAX_VOLTAGE.times(percentOutput)));
     }
   }
 
@@ -107,8 +112,47 @@ public class Shooter extends SubsystemBase {
               final boolean isInVelocityMode = motor.getAppliedControl().equals(velocityRequest);
               final AngularVelocity currentVelocity = motor.getVelocity().getValue();
               final AngularVelocity targetVelocity = velocityRequest.getVelocityMeasure();
-              return isInVelocityMode && currentVelocity.isNear(targetVelocity, kVelocityTolerance);
+              return isInVelocityMode && currentVelocity.isNear(targetVelocity, VELOCITY_TOLERANCE);
             });
+  }
+
+  @Override
+  public void periodic() {
+    // Log individual motor data
+    Logger.recordOutput("Shooter/Left/VelocityRPM", leftMotor.getVelocity().getValue().in(RPM));
+    Logger.recordOutput(
+        "Shooter/Left/StatorCurrentAmps", leftMotor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Shooter/Left/SupplyCurrentAmps", leftMotor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Shooter/Left/TemperatureCelsius", leftMotor.getDeviceTemp().getValue().in(Celsius));
+
+    Logger.recordOutput("Shooter/Middle/VelocityRPM", middleMotor.getVelocity().getValue().in(RPM));
+    Logger.recordOutput(
+        "Shooter/Middle/StatorCurrentAmps", middleMotor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Shooter/Middle/SupplyCurrentAmps", middleMotor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Shooter/Middle/TemperatureCelsius", middleMotor.getDeviceTemp().getValue().in(Celsius));
+
+    Logger.recordOutput("Shooter/Right/VelocityRPM", rightMotor.getVelocity().getValue().in(RPM));
+    Logger.recordOutput(
+        "Shooter/Right/StatorCurrentAmps", rightMotor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Shooter/Right/SupplyCurrentAmps", rightMotor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Shooter/Right/TemperatureCelsius", rightMotor.getDeviceTemp().getValue().in(Celsius));
+
+    // Log aggregate data
+    Logger.recordOutput("Shooter/TargetVelocityRPM", velocityRequest.Velocity * 60.0);
+    Logger.recordOutput("Shooter/AtSetpoint", isVelocityWithinTolerance());
+    Logger.recordOutput("Shooter/ExitVelocityMPS", getExitVelocity().in(Units.MetersPerSecond));
+
+    // Log control state
+    Logger.recordOutput("Shooter/CommandActive", getCurrentCommand() != null);
+    if (getCurrentCommand() != null) {
+      Logger.recordOutput("Shooter/CommandName", getCurrentCommand().getName());
+    }
   }
 
   private void initSendable(SendableBuilder builder, TalonFX motor, String name) {
@@ -132,5 +176,13 @@ public class Shooter extends SubsystemBase {
         "Dashboard RPM", () -> dashboardTargetRPM, value -> dashboardTargetRPM = value);
     builder.addDoubleProperty(
         "Target RPM", () -> velocityRequest.getVelocityMeasure().in(RPM), null);
+  }
+
+  public LinearVelocity getExitVelocity() {
+    double wheelRadiusMeters = 0.05;
+    double wheelRPS = leftMotor.getVelocity().getValue().in(RotationsPerSecond);
+    double mps = 2.0 * Math.PI * wheelRadiusMeters * wheelRPS;
+
+    return Units.MetersPerSecond.of(mps);
   }
 }

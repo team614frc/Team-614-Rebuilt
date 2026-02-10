@@ -11,8 +11,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.LEDs;
-import frc.robot.subsystems.LEDs.HubState;
 
 public class AllianceShiftMonitor {
 
@@ -46,7 +44,6 @@ public class AllianceShiftMonitor {
   private static final double RUMBLE_INTENSITY = 0.7;
 
   private final CommandXboxController driverController;
-  private final LEDs leds;
 
   private boolean hasGameData = false;
   private boolean isRedAlliance = false;
@@ -54,9 +51,8 @@ public class AllianceShiftMonitor {
   private boolean isScheduled = false;
   private Command scheduledCommand = null;
 
-  public AllianceShiftMonitor(CommandXboxController driverController, LEDs leds) {
+  public AllianceShiftMonitor(CommandXboxController driverController) {
     this.driverController = driverController;
-    this.leds = leds;
   }
 
   public void periodic() {
@@ -77,77 +73,45 @@ public class AllianceShiftMonitor {
       isScheduled = true;
     }
 
-    if (!DriverStation.isTeleopEnabled()) {
-      leds.setState(HubState.DISABLED);
-    }
-
     updateDashboard();
   }
 
   /** Loser: odd shifts (1, 3) are ours. */
   private Command buildLoserCommand() {
     return Commands.sequence(
-        // TRANSITION: opponent hub for 5s, rumble3x + "our shift starting soon" in parallel
-        Commands.deadline(
-            wait(Seconds.of(10)),
-            Commands.sequence(
-                opponentActiveLED().withTimeout(WARNING.in(Seconds)),
-                Commands.parallel(rumble3x(), ourShiftNextLED()))),
-        // SHIFT 1 (ours): hub active for 20s, then rumble 5s (keep hub active during rumble)
-        Commands.parallel(
-            hubActiveLED().withTimeout(SHIFT_QUIET.in(Seconds)),
-            Commands.sequence(wait(SHIFT_QUIET), Commands.none())),
-        Commands.parallel(rumble(WARNING), hubActiveLED().withTimeout(WARNING.in(Seconds))),
-        // SHIFT 2 (opponent): opponent for 20s, rumble3x + "our shift starting soon" in parallel
-        Commands.deadline(
-            wait(Seconds.of(25)),
-            Commands.sequence(
-                opponentActiveLED().withTimeout(SHIFT_QUIET.in(Seconds)),
-                Commands.parallel(rumble3x(), ourShiftNextLED()))),
-        // SHIFT 3 (ours): hub active for 20s, then rumble 5s (keep hub active during rumble)
-        Commands.parallel(
-            hubActiveLED().withTimeout(SHIFT_QUIET.in(Seconds)),
-            Commands.sequence(wait(SHIFT_QUIET), Commands.none())),
-        Commands.parallel(rumble(WARNING), hubActiveLED().withTimeout(WARNING.in(Seconds))),
-        // SHIFT 4 (opponent): opponent for 20s, rumble3x + "end game soon" in parallel
-        Commands.deadline(
-            wait(Seconds.of(25)),
-            Commands.sequence(
-                opponentActiveLED().withTimeout(SHIFT_QUIET.in(Seconds)),
-                Commands.parallel(rumble3x(), ourShiftNextLED()))));
+        // TRANSITION: 10s total, rumble3x at 5s mark
+        Commands.deadline(wait(Seconds.of(10)), Commands.sequence(wait(WARNING), rumble3x())),
+        // SHIFT 1 (ours): 20s quiet + 5s rumble = 25s total
+        wait((SHIFT_QUIET)),
+        rumble((WARNING)),
+        // SHIFT 2 (opponent): 25s total, rumble3x at 20s mark
+        Commands.deadline(wait(Seconds.of(25)), Commands.sequence(wait(SHIFT_QUIET), rumble3x())),
+        // SHIFT 3 (ours): 20s quiet + 5s rumble = 25s total
+        wait(SHIFT_QUIET),
+        rumble(WARNING),
+        // SHIFT 4 (opponent): 25s total, rumble3x at 20s mark
+        Commands.deadline(wait(Seconds.of(25)), Commands.sequence(wait(SHIFT_QUIET), rumble3x()))
+        // Total: 10 + 25 + 25 + 25 + 25 = 110s (+ 20s AUTO = 130s)
+        );
   }
 
   /** Winner: even shifts (2, 4) are ours. */
   private Command buildWinnerCommand() {
     return Commands.sequence(
-        // TRANSITION: hub active for 5s, then rumble 5s (keep hub active during rumble)
-        Commands.deadline(
-            wait(Seconds.of(10)),
-            Commands.sequence(
-                hubActiveLED().withTimeout(WARNING.in(Seconds)),
-                Commands.parallel(rumble(WARNING), hubActiveLED()))),
-        // SHIFT 1 (opponent): opponent for 20s, rumble3x + "our shift starting soon" in parallel
-        Commands.deadline(
-            wait(Seconds.of(25)),
-            Commands.sequence(
-                opponentActiveLED().withTimeout(SHIFT_QUIET.in(Seconds)),
-                Commands.parallel(rumble3x(), ourShiftNextLED()))),
-        // SHIFT 2 (ours): hub active for 20s, then rumble 5s (keep hub active during rumble)
-        Commands.parallel(
-            hubActiveLED().withTimeout(SHIFT_QUIET.in(Seconds)),
-            Commands.sequence(wait(SHIFT_QUIET), Commands.none())),
-        Commands.parallel(rumble(WARNING), hubActiveLED().withTimeout(WARNING.in(Seconds))),
-        // SHIFT 3 (opponent): opponent for 20s, rumble3x + "our shift starting soon" in parallel
-        Commands.deadline(
-            wait(Seconds.of(25)),
-            Commands.sequence(
-                opponentActiveLED().withTimeout(SHIFT_QUIET.in(Seconds)),
-                Commands.parallel(rumble3x(), ourShiftNextLED()))),
-        // SHIFT 4 (ours): hub active for 20s, then rumble 5s (keep hub active during rumble)
-        Commands.parallel(
-            hubActiveLED().withTimeout(SHIFT_QUIET.in(Seconds)),
-            Commands.sequence(wait(SHIFT_QUIET), Commands.none())),
-        Commands.parallel(rumble(WARNING), hubActiveLED().withTimeout(WARNING.in(Seconds))));
+        // TRANSITION: 10s total, rumble at 5s mark (transition ending soon)
+        Commands.deadline(wait(Seconds.of(10)), Commands.sequence(wait(WARNING), rumble(WARNING))),
+        // SHIFT 1 (opponent): 25s total, rumble3x at 20s mark (for our shift 2)
+        Commands.deadline(wait(Seconds.of(25)), Commands.sequence(wait(SHIFT_QUIET), rumble3x())),
+        // SHIFT 2 (ours): 20s quiet + 5s rumble = 25s total
+        wait(SHIFT_QUIET),
+        rumble(WARNING),
+        // SHIFT 3 (opponent): 25s total, rumble3x at 20s mark (for our shift 4)
+        Commands.deadline(wait(Seconds.of(25)), Commands.sequence(wait(SHIFT_QUIET), rumble3x())),
+        // SHIFT 4 (ours): 20s quiet + 5s rumble = 25s total
+        wait(SHIFT_QUIET),
+        rumble(WARNING)
+        // Total: 10 + 25 + 25 + 25 + 25 = 110s (+ 20s AUTO = 130s)
+        );
   }
 
   private Command wait(Time duration) {
@@ -168,18 +132,6 @@ public class AllianceShiftMonitor {
         rumble(RUMBLE_PULSE),
         wait(RUMBLE_GAP),
         rumble(RUMBLE_PULSE));
-  }
-
-  private Command ourShiftNextLED() {
-    return new RunCommand(() -> leds.setState(HubState.HUB_STARTING_SOON));
-  }
-
-  private Command hubActiveLED() {
-    return new RunCommand(() -> leds.setState(HubState.HUB_ACTIVE));
-  }
-
-  private Command opponentActiveLED() {
-    return new RunCommand(() -> leds.setState(HubState.OPPONENT_HUB));
   }
 
   private void updateDashboard() {

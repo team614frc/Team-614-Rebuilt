@@ -9,12 +9,13 @@ import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.Interpolator;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Landmarks;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Shooter;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class PrepareShotCommand extends Command {
   private static final InterpolatingTreeMap<Distance, Shot> distanceToShotMap =
@@ -47,7 +48,26 @@ public class PrepareShotCommand extends Command {
   }
 
   public boolean isReadyToShoot() {
-    return shooter.isVelocityWithinTolerance() && hood.isPositionWithinTolerance();
+    boolean hoodReady = hood.isPositionWithinTolerance();
+    boolean shooterReady;
+
+    // In simulation, skip the velocity check since motors don't simulate
+    if (RobotBase.isSimulation()) {
+      shooterReady = true; // Always consider shooter ready in sim
+      Logger.recordOutput("PrepareShot/Hood Ready", hoodReady);
+      Logger.recordOutput("PrepareShot/Shooter Ready (sim)", shooterReady);
+      Logger.recordOutput("PrepareShot/Ready to Shoot", hoodReady);
+      System.out.println(
+          "PrepareShot - Hood Ready: " + hoodReady + ", Ready to Shoot: " + hoodReady);
+    } else {
+      // On real robot, check both shooter velocity and hood position
+      shooterReady = shooter.isVelocityWithinTolerance();
+      Logger.recordOutput("PrepareShot/Hood Ready", hoodReady);
+      Logger.recordOutput("PrepareShot/Shooter Ready", shooterReady);
+      Logger.recordOutput("PrepareShot/Ready to Shoot", hoodReady && shooterReady);
+    }
+
+    return hoodReady && shooterReady;
   }
 
   private Distance getDistanceToHub() {
@@ -62,7 +82,9 @@ public class PrepareShotCommand extends Command {
     final Shot shot = distanceToShotMap.get(distanceToHub);
     shooter.setRPM(shot.shooterRPM);
     hood.setPosition(shot.hoodPosition);
-    SmartDashboard.putNumber("Distance to Hub (inches)", distanceToHub.in(Inches));
+    Logger.recordOutput("Distance to Hub (inches)", distanceToHub.in(Inches));
+    Logger.recordOutput("PrepareShot/Target RPM", shot.shooterRPM);
+    Logger.recordOutput("PrepareShot/Target Hood Position", shot.hoodPosition);
   }
 
   @Override

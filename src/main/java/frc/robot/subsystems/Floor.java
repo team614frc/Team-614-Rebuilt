@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -11,14 +12,20 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Ports;
+import org.littletonrobotics.junction.Logger;
 
 public class Floor extends SubsystemBase {
+  private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(30);
+
   public enum Speed {
     STOP(0),
     FEED(0.83);
@@ -30,7 +37,7 @@ public class Floor extends SubsystemBase {
     }
 
     public Voltage voltage() {
-      return Volts.of(percentOutput * 12.0);
+      return MAX_VOLTAGE.times(percentOutput);
     }
   }
 
@@ -48,9 +55,9 @@ public class Floor extends SubsystemBase {
                     .withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(Amps.of(120))
+                    .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(30))
+                    .withSupplyCurrentLimit(SUPPLY_CURRENT_LIMIT)
                     .withSupplyCurrentLimitEnable(true));
 
     motor.getConfigurator().apply(config);
@@ -63,6 +70,17 @@ public class Floor extends SubsystemBase {
 
   public Command feedCommand() {
     return startEnd(() -> set(Speed.FEED), () -> set(Speed.STOP));
+  }
+
+  @Override
+  public void periodic() {
+    // Log inputs
+    Logger.recordOutput("Floor/VelocityRPM", motor.getVelocity().getValue().in(RPM));
+    Logger.recordOutput("Floor/StatorCurrentAmps", motor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput("Floor/SupplyCurrentAmps", motor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput("Floor/AppliedVoltage", motor.getMotorVoltage().getValue().in(Volts));
+    Logger.recordOutput("Floor/Temperature", motor.getDeviceTemp().getValue().in(Celsius));
+    Logger.recordOutput("Floor/TargetVoltage", voltageRequest.Output);
   }
 
   @Override
