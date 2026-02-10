@@ -245,7 +245,16 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Normal periodic updates
+    Pose2d pose = getPose();
+    Logger.recordOutput("Swerve/Pose", pose);
+    Logger.recordOutput("Swerve/PoseX", pose.getX());
+    Logger.recordOutput("Swerve/PoseY", pose.getY());
+    Logger.recordOutput("Swerve/RotationDeg", pose.getRotation().getDegrees());
+
+    ChassisSpeeds speeds = getRobotVelocity();
+    Logger.recordOutput("Swerve/VelocityX", speeds.vxMetersPerSecond);
+    Logger.recordOutput("Swerve/VelocityY", speeds.vyMetersPerSecond);
+    Logger.recordOutput("Swerve/VelocityOmega", speeds.omegaRadiansPerSecond);
   }
 
   @Override

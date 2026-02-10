@@ -22,8 +22,8 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterVisualizer;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.util.FuelSim;
 import frc.util.AllianceShiftMonitor;
+import frc.util.FuelSim;
 import java.io.File;
 import swervelib.SwerveInputStream;
 
