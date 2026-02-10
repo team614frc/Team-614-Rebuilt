@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -153,10 +154,10 @@ public class Hanger extends SubsystemBase {
     // Log hanger state
     Logger.recordOutput("Hanger/ExtensionInches", currentExtension.in(Inches));
     Logger.recordOutput("Hanger/TargetExtensionInches", targetExtension.in(Inches));
-    Logger.recordOutput("Hanger/SupplyCurrentAmps", motor.getSupplyCurrent().getValueAsDouble());
-    Logger.recordOutput("Hanger/StatorCurrentAmps", motor.getStatorCurrent().getValueAsDouble());
-    Logger.recordOutput("Hanger/AppliedVoltage", motor.getMotorVoltage().getValueAsDouble());
-    Logger.recordOutput("Hanger/TemperatureCelsius", motor.getDeviceTemp().getValueAsDouble());
+    Logger.recordOutput("Hanger/SupplyCurrentAmps", motor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput("Hanger/StatorCurrentAmps", motor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput("Hanger/AppliedVoltage", motor.getMotorVoltage().getValue().in(Volts));
+    Logger.recordOutput("Hanger/TemperatureCelsius", motor.getDeviceTemp().getValue().in(Celsius));
     Logger.recordOutput("Hanger/IsHomed", isHomed);
     Logger.recordOutput("Hanger/AtSetpoint", isExtensionWithinTolerance());
 

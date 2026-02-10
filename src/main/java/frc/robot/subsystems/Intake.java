@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -205,28 +206,28 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     // Log pivot data
-    Logger.recordOutput("Intake/Pivot/AngleDegrees", pivotMotor.getPosition().getValueAsDouble());
+    Logger.recordOutput(
+        "Intake/Pivot/AngleDegrees", pivotMotor.getPosition().getValue().in(Degrees));
     Logger.recordOutput("Intake/Pivot/TargetAngleDegrees", pivotMotionMagicRequest.Position);
     Logger.recordOutput(
-        "Intake/Pivot/SupplyCurrentAmps", pivotMotor.getSupplyCurrent().getValueAsDouble());
+        "Intake/Pivot/SupplyCurrentAmps", pivotMotor.getSupplyCurrent().getValue().in(Amps));
     Logger.recordOutput(
-        "Intake/Pivot/StatorCurrentAmps", pivotMotor.getStatorCurrent().getValueAsDouble());
+        "Intake/Pivot/StatorCurrentAmps", pivotMotor.getStatorCurrent().getValue().in(Amps));
     Logger.recordOutput(
-        "Intake/Pivot/AppliedVoltage", pivotMotor.getMotorVoltage().getValueAsDouble());
+        "Intake/Pivot/AppliedVoltage", pivotMotor.getMotorVoltage().getValue().in(Volts));
     Logger.recordOutput(
-        "Intake/Pivot/TemperatureCelsius", pivotMotor.getDeviceTemp().getValueAsDouble());
+        "Intake/Pivot/TemperatureCelsius", pivotMotor.getDeviceTemp().getValue().in(Celsius));
 
     // Log roller data
+    Logger.recordOutput("Intake/Roller/VelocityRPM", rollerMotor.getVelocity().getValue().in(RPM));
     Logger.recordOutput(
-        "Intake/Roller/VelocityRPM", rollerMotor.getVelocity().getValueAsDouble() * 60.0);
+        "Intake/Roller/SupplyCurrentAmps", rollerMotor.getSupplyCurrent().getValue().in(Amps));
     Logger.recordOutput(
-        "Intake/Roller/SupplyCurrentAmps", rollerMotor.getSupplyCurrent().getValueAsDouble());
+        "Intake/Roller/StatorCurrentAmps", rollerMotor.getStatorCurrent().getValue().in(Amps));
     Logger.recordOutput(
-        "Intake/Roller/StatorCurrentAmps", rollerMotor.getStatorCurrent().getValueAsDouble());
+        "Intake/Roller/AppliedVoltage", rollerMotor.getMotorVoltage().getValue().in(Volts));
     Logger.recordOutput(
-        "Intake/Roller/AppliedVoltage", rollerMotor.getMotorVoltage().getValueAsDouble());
-    Logger.recordOutput(
-        "Intake/Roller/TemperatureCelsius", rollerMotor.getDeviceTemp().getValueAsDouble());
+        "Intake/Roller/TemperatureCelsius", rollerMotor.getDeviceTemp().getValue().in(Celsius));
 
     // Log state
     Logger.recordOutput("Intake/IsHomed", isHomed);

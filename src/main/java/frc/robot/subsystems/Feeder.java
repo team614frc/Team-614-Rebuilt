@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -89,12 +90,12 @@ public class Feeder extends SubsystemBase {
   @Override
   public void periodic() {
     // Log all inputs
-    Logger.recordOutput("Feeder/VelocityRPM", motor.getVelocity().getValueAsDouble() * 60.0);
+    Logger.recordOutput("Feeder/VelocityRPM", motor.getVelocity().getValue().in(RPM));
     Logger.recordOutput("Feeder/TargetVelocityRPM", velocityRequest.Velocity * 60.0);
-    Logger.recordOutput("Feeder/StatorCurrentAmps", motor.getStatorCurrent().getValueAsDouble());
-    Logger.recordOutput("Feeder/SupplyCurrentAmps", motor.getSupplyCurrent().getValueAsDouble());
-    Logger.recordOutput("Feeder/AppliedVoltage", motor.getMotorVoltage().getValueAsDouble());
-    Logger.recordOutput("Feeder/TemperatureCelsius", motor.getDeviceTemp().getValueAsDouble());
+    Logger.recordOutput("Feeder/StatorCurrentAmps", motor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput("Feeder/SupplyCurrentAmps", motor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput("Feeder/AppliedVoltage", motor.getMotorVoltage().getValue().in(Volts));
+    Logger.recordOutput("Feeder/TemperatureCelsius", motor.getDeviceTemp().getValue().in(Celsius));
 
     // Log control state
     boolean isVelocityMode = motor.getAppliedControl().getName().equals("VelocityVoltage");

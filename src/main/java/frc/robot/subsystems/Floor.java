@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -77,8 +78,8 @@ public class Floor extends SubsystemBase {
     Logger.recordOutput("Floor/VelocityRPM", motor.getVelocity().getValue().in(RPM));
     Logger.recordOutput("Floor/StatorCurrentAmps", motor.getStatorCurrent().getValue().in(Amps));
     Logger.recordOutput("Floor/SupplyCurrentAmps", motor.getSupplyCurrent().getValue().in(Amps));
-    Logger.recordOutput("Floor/AppliedVoltage", motor.getMotorVoltage().getValueAsDouble());
-    Logger.recordOutput("Floor/Temperature", motor.getDeviceTemp().getValueAsDouble());
+    Logger.recordOutput("Floor/AppliedVoltage", motor.getMotorVoltage().getValue().in(Volts));
+    Logger.recordOutput("Floor/Temperature", motor.getDeviceTemp().getValue().in(Celsius));
     Logger.recordOutput("Floor/TargetVoltage", voltageRequest.Output);
   }
 

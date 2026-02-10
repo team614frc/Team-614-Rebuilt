@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -118,32 +119,29 @@ public class Shooter extends SubsystemBase {
   @Override
   public void periodic() {
     // Log individual motor data
+    Logger.recordOutput("Shooter/Left/VelocityRPM", leftMotor.getVelocity().getValue().in(RPM));
     Logger.recordOutput(
-        "Shooter/Left/VelocityRPM", leftMotor.getVelocity().getValueAsDouble() * 60.0);
+        "Shooter/Left/StatorCurrentAmps", leftMotor.getStatorCurrent().getValue().in(Amps));
     Logger.recordOutput(
-        "Shooter/Left/StatorCurrentAmps", leftMotor.getStatorCurrent().getValueAsDouble());
+        "Shooter/Left/SupplyCurrentAmps", leftMotor.getSupplyCurrent().getValue().in(Amps));
     Logger.recordOutput(
-        "Shooter/Left/SupplyCurrentAmps", leftMotor.getSupplyCurrent().getValueAsDouble());
-    Logger.recordOutput(
-        "Shooter/Left/TemperatureCelsius", leftMotor.getDeviceTemp().getValueAsDouble());
+        "Shooter/Left/TemperatureCelsius", leftMotor.getDeviceTemp().getValue().in(Celsius));
 
+    Logger.recordOutput("Shooter/Middle/VelocityRPM", middleMotor.getVelocity().getValue().in(RPM));
     Logger.recordOutput(
-        "Shooter/Middle/VelocityRPM", middleMotor.getVelocity().getValueAsDouble() * 60.0);
+        "Shooter/Middle/StatorCurrentAmps", middleMotor.getStatorCurrent().getValue().in(Amps));
     Logger.recordOutput(
-        "Shooter/Middle/StatorCurrentAmps", middleMotor.getStatorCurrent().getValueAsDouble());
+        "Shooter/Middle/SupplyCurrentAmps", middleMotor.getSupplyCurrent().getValue().in(Amps));
     Logger.recordOutput(
-        "Shooter/Middle/SupplyCurrentAmps", middleMotor.getSupplyCurrent().getValueAsDouble());
-    Logger.recordOutput(
-        "Shooter/Middle/TemperatureCelsius", middleMotor.getDeviceTemp().getValueAsDouble());
+        "Shooter/Middle/TemperatureCelsius", middleMotor.getDeviceTemp().getValue().in(Celsius));
 
+    Logger.recordOutput("Shooter/Right/VelocityRPM", rightMotor.getVelocity().getValue().in(RPM));
     Logger.recordOutput(
-        "Shooter/Right/VelocityRPM", rightMotor.getVelocity().getValueAsDouble() * 60.0);
+        "Shooter/Right/StatorCurrentAmps", rightMotor.getStatorCurrent().getValue().in(Amps));
     Logger.recordOutput(
-        "Shooter/Right/StatorCurrentAmps", rightMotor.getStatorCurrent().getValueAsDouble());
+        "Shooter/Right/SupplyCurrentAmps", rightMotor.getSupplyCurrent().getValue().in(Amps));
     Logger.recordOutput(
-        "Shooter/Right/SupplyCurrentAmps", rightMotor.getSupplyCurrent().getValueAsDouble());
-    Logger.recordOutput(
-        "Shooter/Right/TemperatureCelsius", rightMotor.getDeviceTemp().getValueAsDouble());
+        "Shooter/Right/TemperatureCelsius", rightMotor.getDeviceTemp().getValue().in(Celsius));
 
     // Log aggregate data
     Logger.recordOutput("Shooter/TargetVelocityRPM", velocityRequest.Velocity * 60.0);
