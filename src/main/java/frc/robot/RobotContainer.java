@@ -23,6 +23,7 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.util.AllianceShiftMonitor;
 import java.io.File;
 import swervelib.SwerveInputStream;
 
@@ -42,6 +43,8 @@ public class RobotContainer {
   private final Hood hood = new Hood();
   private final Hanger hanger = new Hanger();
   private final VisionSubsystem vision = new VisionSubsystem(swerve);
+
+  private final AllianceShiftMonitor shiftMonitor;
 
   // The driver's controller
   private final CommandXboxController driverXbox =
@@ -89,6 +92,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    shiftMonitor = new AllianceShiftMonitor(driverXbox);
     configureBindings();
     DriverStation.silenceJoystickConnectionWarning(true);
 
@@ -133,5 +137,14 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return autoChooser.getSelected();
+  }
+
+  public void periodic() {
+    shiftMonitor.periodic();
+  }
+
+  /** Call from Robot.autonomousInit() */
+  public void resetShiftMonitor() {
+    shiftMonitor.reset();
   }
 }
