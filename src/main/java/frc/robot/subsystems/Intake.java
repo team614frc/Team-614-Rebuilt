@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -24,6 +25,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -31,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
+import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
@@ -91,6 +94,13 @@ public class Intake extends SubsystemBase {
     rollerMotor = new TalonFX(Ports.kIntakeRollers, Ports.kRoboRioCANBus);
     configurePivotMotor();
     configureRollerMotor();
+
+    // Auto-home in simulation
+    if (RobotBase.isSimulation()) {
+      pivotMotor.setPosition(Position.HOMED.angle());
+      isHomed = true;
+    }
+
     SmartDashboard.putData(this);
   }
 
@@ -191,6 +201,41 @@ public class Intake extends SubsystemBase {
                 }))
         .unless(() -> isHomed)
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+  }
+
+  @Override
+  public void periodic() {
+    // Log pivot data
+    Logger.recordOutput(
+        "Intake/Pivot/AngleDegrees", pivotMotor.getPosition().getValue().in(Degrees));
+    Logger.recordOutput("Intake/Pivot/TargetAngleDegrees", pivotMotionMagicRequest.Position);
+    Logger.recordOutput(
+        "Intake/Pivot/SupplyCurrentAmps", pivotMotor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Intake/Pivot/StatorCurrentAmps", pivotMotor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Intake/Pivot/AppliedVoltage", pivotMotor.getMotorVoltage().getValue().in(Volts));
+    Logger.recordOutput(
+        "Intake/Pivot/TemperatureCelsius", pivotMotor.getDeviceTemp().getValue().in(Celsius));
+
+    // Log roller data
+    Logger.recordOutput("Intake/Roller/VelocityRPM", rollerMotor.getVelocity().getValue().in(RPM));
+    Logger.recordOutput(
+        "Intake/Roller/SupplyCurrentAmps", rollerMotor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Intake/Roller/StatorCurrentAmps", rollerMotor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Intake/Roller/AppliedVoltage", rollerMotor.getMotorVoltage().getValue().in(Volts));
+    Logger.recordOutput(
+        "Intake/Roller/TemperatureCelsius", rollerMotor.getDeviceTemp().getValue().in(Celsius));
+
+    // Log state
+    Logger.recordOutput("Intake/IsHomed", isHomed);
+    Logger.recordOutput("Intake/AtSetpoint", isPositionWithinTolerance());
+    Logger.recordOutput("Intake/CommandActive", getCurrentCommand() != null);
+    if (getCurrentCommand() != null) {
+      Logger.recordOutput("Intake/CommandName", getCurrentCommand().getName());
+    }
   }
 
   @Override

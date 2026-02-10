@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -18,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Ports;
+import org.littletonrobotics.junction.Logger;
 
 public class Floor extends SubsystemBase {
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
@@ -68,6 +70,17 @@ public class Floor extends SubsystemBase {
 
   public Command feedCommand() {
     return startEnd(() -> set(Speed.FEED), () -> set(Speed.STOP));
+  }
+
+  @Override
+  public void periodic() {
+    // Log inputs
+    Logger.recordOutput("Floor/VelocityRPM", motor.getVelocity().getValue().in(RPM));
+    Logger.recordOutput("Floor/StatorCurrentAmps", motor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput("Floor/SupplyCurrentAmps", motor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput("Floor/AppliedVoltage", motor.getMotorVoltage().getValue().in(Volts));
+    Logger.recordOutput("Floor/Temperature", motor.getDeviceTemp().getValue().in(Celsius));
+    Logger.recordOutput("Floor/TargetVoltage", voltageRequest.Output);
   }
 
   @Override

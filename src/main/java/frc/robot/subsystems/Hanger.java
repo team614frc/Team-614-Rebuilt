@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -33,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
+import org.littletonrobotics.junction.Logger;
 
 public class Hanger extends SubsystemBase {
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
@@ -65,7 +67,7 @@ public class Hanger extends SubsystemBase {
     public Angle motorAngle() {
       final Measure<AngleUnit> angleMeasure =
           distance.divideRatio(HANGER_EXTENSION_PER_MOTOR_ANGLE);
-      return Rotations.of(angleMeasure.in(Rotations)); // Promote from Measure<AngleUnit> to Angle
+      return Rotations.of(angleMeasure.in(Rotations));
     }
   }
 
@@ -141,7 +143,28 @@ public class Hanger extends SubsystemBase {
   private Distance motorAngleToExtension(Angle motorAngle) {
     final Measure<DistanceUnit> extensionMeasure =
         motorAngle.timesRatio(HANGER_EXTENSION_PER_MOTOR_ANGLE);
-    return Inches.of(extensionMeasure.in(Inches)); // Promote from Measure<DistanceUnit> to Distance
+    return Inches.of(extensionMeasure.in(Inches));
+  }
+
+  @Override
+  public void periodic() {
+    Distance currentExtension = motorAngleToExtension(motor.getPosition().getValue());
+    Distance targetExtension = motorAngleToExtension(motionMagicRequest.getPositionMeasure());
+
+    // Log hanger state
+    Logger.recordOutput("Hanger/ExtensionInches", currentExtension.in(Inches));
+    Logger.recordOutput("Hanger/TargetExtensionInches", targetExtension.in(Inches));
+    Logger.recordOutput("Hanger/SupplyCurrentAmps", motor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput("Hanger/StatorCurrentAmps", motor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput("Hanger/AppliedVoltage", motor.getMotorVoltage().getValue().in(Volts));
+    Logger.recordOutput("Hanger/TemperatureCelsius", motor.getDeviceTemp().getValue().in(Celsius));
+    Logger.recordOutput("Hanger/IsHomed", isHomed);
+    Logger.recordOutput("Hanger/AtSetpoint", isExtensionWithinTolerance());
+
+    Logger.recordOutput("Hanger/CommandActive", getCurrentCommand() != null);
+    if (getCurrentCommand() != null) {
+      Logger.recordOutput("Hanger/CommandName", getCurrentCommand().getName());
+    }
   }
 
   @Override

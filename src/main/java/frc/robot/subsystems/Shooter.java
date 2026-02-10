@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -15,8 +16,10 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -26,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 import java.util.List;
+import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
 
@@ -112,6 +116,45 @@ public class Shooter extends SubsystemBase {
             });
   }
 
+  @Override
+  public void periodic() {
+    // Log individual motor data
+    Logger.recordOutput("Shooter/Left/VelocityRPM", leftMotor.getVelocity().getValue().in(RPM));
+    Logger.recordOutput(
+        "Shooter/Left/StatorCurrentAmps", leftMotor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Shooter/Left/SupplyCurrentAmps", leftMotor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Shooter/Left/TemperatureCelsius", leftMotor.getDeviceTemp().getValue().in(Celsius));
+
+    Logger.recordOutput("Shooter/Middle/VelocityRPM", middleMotor.getVelocity().getValue().in(RPM));
+    Logger.recordOutput(
+        "Shooter/Middle/StatorCurrentAmps", middleMotor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Shooter/Middle/SupplyCurrentAmps", middleMotor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Shooter/Middle/TemperatureCelsius", middleMotor.getDeviceTemp().getValue().in(Celsius));
+
+    Logger.recordOutput("Shooter/Right/VelocityRPM", rightMotor.getVelocity().getValue().in(RPM));
+    Logger.recordOutput(
+        "Shooter/Right/StatorCurrentAmps", rightMotor.getStatorCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Shooter/Right/SupplyCurrentAmps", rightMotor.getSupplyCurrent().getValue().in(Amps));
+    Logger.recordOutput(
+        "Shooter/Right/TemperatureCelsius", rightMotor.getDeviceTemp().getValue().in(Celsius));
+
+    // Log aggregate data
+    Logger.recordOutput("Shooter/TargetVelocityRPM", velocityRequest.Velocity * 60.0);
+    Logger.recordOutput("Shooter/AtSetpoint", isVelocityWithinTolerance());
+    Logger.recordOutput("Shooter/ExitVelocityMPS", getExitVelocity().in(Units.MetersPerSecond));
+
+    // Log control state
+    Logger.recordOutput("Shooter/CommandActive", getCurrentCommand() != null);
+    if (getCurrentCommand() != null) {
+      Logger.recordOutput("Shooter/CommandName", getCurrentCommand().getName());
+    }
+  }
+
   private void initSendable(SendableBuilder builder, TalonFX motor, String name) {
     builder.addDoubleProperty(name + " RPM", () -> motor.getVelocity().getValue().in(RPM), null);
     builder.addDoubleProperty(
@@ -133,5 +176,13 @@ public class Shooter extends SubsystemBase {
         "Dashboard RPM", () -> dashboardTargetRPM, value -> dashboardTargetRPM = value);
     builder.addDoubleProperty(
         "Target RPM", () -> velocityRequest.getVelocityMeasure().in(RPM), null);
+  }
+
+  public LinearVelocity getExitVelocity() {
+    double wheelRadiusMeters = 0.05;
+    double wheelRPS = leftMotor.getVelocity().getValue().in(RotationsPerSecond);
+    double mps = 2.0 * Math.PI * wheelRadiusMeters * wheelRPS;
+
+    return Units.MetersPerSecond.of(mps);
   }
 }
