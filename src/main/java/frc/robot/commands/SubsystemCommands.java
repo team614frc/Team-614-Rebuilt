@@ -10,34 +10,34 @@ import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterVisualizer;
-import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.Vision;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 
 public final class SubsystemCommands {
-  private final SwerveSubsystem swerve;
+  private final Swerve swerve;
   private final Intake intake;
   private final Floor floor;
   private final Feeder feeder;
   private final Shooter shooter;
   private final Hood hood;
   private final Hanger hanger;
-  private final VisionSubsystem vision;
+  private final Vision vision;
   private final ShooterVisualizer shooterVisualizer;
 
   private final DoubleSupplier forwardInput;
   private final DoubleSupplier leftInput;
 
   public SubsystemCommands(
-      SwerveSubsystem swerve,
+      Swerve swerve,
       Intake intake,
       Floor floor,
       Feeder feeder,
       Shooter shooter,
       Hood hood,
       Hanger hanger,
-      VisionSubsystem vision,
+      Vision vision,
       ShooterVisualizer shooterVisualizer,
       DoubleSupplier forwardInput,
       DoubleSupplier leftInput) {
@@ -56,14 +56,14 @@ public final class SubsystemCommands {
   }
 
   public SubsystemCommands(
-      SwerveSubsystem swerve,
+      Swerve swerve,
       Intake intake,
       Floor floor,
       Feeder feeder,
       Shooter shooter,
       Hood hood,
       Hanger hanger,
-      VisionSubsystem vision) {
+      Vision vision) {
     this(swerve, intake, floor, feeder, shooter, hood, hanger, vision, null, () -> 0, () -> 0);
   }
 

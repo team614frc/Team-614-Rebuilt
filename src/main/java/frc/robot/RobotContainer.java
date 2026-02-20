@@ -20,8 +20,8 @@ import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterVisualizer;
-import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.Vision;
 import frc.util.AllianceShiftMonitor;
 import frc.util.FuelSim;
 import java.io.File;
@@ -34,15 +34,15 @@ import swervelib.SwerveInputStream;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  private final SwerveSubsystem swerve =
-      new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
+  private final Swerve swerve =
+      new Swerve (new File(Filesystem.getDeployDirectory(), "swerve"));
   private final Intake intake = new Intake();
   private final Floor floor = new Floor();
   private final Feeder feeder = new Feeder();
   private final Shooter shooter = new Shooter();
   private final Hood hood = new Hood();
   private final Hanger hanger = new Hanger();
-  private final VisionSubsystem vision = new VisionSubsystem(swerve);
+  private final Vision vision = new Vision(swerve);
 
   // Shooter visualizer for simulation (only used in sim)
   private final ShooterVisualizer shooterVisualizer;
