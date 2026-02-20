@@ -17,7 +17,7 @@ import frc.robot.subsystems.Shooter;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class PrepareShotCommand extends Command {
+public class PrepareShot extends Command {
   private static final InterpolatingTreeMap<Distance, Shot> distanceToShotMap =
       new InterpolatingTreeMap<>(
           (startValue, endValue, q) ->
@@ -40,7 +40,7 @@ public class PrepareShotCommand extends Command {
   private final Hood hood;
   private final Supplier<Pose2d> robotPoseSupplier;
 
-  public PrepareShotCommand(Shooter shooter, Hood hood, Supplier<Pose2d> robotPoseSupplier) {
+  public PrepareShot(Shooter shooter, Hood hood, Supplier<Pose2d> robotPoseSupplier) {
     this.shooter = shooter;
     this.hood = hood;
     this.robotPoseSupplier = robotPoseSupplier;

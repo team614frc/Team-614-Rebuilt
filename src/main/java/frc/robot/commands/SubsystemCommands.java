@@ -70,17 +70,16 @@ public final class SubsystemCommands {
   public Command aimAndShoot() {
     return Commands.defer(
         () -> {
-          final PrepareShotCommand prepareShotCommand =
-              new PrepareShotCommand(shooter, hood, () -> swerve.getPose());
+          final PrepareShot prepareShot = new PrepareShot(shooter, hood, () -> swerve.getPose());
 
           return Commands.parallel(
               vision.rotateToAllianceTagWhileDriving(forwardInput, leftInput),
-              Commands.waitSeconds(0.25).andThen(prepareShotCommand),
+              Commands.waitSeconds(0.25).andThen(prepareShot),
               Commands.sequence(
                   Commands.waitUntil(
                       () -> {
                         boolean aimed = vision.isAimed();
-                        boolean ready = prepareShotCommand.isReadyToShoot();
+                        boolean ready = prepareShot.isReadyToShoot();
                         return aimed && ready;
                       }),
                   // SIMULATION: Continuously fire while held
