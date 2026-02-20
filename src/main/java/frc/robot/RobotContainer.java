@@ -187,7 +187,7 @@ public class RobotContainer {
             () -> driverXbox.getLeftY(),
             () -> driverXbox.getLeftX());
 
-    shiftMonitor = new AllianceShiftMonitor(driverXbox);
+    shiftMonitor = new AllianceShiftMonitor(driverXbox, leds);
     DriverStation.silenceJoystickConnectionWarning(true);
 
     // Build an auto chooser. This will use Commands.none() as the default option.
