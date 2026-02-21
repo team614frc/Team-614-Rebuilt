@@ -174,10 +174,10 @@ public class Shooter extends SubsystemBase {
   public LinearVelocity getExitVelocity() {
     Distance wheelRadius = Meters.of(0.05);
     AngularVelocity wheelAngularVelocity = leftMotor.getVelocity().getValue();
-    LinearVelocity mps =
+    LinearVelocity speed =
         MetersPerSecond.of(
-            2.0 * Math.PI * wheelRadius.in(Meters) * wheelAngularVelocity.in(RotationsPerSecond));
+            wheelRadius.times(2.0 * Math.PI).in(Meters) * wheelAngularVelocity.in(RotationsPerSecond));
 
-    return mps;
+    return speed;
   }
 }
