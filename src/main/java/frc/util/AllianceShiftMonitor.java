@@ -17,7 +17,7 @@ public class AllianceShiftMonitor {
 
   private enum Phase {
     TRANSITION(130), // 2:10 remaining (after 20s AUTO)
-    
+
     SHIFT_1(105), // 1:45 remaining
     SHIFT_2(80), // 1:20 remaining
     SHIFT_3(55), // 0:55 remaining
@@ -73,7 +73,7 @@ public class AllianceShiftMonitor {
       }
       return; // Don't process anything else when disabled
     }
-    
+
     // Set green during autonomous and reset scheduled flag for new match
     if (DriverStation.isAutonomous()) {
       if (currentHub != LEDs.HubState.HUB_ACTIVE) {
@@ -106,7 +106,7 @@ public class AllianceShiftMonitor {
 
     updateDashboard();
   }
-  
+
   private void setHub(LEDs.HubState hub) {
     if (hub == currentHub) return; // Prevent spamming
 
@@ -127,41 +127,37 @@ public class AllianceShiftMonitor {
         wait(Seconds.of(20)),
         Commands.runOnce(() -> setHub(LEDs.HubState.HUB_STARTING_SOON)),
         Commands.parallel(
-           // rumble3x(),
-            wait(WARNING)
-        ),
-        
+            // rumble3x(),
+            wait(WARNING)),
+
         // SHIFT 1 (ours): 20s green, then 5s purple warning
         Commands.runOnce(() -> setHub(LEDs.HubState.HUB_ACTIVE)),
         wait(SHIFT_QUIET),
         Commands.runOnce(() -> setHub(LEDs.HubState.HUB_ENDING_SOON)),
         Commands.parallel(
-           // rumble(WARNING),
-            wait(WARNING)
-        ),
-        
+            // rumble(WARNING),
+            wait(WARNING)),
+
         // SHIFT 2 (opponent): 20s red, then 5s yellow warning
         Commands.runOnce(() -> setHub(LEDs.HubState.OPPONENT_HUB)),
         wait(SHIFT_QUIET),
         Commands.runOnce(() -> setHub(LEDs.HubState.HUB_STARTING_SOON)),
         Commands.parallel(
-            //rumble3x(),
-            wait(WARNING)
-        ),
-        
+            // rumble3x(),
+            wait(WARNING)),
+
         // SHIFT 3 (ours): 20s green, then 5s purple warning
         Commands.runOnce(() -> setHub(LEDs.HubState.HUB_ACTIVE)),
         wait(SHIFT_QUIET),
         Commands.runOnce(() -> setHub(LEDs.HubState.HUB_ENDING_SOON)),
         Commands.parallel(
-           // rumble(WARNING),
-            wait(WARNING)
-        ),
-        
+            // rumble(WARNING),
+            wait(WARNING)),
+
         // SHIFT 4 (opponent): 25s red (no more shifts after this)
         Commands.runOnce(() -> setHub(LEDs.HubState.TRANSITION))
         // Total: 25 + 25 + 25 + 25 + 25 = 125s (+ 20s AUTO = 145s, but match is only 135s)
-    );
+        );
   }
 
   /** Winner: opponent's hub starts first (shifts 1, 3). We get shifts 2, 4. */
@@ -170,43 +166,39 @@ public class AllianceShiftMonitor {
         // TRANSITION: 25s blue
         Commands.runOnce(() -> setHub(LEDs.HubState.TRANSITION)),
         wait(Seconds.of(25)),
-        
+
         // SHIFT 1 (opponent): 20s red, then 5s yellow (our hub starting soon)
         Commands.runOnce(() -> setHub(LEDs.HubState.OPPONENT_HUB)),
         wait(SHIFT_QUIET),
         Commands.runOnce(() -> setHub(LEDs.HubState.HUB_STARTING_SOON)),
         Commands.parallel(
-           // rumble3x(),
-            wait(WARNING)
-        ),
-        
+            // rumble3x(),
+            wait(WARNING)),
+
         // SHIFT 2 (ours): 20s green, then 5s purple (our hub ending soon)
         Commands.runOnce(() -> setHub(LEDs.HubState.HUB_ACTIVE)),
         wait(SHIFT_QUIET),
         Commands.runOnce(() -> setHub(LEDs.HubState.HUB_ENDING_SOON)),
         Commands.parallel(
-           // rumble(WARNING),
-            wait(WARNING)
-        ),
-        
+            // rumble(WARNING),
+            wait(WARNING)),
+
         // SHIFT 3 (opponent): 20s red, then 5s yellow (our hub starting soon)
         Commands.runOnce(() -> setHub(LEDs.HubState.OPPONENT_HUB)),
         wait(SHIFT_QUIET),
         Commands.runOnce(() -> setHub(LEDs.HubState.HUB_STARTING_SOON)),
         Commands.parallel(
-           // rumble3x(),
-            wait(WARNING)
-        ),
-        
+            // rumble3x(),
+            wait(WARNING)),
+
         // SHIFT 4 (ours): 20s green, then 5s purple (our hub ending soon)
         Commands.runOnce(() -> setHub(LEDs.HubState.TRANSITION)),
         wait(SHIFT_QUIET),
         Commands.parallel(
-           // rumble(WARNING),
-            wait(WARNING)
-        )
+            // rumble(WARNING),
+            wait(WARNING))
         // Total: 25 + 25 + 25 + 25 + 25 = 125s (+ 20s AUTO = 145s, but match is only 135s)
-    );
+        );
   }
 
   private Command wait(Time duration) {

@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import java.awt.Color;
-
 import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
@@ -14,7 +12,8 @@ public class LEDs extends SubsystemBase {
     // CHANGE CAN ID LATER
     candle = new CANdle(31, "rio");
   }
-// WS2812B LEDs swapped
+
+  // WS2812B LEDs swapped
   public void setState(HubState state) {
     candle.setControl(new SolidColor(0, 7).withColor(state.color));
     candle.setControl(new SolidColor(8, 399));
