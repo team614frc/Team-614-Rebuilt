@@ -1,10 +1,6 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Celsius;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -17,10 +13,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -179,10 +172,12 @@ public class Shooter extends SubsystemBase {
   }
 
   public LinearVelocity getExitVelocity() {
-    double wheelRadiusMeters = 0.05;
-    double wheelRPS = leftMotor.getVelocity().getValue().in(RotationsPerSecond);
-    double mps = 2.0 * Math.PI * wheelRadiusMeters * wheelRPS;
+    Distance wheelRadius = Meters.of(0.05);
+    AngularVelocity wheelAngularVelocity = leftMotor.getVelocity().getValue();
+    LinearVelocity mps =
+        MetersPerSecond.of(
+            2.0 * Math.PI * wheelRadius.in(Meters) * wheelAngularVelocity.in(RotationsPerSecond));
 
-    return Units.MetersPerSecond.of(mps);
+    return mps;
   }
 }
