@@ -34,8 +34,8 @@ public class ShooterVisualizer {
   private static final int MAX_FUEL_CAPACITY = 54;
 
   // Hood Angle Mapping
-  private static final Angle MIN_ANGLE_DEG = Degrees.of(42.0);
-  private static final Angle MAX_ANGLE_DEG = Degrees.of(65.0);
+  private static final Angle MIN_ANGLE = Degrees.of(42.0);
+  private static final Angle MAX_ANGLE = Degrees.of(65.0);
 
   // Shooter Speed Limits
   // ADJUSTED: Increased speeds to compensate for shooter being 0.3m behind center
@@ -89,7 +89,7 @@ public class ShooterVisualizer {
     // Hood Normalization
     double hoodDeg = mapHoodAngleToDegrees(hoodAngle);
     double hoodT =
-        MathUtil.inverseInterpolate(MIN_ANGLE_DEG.in(Degrees), MAX_ANGLE_DEG.in(Degrees), hoodDeg);
+        MathUtil.inverseInterpolate(MIN_ANGLE.in(Degrees), MAX_ANGLE.in(Degrees), hoodDeg);
 
     Logger.recordOutput("Sim/Hood_mapped_deg", hoodDeg);
     Logger.recordOutput("Sim/Hood_t", hoodT);
@@ -175,11 +175,11 @@ public class ShooterVisualizer {
     if (maybeDeg < 10.0) {
       double unit = hoodAngle.in(Rotations);
       double t = MathUtil.clamp(unit, 0.0, 1.0);
-      return MIN_ANGLE_DEG.in(Degrees)
-          + t * (MAX_ANGLE_DEG.in(Degrees) - MIN_ANGLE_DEG.in(Degrees));
+      return MIN_ANGLE.in(Degrees)
+          + t * (MAX_ANGLE.in(Degrees) - MIN_ANGLE.in(Degrees));
     }
 
-    return MathUtil.clamp(maybeDeg, MIN_ANGLE_DEG.in(Degrees), MAX_ANGLE_DEG.in(Degrees));
+    return MathUtil.clamp(maybeDeg, MIN_ANGLE.in(Degrees), MAX_ANGLE.in(Degrees));
   }
 
   // Utility
