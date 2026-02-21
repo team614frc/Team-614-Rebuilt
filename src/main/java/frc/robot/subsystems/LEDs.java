@@ -17,8 +17,7 @@ public class LEDs extends SubsystemBase {
 // WS2812B LEDs swapped
   public void setState(HubState state) {
     candle.setControl(new SolidColor(0, 7).withColor(state.color));
-    RGBWColor color = new RGBWColor(state.color.Red, state.color.Green, state.color.Blue);
-    candle.setControl(new SolidColor(8, 399).withColor(color));
+    candle.setControl(new SolidColor(8, 399));
   }
 
   public enum HubState {
