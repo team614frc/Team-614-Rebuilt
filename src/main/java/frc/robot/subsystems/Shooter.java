@@ -2,8 +2,6 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Celsius;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -21,7 +19,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -182,13 +179,10 @@ public class Shooter extends SubsystemBase {
   }
 
   public LinearVelocity getExitVelocity() {
-    Distance wheelRadius = Meters.of(0.05);
-    AngularVelocity wheelAngularVelocity = leftMotor.getVelocity().getValue();
-    LinearVelocity speed =
-        MetersPerSecond.of(
-            wheelRadius.times(2.0 * Math.PI).in(Meters)
-                * wheelAngularVelocity.in(RotationsPerSecond));
+    double wheelRadiusMeters = 0.05;
+    double wheelRPS = leftMotor.getVelocity().getValue().in(RotationsPerSecond);
+    double mps = 2.0 * Math.PI * wheelRadiusMeters * wheelRPS;
 
-    return speed;
+    return Units.MetersPerSecond.of(mps);
   }
 }

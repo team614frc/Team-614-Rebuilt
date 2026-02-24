@@ -113,10 +113,10 @@ public class Hood extends SubsystemBase {
   }
 
   public Angle getAngle() {
-    Angle minAngle = Degrees.of(10.0);
-    Angle maxAngle = Degrees.of(60.0);
-    // minAngleDeg + (maxAngleDeg - minAngleDeg) * currentPosition
-    Angle angle = minAngle.plus(maxAngle.minus(minAngle).times(currentPosition));
-    return angle;
+    double minAngleDeg = 10.0;
+    double maxAngleDeg = 60.0;
+    double angleDeg = minAngleDeg + (maxAngleDeg - minAngleDeg) * currentPosition;
+
+    return Degrees.of(angleDeg);
   }
 }
