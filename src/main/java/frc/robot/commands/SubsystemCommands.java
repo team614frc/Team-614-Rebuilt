@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.Feeder;
@@ -9,7 +8,6 @@ import frc.robot.subsystems.Hanger;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.ShooterVisualizer;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import java.util.Set;
@@ -24,7 +22,6 @@ public final class SubsystemCommands {
   private final Hood hood;
   private final Hanger hanger;
   private final VisionSubsystem vision;
-  private final ShooterVisualizer shooterVisualizer;
 
   private final DoubleSupplier forwardInput;
   private final DoubleSupplier leftInput;
@@ -38,7 +35,6 @@ public final class SubsystemCommands {
       Hood hood,
       Hanger hanger,
       VisionSubsystem vision,
-      ShooterVisualizer shooterVisualizer,
       DoubleSupplier forwardInput,
       DoubleSupplier leftInput) {
     this.swerve = swerve;
@@ -49,7 +45,6 @@ public final class SubsystemCommands {
     this.hood = hood;
     this.hanger = hanger;
     this.vision = vision;
-    this.shooterVisualizer = shooterVisualizer;
 
     this.forwardInput = forwardInput;
     this.leftInput = leftInput;
@@ -64,7 +59,7 @@ public final class SubsystemCommands {
       Hood hood,
       Hanger hanger,
       VisionSubsystem vision) {
-    this(swerve, intake, floor, feeder, shooter, hood, hanger, vision, null, () -> 0, () -> 0);
+    this(swerve, intake, floor, feeder, shooter, hood, hanger, vision, () -> 0, () -> 0);
   }
 
   public Command aimAndShoot() {
@@ -74,49 +69,41 @@ public final class SubsystemCommands {
               new PrepareShotCommand(shooter, hood, () -> swerve.getPose());
 
           return Commands.parallel(
-              vision.rotateToAllianceTagWhileDriving(forwardInput, leftInput),
+              // vision.rotateToAllianceTagWhileDriving(forwardInput, leftInput),
               Commands.waitSeconds(0.25).andThen(prepareShotCommand),
               Commands.sequence(
                   Commands.waitUntil(
                       () -> {
-                        boolean aimed = vision.isAimed();
+                        // boolean aimed = vision.isAimed();
                         boolean ready = prepareShotCommand.isReadyToShoot();
-                        return aimed && ready;
+                        return ready;
                       }),
-                  // SIMULATION: Continuously fire while held
-                  // REAL ROBOT: Fire once with feed() command
-                  RobotBase.isSimulation()
-                      ? Commands.repeatingSequence(
-                          Commands.runOnce(
-                              () -> {
-                                if (shooterVisualizer != null) {
-                                  shooterVisualizer.launchFuel();
-                                  System.out.println(
-                                      "=== FIRED 3 BALLS, remaining: "
-                                          + shooterVisualizer.getFuelCount()
-                                          + " ===");
-                                }
-                              }),
-                          Commands.waitSeconds(0.3) // Fire 3 balls every 0.3 seconds
-                          )
-                      : Commands.sequence(
-                          Commands.runOnce(
-                              () -> System.out.println("=== WAIT COMPLETE - FEEDING ===")),
-                          feed())));
+                  feed()));
         },
         Set.of(vision, shooter, hood));
   }
 
   public Command shootManually() {
-    return shooter.dashboardSpinUpCommand().andThen(feed()).handleInterrupt(() -> shooter.stop());
+    return Commands.sequence(
+        shooter.dashboardSpinUpCommand(),
+        Commands.waitUntil(
+            () -> {
+              // boolean aimed = vision.isAimed();
+              boolean ready = shooter.isVelocityWithinTolerance();
+              return ready;
+            }),
+        feed());
   }
 
   private Command feed() {
     return Commands.sequence(
         Commands.waitSeconds(0.25),
         Commands.parallel(
-            feeder.feedCommand(),
-            Commands.waitSeconds(0.125)
-                .andThen(floor.feedCommand().alongWith(intake.agitateCommand()))));
+            feeder.feedCommand(), Commands.waitSeconds(0.125).andThen(floor.feedCommand())));
+    // .alongWith(intake.agitateCommand()))));
+  }
+
+  public Command hoodUp() {
+    return hood.positionCommand(0.7);
   }
 }

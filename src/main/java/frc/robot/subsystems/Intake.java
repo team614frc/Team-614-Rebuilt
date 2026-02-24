@@ -69,7 +69,7 @@ public class Intake extends SubsystemBase {
     HOMED(Degrees.of(110)),
     STOWED(Degrees.of(100)),
     INTAKE(Degrees.of(-4)),
-    AGITATE(Degrees.of(20));
+    AGITATE(Degrees.of(25));
 
     private final Angle angle;
 
@@ -90,7 +90,7 @@ public class Intake extends SubsystemBase {
   private boolean isHomed = false;
 
   public Intake() {
-    pivotMotor = new TalonFX(Ports.kIntakePivot, Ports.kCANivoreCANBus);
+    pivotMotor = new TalonFX(Ports.kIntakePivot, Ports.kRoboRioCANBus);
     rollerMotor = new TalonFX(Ports.kIntakeRollers, Ports.kRoboRioCANBus);
     configurePivotMotor();
     configureRollerMotor();
@@ -197,7 +197,7 @@ public class Intake extends SubsystemBase {
                 () -> {
                   pivotMotor.setPosition(Position.HOMED.angle());
                   isHomed = true;
-                  set(Position.STOWED);
+                  set(Position.INTAKE);
                 }))
         .unless(() -> isHomed)
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);

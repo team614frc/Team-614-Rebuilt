@@ -159,13 +159,14 @@ public class RobotContainer {
   public RobotContainer() {
     // Initialize shooter visualizer
     if (RobotBase.isSimulation()) {
-      shooterVisualizer =
-          new ShooterVisualizer(
-              () -> swerve.getPose(),
-              () -> hood.getAngle(),
-              () -> shooter.getExitVelocity() // already matches 3-param constructor
-              );
-      configureFuelSim();
+      // // shooterVisualizer =
+      //     new ShooterVisualizer(
+      //         () -> swerve.getPose(),
+      //         // () -> hood.getAngle(),
+      //         () -> shooter.getExitVelocity() // already matches 3-param constructor
+      //         );
+      // configureFuelSim();
+      shooterVisualizer = null;
     } else {
       shooterVisualizer = null;
     }
@@ -181,7 +182,6 @@ public class RobotContainer {
             hood,
             hanger,
             vision,
-            shooterVisualizer, // Now this is initialized!
             () -> driverXbox.getLeftY(),
             () -> driverXbox.getLeftX());
 
@@ -208,18 +208,21 @@ public class RobotContainer {
     Command driveFieldOrientedAnglularVelocity = swerve.driveFieldOriented(driveAngularVelocity);
     swerve.setDefaultCommand(driveFieldOrientedAnglularVelocity);
 
-    RobotModeTriggers.autonomous()
-        .or(RobotModeTriggers.teleop())
-        .onTrue(intake.homingCommand())
-        .onTrue(hanger.homingCommand());
+    RobotModeTriggers.autonomous().or(RobotModeTriggers.teleop()).onTrue(intake.homingCommand());
+    // .onTrue(hanger.homingCommand());
 
+    driverXbox
+        .rightBumper()
+        .whileTrue(Commands.parallel(floor.feedCommand(), feeder.feedCommand()));
     driverXbox.rightTrigger().whileTrue(subsystemCommands.aimAndShoot());
-    driverXbox.rightBumper().whileTrue(subsystemCommands.shootManually());
-    driverXbox.leftTrigger().whileTrue(intake.intakeCommand());
-    driverXbox.leftBumper().onTrue(intake.runOnce(() -> intake.set(Intake.Position.STOWED)));
+    driverXbox.leftTrigger().whileTrue(subsystemCommands.shootManually());
+    driverXbox.y().onTrue(subsystemCommands.hoodUp());
 
-    driverXbox.povUp().onTrue(hanger.positionCommand(Hanger.Position.HANGING));
-    driverXbox.povDown().onTrue(hanger.positionCommand(Hanger.Position.HUNG));
+    // driverXbox.leftTrigger().whileTrue(intake.intakeCommand());
+    // driverXbox.leftBumper().onTrue(intake.runOnce(() -> intake.set(Intake.Position.STOWED)));
+
+    // driverXbox.povUp().onTrue(hanger.positionCommand(Hanger.Position.HANGING));
+    // driverXbox.povDown().onTrue(hanger.positionCommand(Hanger.Position.HUNG));
   }
 
   /**
@@ -233,7 +236,6 @@ public class RobotContainer {
   }
 
   public void periodic() {
-    shooterVisualizer.periodic();
     shiftMonitor.periodic();
   }
 

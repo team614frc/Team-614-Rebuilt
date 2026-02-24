@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -22,7 +21,6 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 import org.littletonrobotics.junction.Logger;
 
@@ -33,11 +31,10 @@ public class Feeder extends SubsystemBase {
   private static final double kP = 1.0;
   private static final double kI = 0.0;
   private static final double kD = 0.0;
-  private static final double kV =
-      MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
+  private static final double kV = 0.1195;
 
   public enum Speed {
-    FEED(RPM.of(5000));
+    FEED(RPM.of(5500));
 
     private final AngularVelocity velocity;
 
