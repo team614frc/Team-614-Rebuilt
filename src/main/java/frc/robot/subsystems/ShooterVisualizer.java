@@ -178,7 +178,7 @@ public class ShooterVisualizer {
     if (maybeDeg < 10.0) {
       double unit = hoodAngle.in(Rotations);
       double t = MathUtil.clamp(unit, 0.0, 1.0);
-      return MIN_ANGLE.in(Degrees) + t * (MAX_ANGLE.in(Degrees) - MIN_ANGLE.in(Degrees));
+      return MAX_ANGLE.minus(MIN_ANGLE).times(t).plus(MIN_ANGLE).in(Degrees);
     }
 
     return MathUtil.clamp(maybeDeg, MIN_ANGLE.in(Degrees), MAX_ANGLE.in(Degrees));
