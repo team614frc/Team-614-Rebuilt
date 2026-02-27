@@ -34,8 +34,7 @@ import swervelib.SwerveInputStream;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  private final Swerve swerve =
-      new Swerve (new File(Filesystem.getDeployDirectory(), "swerve"));
+  private final Swerve swerve = new Swerve(new File(Filesystem.getDeployDirectory(), "swerve"));
   private final Intake intake = new Intake();
   private final Floor floor = new Floor();
   private final Feeder feeder = new Feeder();

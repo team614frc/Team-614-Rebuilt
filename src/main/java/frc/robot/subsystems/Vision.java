@@ -128,8 +128,7 @@ public class Vision extends SubsystemBase {
       // If the layout is not available, don't create estimator
       // Set it to be null so the robot doesn't explode
       System.err.println("[Vision] fieldLayout null -> poseEstimator disabled");
-      throw new IllegalStateException(
-          "[Vision] AprilTagFieldLayout required for pose estimator");
+      throw new IllegalStateException("[Vision] AprilTagFieldLayout required for pose estimator");
     }
 
     // Simulation setup
