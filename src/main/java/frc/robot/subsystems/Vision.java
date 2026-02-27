@@ -39,14 +39,14 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /**
- * VisionSubsystem
+ * Vision
  *
  * <p>Keeps alignment command intact - Uses PhotonPoseEstimator per Photon docs/javadocs:
  * PhotonPoseEstimator(AprilTagFieldLayout, PoseStrategy, Transform3d) - Loops over
  * camera.getAllUnreadResults() and calls poseEstimator.update(result) - Stores latest Estimated
- * pose and timestamp; attempts to apply it to your SwerveSubsystem by reflection
+ * pose and timestamp; attempts to apply it to your Swerve by reflection
  */
-public class VisionSubsystem extends SubsystemBase {
+public class Vision extends SubsystemBase {
 
   private static final String CAMERA_NAME = "spatulas_eye";
   private static final String REAR_CAMERA_NAME = "spatulas_eye_back";
@@ -59,7 +59,7 @@ public class VisionSubsystem extends SubsystemBase {
   private boolean simEnabled = false;
   private AprilTagFieldLayout fieldLayout = null;
 
-  private final SwerveSubsystem drivebase;
+  private final Swerve drivebase;
 
   // Fields for PhotonPoseEstimator usage
   private final Transform3d robotToCamera;
@@ -79,7 +79,7 @@ public class VisionSubsystem extends SubsystemBase {
   private double frontCameraAvgDistance = 0.0;
   private double rearCameraAvgDistance = 0.0;
 
-  public VisionSubsystem(SwerveSubsystem drivebase) {
+  public Vision(Swerve drivebase) {
     this.drivebase = drivebase;
 
     // Load field layout
@@ -128,8 +128,7 @@ public class VisionSubsystem extends SubsystemBase {
       // If the layout is not available, don't create estimator
       // Set it to be null so the robot doesn't explode
       System.err.println("[Vision] fieldLayout null -> poseEstimator disabled");
-      throw new IllegalStateException(
-          "[VisionSubsystem] AprilTagFieldLayout required for pose estimator");
+      throw new IllegalStateException("[Vision] AprilTagFieldLayout required for pose estimator");
     }
 
     // Simulation setup
