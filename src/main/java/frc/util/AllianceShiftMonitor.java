@@ -11,11 +11,13 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.LEDs;
 
 public class AllianceShiftMonitor {
 
   private enum Phase {
     TRANSITION(130), // 2:10 remaining (after 20s AUTO)
+
     SHIFT_1(105), // 1:45 remaining
     SHIFT_2(80), // 1:20 remaining
     SHIFT_3(55), // 0:55 remaining
@@ -36,6 +38,8 @@ public class AllianceShiftMonitor {
     }
   }
 
+  private LEDs.HubState currentHub = LEDs.HubState.HUB_ACTIVE;
+
   private static final Time WARNING = Seconds.of(5);
   private static final Time SHIFT_QUIET = Seconds.of(20);
   private static final Time RUMBLE_PULSE = Seconds.of(0.3);
@@ -50,13 +54,40 @@ public class AllianceShiftMonitor {
   private boolean isOurHubActiveInOddShifts = true;
   private boolean isScheduled = false;
   private Command scheduledCommand = null;
+  private final LEDs leds;
 
-  public AllianceShiftMonitor(CommandXboxController driverController) {
+  public AllianceShiftMonitor(CommandXboxController driverController, LEDs leds) {
     this.driverController = driverController;
+    this.leds = leds;
+    // Set initial state to GREEN (for autonomous)
+    setHub(LEDs.HubState.HUB_ACTIVE);
   }
 
   public void periodic() {
     DriverStation.getAlliance().ifPresent(a -> isRedAlliance = a == DriverStation.Alliance.Red);
+
+    // Handle disabled state - only set DISABLED when truly disabled (not auto or teleop)
+    if (DriverStation.isDisabled()) {
+      if (currentHub != LEDs.HubState.DISABLED) {
+        setHub(LEDs.HubState.DISABLED);
+      }
+      return; // Don't process anything else when disabled
+    }
+
+    // Set green during autonomous and reset scheduled flag for new match
+    if (DriverStation.isAutonomous()) {
+      if (currentHub != LEDs.HubState.HUB_ACTIVE) {
+        setHub(LEDs.HubState.HUB_ACTIVE);
+      }
+      // Reset for new match - allow commands to be scheduled again in teleop
+      if (isScheduled) {
+        isScheduled = false;
+        if (scheduledCommand != null) {
+          scheduledCommand.cancel();
+          scheduledCommand = null;
+        }
+      }
+    }
 
     if (!hasGameData) {
       String data = DriverStation.getGameSpecificMessage();
@@ -76,41 +107,97 @@ public class AllianceShiftMonitor {
     updateDashboard();
   }
 
-  /** Loser: odd shifts (1, 3) are ours. */
+  private void setHub(LEDs.HubState hub) {
+    if (hub == currentHub) return; // Prevent spamming
+
+    currentHub = hub;
+
+    // Update LEDs
+    leds.setState(hub);
+
+    // Update SmartDashboard
+    SmartDashboard.putString("Shift/Hub Active", hub.name());
+  }
+
+  /** Loser: our hub starts first (shifts 1, 3). Opponent gets shifts 2, 4. */
   private Command buildLoserCommand() {
     return Commands.sequence(
-        // TRANSITION: 10s total, rumble3x at 5s mark
-        Commands.deadline(wait(Seconds.of(10)), Commands.sequence(wait(WARNING), rumble3x())),
-        // SHIFT 1 (ours): 20s quiet + 5s rumble = 25s total
-        wait((SHIFT_QUIET)),
-        rumble((WARNING)),
-        // SHIFT 2 (opponent): 25s total, rumble3x at 20s mark
-        Commands.deadline(wait(Seconds.of(25)), Commands.sequence(wait(SHIFT_QUIET), rumble3x())),
-        // SHIFT 3 (ours): 20s quiet + 5s rumble = 25s total
+        // TRANSITION: 20s blue, then 5s yellow warning
+        Commands.runOnce(() -> setHub(LEDs.HubState.TRANSITION)),
+        wait(Seconds.of(20)),
+        Commands.runOnce(() -> setHub(LEDs.HubState.HUB_STARTING_SOON)),
+        Commands.parallel(
+            // rumble3x(),
+            wait(WARNING)),
+
+        // SHIFT 1 (ours): 20s green, then 5s purple warning
+        Commands.runOnce(() -> setHub(LEDs.HubState.HUB_ACTIVE)),
         wait(SHIFT_QUIET),
-        rumble(WARNING),
-        // SHIFT 4 (opponent): 25s total, rumble3x at 20s mark
-        Commands.deadline(wait(Seconds.of(25)), Commands.sequence(wait(SHIFT_QUIET), rumble3x()))
-        // Total: 10 + 25 + 25 + 25 + 25 = 110s (+ 20s AUTO = 130s)
+        Commands.runOnce(() -> setHub(LEDs.HubState.HUB_ENDING_SOON)),
+        Commands.parallel(
+            // rumble(WARNING),
+            wait(WARNING)),
+
+        // SHIFT 2 (opponent): 20s red, then 5s yellow warning
+        Commands.runOnce(() -> setHub(LEDs.HubState.OPPONENT_HUB)),
+        wait(SHIFT_QUIET),
+        Commands.runOnce(() -> setHub(LEDs.HubState.HUB_STARTING_SOON)),
+        Commands.parallel(
+            // rumble3x(),
+            wait(WARNING)),
+
+        // SHIFT 3 (ours): 20s green, then 5s purple warning
+        Commands.runOnce(() -> setHub(LEDs.HubState.HUB_ACTIVE)),
+        wait(SHIFT_QUIET),
+        Commands.runOnce(() -> setHub(LEDs.HubState.HUB_ENDING_SOON)),
+        Commands.parallel(
+            // rumble(WARNING),
+            wait(WARNING)),
+
+        // SHIFT 4 (opponent): 25s red (no more shifts after this)
+        Commands.runOnce(() -> setHub(LEDs.HubState.TRANSITION))
+        // Total: 25 + 25 + 25 + 25 + 25 = 125s (+ 20s AUTO = 145s, but match is only 135s)
         );
   }
 
-  /** Winner: even shifts (2, 4) are ours. */
+  /** Winner: opponent's hub starts first (shifts 1, 3). We get shifts 2, 4. */
   private Command buildWinnerCommand() {
     return Commands.sequence(
-        // TRANSITION: 10s total, rumble at 5s mark (transition ending soon)
-        Commands.deadline(wait(Seconds.of(10)), Commands.sequence(wait(WARNING), rumble(WARNING))),
-        // SHIFT 1 (opponent): 25s total, rumble3x at 20s mark (for our shift 2)
-        Commands.deadline(wait(Seconds.of(25)), Commands.sequence(wait(SHIFT_QUIET), rumble3x())),
-        // SHIFT 2 (ours): 20s quiet + 5s rumble = 25s total
+        // TRANSITION: 25s blue
+        Commands.runOnce(() -> setHub(LEDs.HubState.TRANSITION)),
+        wait(Seconds.of(25)),
+
+        // SHIFT 1 (opponent): 20s red, then 5s yellow (our hub starting soon)
+        Commands.runOnce(() -> setHub(LEDs.HubState.OPPONENT_HUB)),
         wait(SHIFT_QUIET),
-        rumble(WARNING),
-        // SHIFT 3 (opponent): 25s total, rumble3x at 20s mark (for our shift 4)
-        Commands.deadline(wait(Seconds.of(25)), Commands.sequence(wait(SHIFT_QUIET), rumble3x())),
-        // SHIFT 4 (ours): 20s quiet + 5s rumble = 25s total
+        Commands.runOnce(() -> setHub(LEDs.HubState.HUB_STARTING_SOON)),
+        Commands.parallel(
+            // rumble3x(),
+            wait(WARNING)),
+
+        // SHIFT 2 (ours): 20s green, then 5s purple (our hub ending soon)
+        Commands.runOnce(() -> setHub(LEDs.HubState.HUB_ACTIVE)),
         wait(SHIFT_QUIET),
-        rumble(WARNING)
-        // Total: 10 + 25 + 25 + 25 + 25 = 110s (+ 20s AUTO = 130s)
+        Commands.runOnce(() -> setHub(LEDs.HubState.HUB_ENDING_SOON)),
+        Commands.parallel(
+            // rumble(WARNING),
+            wait(WARNING)),
+
+        // SHIFT 3 (opponent): 20s red, then 5s yellow (our hub starting soon)
+        Commands.runOnce(() -> setHub(LEDs.HubState.OPPONENT_HUB)),
+        wait(SHIFT_QUIET),
+        Commands.runOnce(() -> setHub(LEDs.HubState.HUB_STARTING_SOON)),
+        Commands.parallel(
+            // rumble3x(),
+            wait(WARNING)),
+
+        // SHIFT 4 (ours): 20s green, then 5s purple (our hub ending soon)
+        Commands.runOnce(() -> setHub(LEDs.HubState.TRANSITION)),
+        wait(SHIFT_QUIET),
+        Commands.parallel(
+            // rumble(WARNING),
+            wait(WARNING))
+        // Total: 25 + 25 + 25 + 25 + 25 = 125s (+ 20s AUTO = 145s, but match is only 135s)
         );
   }
 
@@ -162,5 +249,6 @@ public class AllianceShiftMonitor {
       scheduledCommand = null;
     }
     driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+    setHub(LEDs.HubState.HUB_ACTIVE); // Back to GREEN for autonomous
   }
 }

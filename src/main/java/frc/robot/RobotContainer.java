@@ -18,6 +18,7 @@ import frc.robot.subsystems.Floor;
 import frc.robot.subsystems.Hanger;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterVisualizer;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -42,6 +43,7 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter();
   private final Hood hood = new Hood();
   private final Hanger hanger = new Hanger();
+  private final LEDs leds = new LEDs();
   private final VisionSubsystem vision = new VisionSubsystem(swerve);
 
   // Shooter visualizer for simulation (only used in sim)
@@ -185,7 +187,7 @@ public class RobotContainer {
             () -> driverXbox.getLeftY(),
             () -> driverXbox.getLeftX());
 
-    shiftMonitor = new AllianceShiftMonitor(driverXbox);
+    shiftMonitor = new AllianceShiftMonitor(driverXbox, leds);
     DriverStation.silenceJoystickConnectionWarning(true);
 
     // Build an auto chooser. This will use Commands.none() as the default option.
