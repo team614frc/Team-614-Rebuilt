@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMB_SEND_1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBR_PATH_1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseRight"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBRNICE_PATH_2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBRNICE_PATH_3"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": "RIGHT_AUTOS",
+  "choreoAuto": false
+}

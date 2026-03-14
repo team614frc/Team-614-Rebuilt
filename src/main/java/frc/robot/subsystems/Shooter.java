@@ -1,26 +1,16 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Celsius;
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.configs.VoltageConfigs;
-import com.ctre.phoenix6.controls.NeutralOut;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.configs.*;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,60 +22,97 @@ import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
 
-  private static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(100);
-  private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
-  private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
-  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
+  // ── Tolerances & limits ──────────────────────────────────────────────────
 
-  // With TorqueCurrentFOC, kP units = Amps per RPS error, kV = Amps per RPS
-  // These will need retuning — start here and adjust via SmartDashboard
-  private static final double LEFT_KP = 0.785, LEFT_KI = 0.0, LEFT_KD = 0.0;
-  private static final double MIDDLE_KP = 0.785, MIDDLE_KI = 0.0, MIDDLE_KD = 0.0;
-  private static final double RIGHT_KP = 0.785, RIGHT_KI = 0.0, RIGHT_KD = 0.0;
+  // Velocity must be within this of setpoint to be considered "in tolerance"
+  // (switches to torque-current bang-bang, and counts as atGoal).
+  // Mirrors 6328's torqueCurrentControlTolerance (default 20 rad/s ≈ 191 RPM).
+  private static final double TORQUE_CURRENT_TOLERANCE_RPM = 100.0;
 
-  // kV: Amps per RPS — spin freely, read stator current at target RPS, then kV = current / RPS
-  private static final double kV = 0.1225;
-  private static final double TEST_RPM = 3590.0;
+  // How long (seconds) velocity must stay OUT of tolerance before we switch
+  // back to duty-cycle. kFalling debounce prevents brief oscillation dips from
+  // dropping out of torque-current mode. Mirrors 6328's torqueCurrentControlDebounce.
+  private static final double TORQUE_CURRENT_DEBOUNCE_SECONDS = 0.025;
 
-  // Signal refresh rates (Hz).
-  // On RoboRIO CAN bus: keep velocity <= 100 Hz to avoid starving other devices.
-  // On CANivore: safe to bump velocity and current up to 250 Hz.
+  // How long (seconds) velocity must stay in tolerance before atGoal is true.
+  // Mirrors 6328's atGoalDebounce (default 0.2s).
+  private static final double AT_GOAL_DEBOUNCE_SECONDS = 0.2;
+
+  // Peak torque-current during torque-current bang-bang (Amps).
+  // Tune: too low = sluggish idle hold; too high = violent spikes.
+  private static final double IDLE_PEAK_TORQUE_AMPS = 40.0;
+
+  // ── Bang-bang kP ─────────────────────────────────────────────────────────
+  private static final double BANG_BANG_KP = 999999.0;
+
+  // ── Signal refresh rates ─────────────────────────────────────────────────
   private static final double VELOCITY_UPDATE_FREQ_HZ = 100.0;
   private static final double CURRENT_UPDATE_FREQ_HZ = 100.0;
   private static final double SUPPLY_CURRENT_UPDATE_FREQ_HZ = 50.0;
   private static final double TEMP_UPDATE_FREQ_HZ = 4.0;
 
+  // ── Hardware ─────────────────────────────────────────────────────────────
   private final TalonFX leftMotor, middleMotor, rightMotor;
   private final List<TalonFX> motors;
 
-  // FOC velocity control requests — output is torque current (Amps), not voltage
-  private final VelocityTorqueCurrentFOC leftVelocityRequest =
+  // ── Control requests ─────────────────────────────────────────────────────
+  private final VelocityDutyCycle leftIdleRequest = new VelocityDutyCycle(0).withSlot(1);
+  private final VelocityDutyCycle middleIdleRequest = new VelocityDutyCycle(0).withSlot(1);
+  private final VelocityDutyCycle rightIdleRequest = new VelocityDutyCycle(0).withSlot(1);
+
+  private static final double IDLE_RPM = 2000.0;
+
+  private final VelocityTorqueCurrentFOC leftTorqueRequest =
       new VelocityTorqueCurrentFOC(0).withSlot(0);
-  private final VelocityTorqueCurrentFOC middleVelocityRequest =
+  private final VelocityTorqueCurrentFOC middleTorqueRequest =
       new VelocityTorqueCurrentFOC(0).withSlot(0);
-  private final VelocityTorqueCurrentFOC rightVelocityRequest =
+  private final VelocityTorqueCurrentFOC rightTorqueRequest =
       new VelocityTorqueCurrentFOC(0).withSlot(0);
 
-  // Use NeutralOut to coast to stop (replaces VoltageOut at 0)
   private final NeutralOut neutralRequest = new NeutralOut();
 
-  private double dashboardTargetRPM = 3500;
+  // ── Debouncers ───────────────────────────────────────────────────────────
+  // torque debouncers: kFalling — switches TO torque-current immediately when in
+  // tolerance, but only switches BACK to duty-cycle after being out of tolerance
+  // for TORQUE_CURRENT_DEBOUNCE_SECONDS. Brief oscillation dips stay in torque mode.
+  private final Debouncer leftTorqueDebouncer =
+      new Debouncer(TORQUE_CURRENT_DEBOUNCE_SECONDS, DebounceType.kFalling);
+  private final Debouncer middleTorqueDebouncer =
+      new Debouncer(TORQUE_CURRENT_DEBOUNCE_SECONDS, DebounceType.kFalling);
+  private final Debouncer rightTorqueDebouncer =
+      new Debouncer(TORQUE_CURRENT_DEBOUNCE_SECONDS, DebounceType.kFalling);
 
-  // Individual motor test toggles (SmartDashboard checkboxes)
+  // atGoal debouncers: kFalling — atGoal goes true quickly when in tolerance,
+  // stays true briefly after going out (prevents flickering on the robot side).
+  private final Debouncer leftAtGoalDebouncer =
+      new Debouncer(AT_GOAL_DEBOUNCE_SECONDS, DebounceType.kFalling);
+  private final Debouncer middleAtGoalDebouncer =
+      new Debouncer(AT_GOAL_DEBOUNCE_SECONDS, DebounceType.kFalling);
+  private final Debouncer rightAtGoalDebouncer =
+      new Debouncer(AT_GOAL_DEBOUNCE_SECONDS, DebounceType.kFalling);
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  private double leftTargetRPM = 0;
+  private double middleTargetRPM = 0;
+  private double rightTargetRPM = 0;
+
+  // Mirrors 6328's lastTorqueCurrentControl — detects transitions out of torque
+  // mode (i.e., a ball was launched) to increment ballCount.
+  private boolean leftLastTorque = false;
+  private boolean middleLastTorque = false;
+  private boolean rightLastTorque = false;
+
+  private long ballCount = 0;
+
+  private boolean leftAtGoal = false;
+  private boolean middleAtGoal = false;
+  private boolean rightAtGoal = false;
+
+  private double dashboardTargetRPM = 3750;
+
   private boolean leftTestEnabled = false;
   private boolean middleTestEnabled = false;
   private boolean rightTestEnabled = false;
-
-  // Per-motor live-tunable PIDF gains
-  private double leftKP = LEFT_KP, leftKI = LEFT_KI, leftKD = LEFT_KD;
-  private double middleKP = MIDDLE_KP, middleKI = MIDDLE_KI, middleKD = MIDDLE_KD;
-  private double rightKP = RIGHT_KP, rightKI = RIGHT_KI, rightKD = RIGHT_KD;
-  private double leftKV = kV, middleKV = kV, rightKV = kV;
-
-  // Track last-applied gains to avoid spamming CAN bus
-  private final double[] leftApplied = {-1, -1, -1, -1}; // [kP, kI, kD, kV]
-  private final double[] middleApplied = {-1, -1, -1, -1};
-  private final double[] rightApplied = {-1, -1, -1, -1};
 
   public Shooter() {
     leftMotor = new TalonFX(Ports.kShooterLeft, Ports.kRoboRioCANBus);
@@ -93,104 +120,116 @@ public class Shooter extends SubsystemBase {
     rightMotor = new TalonFX(Ports.kShooterRight, Ports.kRoboRioCANBus);
     motors = List.of(leftMotor, middleMotor, rightMotor);
 
-    configureMotor(leftMotor, InvertedValue.CounterClockwise_Positive, LEFT_KP, LEFT_KI, LEFT_KD);
-    configureMotor(
-        middleMotor, InvertedValue.CounterClockwise_Positive, MIDDLE_KP, MIDDLE_KI, MIDDLE_KD);
-    configureMotor(rightMotor, InvertedValue.Clockwise_Positive, RIGHT_KP, RIGHT_KI, RIGHT_KD);
+    configureMotor(leftMotor, InvertedValue.CounterClockwise_Positive);
+    configureMotor(middleMotor, InvertedValue.CounterClockwise_Positive);
+    configureMotor(rightMotor, InvertedValue.Clockwise_Positive);
 
     SmartDashboard.putData(this);
   }
 
-  private void configureMotor(
-      TalonFX motor, InvertedValue invertDirection, double kP, double kI, double kD) {
+  // ── Configuration ────────────────────────────────────────────────────────
+
+  private void configureMotor(TalonFX motor, InvertedValue invertDirection) {
     final TalonFXConfiguration config =
         new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
                     .withInverted(invertDirection)
-                    .withNeutralMode(NeutralModeValue.Coast))
-            .withVoltage(new VoltageConfigs().withPeakReverseVoltage(Volts.of(0)))
+                    .withNeutralMode(NeutralModeValue.Coast)
+                    .withPeakForwardDutyCycle(1.0)
+                    .withPeakReverseDutyCycle(0.0))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
+                    .withStatorCurrentLimit(Amps.of(140))
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(SUPPLY_CURRENT_LIMIT)
+                    .withSupplyCurrentLimit(Amps.of(70))
                     .withSupplyCurrentLimitEnable(true))
-            // With TorqueCurrentFOC: kP = Amps/RPS error, kV = Amps/RPS, kA = Amps/(RPS/s)
-            .withSlot0(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD).withKV(kV));
+            .withTorqueCurrent(
+                new TorqueCurrentConfigs()
+                    .withPeakForwardTorqueCurrent(IDLE_PEAK_TORQUE_AMPS)
+                    .withPeakReverseTorqueCurrent(0.0))
+            .withSlot0(new Slot0Configs().withKP(BANG_BANG_KP)) // bang-bang for commanded shots
+            .withSlot1(
+                new Slot1Configs() // gentle PID for idle
+                    .withKP(0.035)
+                    .withKI(0.0)
+                    .withKD(0.0)
+                    .withKV(0.0103)); // feedforward — tune: 0.12 is a starting point for Falcon
 
     motor.getConfigurator().apply(config);
 
-    // Configure signal refresh rates AFTER applying the full config.
-    // Call setUpdateFrequency on every signal read in periodic() or logging
-    // BEFORE optimizeBusUtilization(), which silences all un-configured signals.
     motor.getVelocity().setUpdateFrequency(VELOCITY_UPDATE_FREQ_HZ);
     motor.getStatorCurrent().setUpdateFrequency(CURRENT_UPDATE_FREQ_HZ);
     motor.getSupplyCurrent().setUpdateFrequency(SUPPLY_CURRENT_UPDATE_FREQ_HZ);
     motor.getDeviceTemp().setUpdateFrequency(TEMP_UPDATE_FREQ_HZ);
-
-    // Disable all signals not explicitly configured above to free up CAN bandwidth
     motor.optimizeBusUtilization();
   }
 
+  // ── Core velocity control (mirrors 6328's runVelocity) ───────────────────
+
   /**
-   * Applies updated Slot0 gains to a motor only when values have changed, then runs or stops the
-   * motor based on the test toggle. Called from periodic().
+   * Runs one motor using the same two-mode bang-bang scheme as 6328: torque-current when in
+   * tolerance, duty-cycle otherwise. Returns the new torqueCurrentControl state for lastTorque
+   * tracking.
    */
-  private void handleMotorTest(
+  private boolean runMotorVelocity(
       TalonFX motor,
-      VelocityTorqueCurrentFOC request,
-      boolean enabled,
-      double kP,
-      double kI,
-      double kD,
-      double kVval,
-      double[] lastApplied /* [kP, kI, kD, kV] */) {
+      VelocityDutyCycle dutyReq,
+      VelocityTorqueCurrentFOC torqueReq,
+      Debouncer torqueDebouncer,
+      Debouncer atGoalDebouncer,
+      boolean lastTorque,
+      double targetRPM) {
 
-    // Only apply config when a gain has actually changed
-    if (kP != lastApplied[0]
-        || kI != lastApplied[1]
-        || kD != lastApplied[2]
-        || kVval != lastApplied[3]) {
-      motor
-          .getConfigurator()
-          .apply(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD).withKV(kVval));
-      lastApplied[0] = kP;
-      lastApplied[1] = kI;
-      lastApplied[2] = kD;
-      lastApplied[3] = kVval;
+    final double currentRPM = motor.getVelocity().getValue().in(RPM);
+    final boolean inTolerance = Math.abs(currentRPM - targetRPM) <= TORQUE_CURRENT_TOLERANCE_RPM;
+
+    final boolean torqueCurrentControl = torqueDebouncer.calculate(inTolerance);
+    atGoalDebouncer.calculate(inTolerance);
+
+    // A transition out of torque-current means a ball was just launched
+    if (!torqueCurrentControl && lastTorque) {
+      ballCount++;
     }
 
-    if (enabled) {
-      motor.setControl(request.withVelocity(RPM.of(TEST_RPM)));
+    if (torqueCurrentControl) {
+      motor.setControl(torqueReq.withVelocity(RPM.of(targetRPM)));
     } else {
-      motor.setControl(neutralRequest);
+      motor.setControl(dutyReq.withVelocity(RPM.of(targetRPM)));
     }
+
+    return torqueCurrentControl;
   }
 
   public void setRPM(double leftRPM, double middleRPM, double rightRPM) {
-    leftMotor.setControl(leftVelocityRequest.withVelocity(RPM.of(leftRPM)));
-    middleMotor.setControl(middleVelocityRequest.withVelocity(RPM.of(middleRPM)));
-    rightMotor.setControl(rightVelocityRequest.withVelocity(RPM.of(rightRPM)));
+    leftTargetRPM = leftRPM;
+    middleTargetRPM = middleRPM;
+    rightTargetRPM = rightRPM;
   }
 
-  /** Convenience overload: same RPM for all motors. */
   public void setRPM(double rpm) {
     setRPM(rpm, rpm, rpm);
   }
 
-  public void setPercentOutput(double percentOutput) {
-    for (final TalonFX motor : motors) {
-      // Approximate percent output via voltage for manual control
-      motor.setControl(
-          new com.ctre.phoenix6.controls.VoltageOut(MAX_VOLTAGE.in(Volts) * percentOutput));
-    }
+  public void stop() {
+    leftTargetRPM = middleTargetRPM = rightTargetRPM = 0;
+    for (TalonFX m : motors) m.setControl(neutralRequest);
   }
 
-  public void stop() {
-    for (final TalonFX motor : motors) {
-      motor.setControl(neutralRequest);
-    }
+  public Command stopCommand() {
+    return runOnce(this::stop);
+  }
+
+  public boolean isAtGoal() {
+    return leftAtGoal && middleAtGoal && rightAtGoal;
+  }
+
+  public boolean isVelocityWithinTolerance() {
+    return leftLastTorque && middleLastTorque && rightLastTorque;
+  }
+
+  public long getBallCount() {
+    return ballCount;
   }
 
   public Command spinUpCommand(double rpm) {
@@ -199,63 +238,98 @@ public class Shooter extends SubsystemBase {
 
   public Command spinUpCommand(double leftRPM, double middleRPM, double rightRPM) {
     return runOnce(() -> setRPM(leftRPM, middleRPM, rightRPM))
-        .andThen(Commands.waitUntil(this::isVelocityWithinTolerance));
+        .andThen(Commands.waitUntil(this::isAtGoal));
   }
 
   public Command dashboardSpinUpCommand() {
     return defer(() -> spinUpCommand(dashboardTargetRPM));
   }
 
-  public boolean isVelocityWithinTolerance() {
-    return isMotorAtTarget(leftMotor, leftVelocityRequest)
-        && isMotorAtTarget(middleMotor, middleVelocityRequest)
-        && isMotorAtTarget(rightMotor, rightVelocityRequest);
+  public Command shuttleCommand() {
+    return defer(() -> spinUpCommand(4500));
   }
 
-  /**
-   * Checks if a motor's actual velocity is within tolerance of the request's target velocity. Uses
-   * velocity comparison only — no control mode check — so it works correctly across control mode
-   * transitions and with FOC requests.
-   */
-  private boolean isMotorAtTarget(TalonFX motor, VelocityTorqueCurrentFOC request) {
-    final AngularVelocity currentVelocity = motor.getVelocity().getValue();
-    final AngularVelocity targetVelocity = request.getVelocityMeasure();
-    return currentVelocity.isNear(targetVelocity, VELOCITY_TOLERANCE);
+  public LinearVelocity getExitVelocity() {
+    double wheelRadiusMeters = 0.05;
+    double wheelRPS = leftMotor.getVelocity().getValue().in(RotationsPerSecond);
+    return Units.MetersPerSecond.of(2.0 * Math.PI * wheelRadiusMeters * wheelRPS);
+  }
+
+  public Command punchThroughCommand() {
+    return startEnd(
+        () -> setRPM(6000), // full send — ball goes through regardless
+        this::stop);
   }
 
   @Override
   public void periodic() {
-    // Handle individual motor test mode (only active when no command is running)
     if (getCurrentCommand() == null) {
-      handleMotorTest(
-          leftMotor,
-          leftVelocityRequest,
-          leftTestEnabled,
-          leftKP,
-          leftKI,
-          leftKD,
-          leftKV,
-          leftApplied);
-      handleMotorTest(
-          middleMotor,
-          middleVelocityRequest,
-          middleTestEnabled,
-          middleKP,
-          middleKI,
-          middleKD,
-          middleKV,
-          middleApplied);
-      handleMotorTest(
-          rightMotor,
-          rightVelocityRequest,
-          rightTestEnabled,
-          rightKP,
-          rightKI,
-          rightKD,
-          rightKV,
-          rightApplied);
+      leftTargetRPM = leftTestEnabled ? dashboardTargetRPM : 0;
+      middleTargetRPM = middleTestEnabled ? dashboardTargetRPM : 0;
+      rightTargetRPM = rightTestEnabled ? dashboardTargetRPM : 0;
     }
 
+    // Left
+    if (leftTargetRPM == 0) {
+      leftTorqueDebouncer.calculate(false);
+      leftAtGoalDebouncer.calculate(false);
+      leftMotor.setControl(leftIdleRequest.withVelocity(RPM.of(IDLE_RPM))); // gentle PID idle
+      leftLastTorque = false;
+      leftAtGoal = false;
+    } else {
+      leftLastTorque =
+          runMotorVelocity(
+              leftMotor,
+              leftIdleRequest,
+              leftTorqueRequest,
+              leftTorqueDebouncer,
+              leftAtGoalDebouncer,
+              leftLastTorque,
+              leftTargetRPM);
+      leftAtGoal = leftLastTorque; // atGoal = currently in torque-current mode
+    }
+
+    // Middle
+    if (middleTargetRPM == 0) {
+      middleTorqueDebouncer.calculate(false);
+      middleAtGoalDebouncer.calculate(false);
+      middleMotor.setControl(middleIdleRequest.withVelocity(RPM.of(IDLE_RPM)));
+      middleLastTorque = false;
+      middleAtGoal = false;
+    } else {
+      middleLastTorque =
+          runMotorVelocity(
+              middleMotor,
+              middleIdleRequest,
+              middleTorqueRequest,
+              middleTorqueDebouncer,
+              middleAtGoalDebouncer,
+              middleLastTorque,
+              middleTargetRPM);
+      middleAtGoal = middleLastTorque;
+    }
+
+    // Right
+    if (rightTargetRPM == 0) {
+      rightTorqueDebouncer.calculate(false);
+      rightAtGoalDebouncer.calculate(false);
+      rightMotor.setControl(rightIdleRequest.withVelocity(RPM.of(IDLE_RPM)));
+      rightLastTorque = false;
+      rightAtGoal = false;
+    } else {
+      rightLastTorque =
+          runMotorVelocity(
+              rightMotor,
+              rightIdleRequest,
+              rightTorqueRequest,
+              rightTorqueDebouncer,
+              rightAtGoalDebouncer,
+              rightLastTorque,
+              rightTargetRPM);
+      rightAtGoal = rightLastTorque;
+    }
+
+    // Logging
     Logger.recordOutput("Shooter/Left/VelocityRPM", leftMotor.getVelocity().getValue().in(RPM));
     Logger.recordOutput(
         "Shooter/Left/StatorCurrentAmps", leftMotor.getStatorCurrent().getValue().in(Amps));
@@ -263,8 +337,9 @@ public class Shooter extends SubsystemBase {
         "Shooter/Left/SupplyCurrentAmps", leftMotor.getSupplyCurrent().getValue().in(Amps));
     Logger.recordOutput(
         "Shooter/Left/TemperatureCelsius", leftMotor.getDeviceTemp().getValue().in(Celsius));
-    Logger.recordOutput("Shooter/Left/TargetRPM", leftVelocityRequest.getVelocityMeasure().in(RPM));
-    Logger.recordOutput("Shooter/Left/AtSetpoint", isMotorAtTarget(leftMotor, leftVelocityRequest));
+    Logger.recordOutput("Shooter/Left/TargetRPM", leftTargetRPM);
+    Logger.recordOutput("Shooter/Left/TorqueCurrentMode", leftLastTorque);
+    Logger.recordOutput("Shooter/Left/AtGoal", leftAtGoal);
 
     Logger.recordOutput("Shooter/Middle/VelocityRPM", middleMotor.getVelocity().getValue().in(RPM));
     Logger.recordOutput(
@@ -273,10 +348,9 @@ public class Shooter extends SubsystemBase {
         "Shooter/Middle/SupplyCurrentAmps", middleMotor.getSupplyCurrent().getValue().in(Amps));
     Logger.recordOutput(
         "Shooter/Middle/TemperatureCelsius", middleMotor.getDeviceTemp().getValue().in(Celsius));
-    Logger.recordOutput(
-        "Shooter/Middle/TargetRPM", middleVelocityRequest.getVelocityMeasure().in(RPM));
-    Logger.recordOutput(
-        "Shooter/Middle/AtSetpoint", isMotorAtTarget(middleMotor, middleVelocityRequest));
+    Logger.recordOutput("Shooter/Middle/TargetRPM", middleTargetRPM);
+    Logger.recordOutput("Shooter/Middle/TorqueCurrentMode", middleLastTorque);
+    Logger.recordOutput("Shooter/Middle/AtGoal", middleAtGoal);
 
     Logger.recordOutput("Shooter/Right/VelocityRPM", rightMotor.getVelocity().getValue().in(RPM));
     Logger.recordOutput(
@@ -285,73 +359,48 @@ public class Shooter extends SubsystemBase {
         "Shooter/Right/SupplyCurrentAmps", rightMotor.getSupplyCurrent().getValue().in(Amps));
     Logger.recordOutput(
         "Shooter/Right/TemperatureCelsius", rightMotor.getDeviceTemp().getValue().in(Celsius));
-    Logger.recordOutput(
-        "Shooter/Right/TargetRPM", rightVelocityRequest.getVelocityMeasure().in(RPM));
-    Logger.recordOutput(
-        "Shooter/Right/AtSetpoint", isMotorAtTarget(rightMotor, rightVelocityRequest));
+    Logger.recordOutput("Shooter/Right/TargetRPM", rightTargetRPM);
+    Logger.recordOutput("Shooter/Right/TorqueCurrentMode", rightLastTorque);
+    Logger.recordOutput("Shooter/Right/AtGoal", rightAtGoal);
 
-    Logger.recordOutput("Shooter/AtSetpoint", isVelocityWithinTolerance());
+    Logger.recordOutput("Shooter/AtGoal", isAtGoal());
+    Logger.recordOutput("Shooter/BallCount", ballCount);
     Logger.recordOutput("Shooter/ExitVelocityMPS", getExitVelocity().in(Units.MetersPerSecond));
     Logger.recordOutput("Shooter/CommandActive", getCurrentCommand() != null);
-    if (getCurrentCommand() != null) {
+    if (getCurrentCommand() != null)
       Logger.recordOutput("Shooter/CommandName", getCurrentCommand().getName());
-    }
   }
 
-  private void addMotorSendable(
-      SendableBuilder builder, TalonFX motor, String name, VelocityTorqueCurrentFOC request) {
-    builder.addDoubleProperty(name + " RPM", () -> motor.getVelocity().getValue().in(RPM), null);
-    builder.addDoubleProperty(
-        name + " Stator Current", () -> motor.getStatorCurrent().getValue().in(Amps), null);
-    builder.addDoubleProperty(
-        name + " Supply Current", () -> motor.getSupplyCurrent().getValue().in(Amps), null);
-    builder.addDoubleProperty(
-        name + " Target RPM", () -> request.getVelocityMeasure().in(RPM), null);
-    builder.addBooleanProperty(name + " At Setpoint", () -> isMotorAtTarget(motor, request), null);
-  }
+  // ── Sendable ─────────────────────────────────────────────────────────────
 
   @Override
   public void initSendable(SendableBuilder builder) {
-    addMotorSendable(builder, leftMotor, "Left", leftVelocityRequest);
-    addMotorSendable(builder, middleMotor, "Middle", middleVelocityRequest);
-    addMotorSendable(builder, rightMotor, "Right", rightVelocityRequest);
+    builder.addDoubleProperty("Left RPM", () -> leftMotor.getVelocity().getValue().in(RPM), null);
+    builder.addDoubleProperty(
+        "Middle RPM", () -> middleMotor.getVelocity().getValue().in(RPM), null);
+    builder.addDoubleProperty("Right RPM", () -> rightMotor.getVelocity().getValue().in(RPM), null);
 
+    builder.addDoubleProperty("Left Target RPM", () -> leftTargetRPM, null);
+    builder.addDoubleProperty("Middle Target RPM", () -> middleTargetRPM, null);
+    builder.addDoubleProperty("Right Target RPM", () -> rightTargetRPM, null);
+
+    builder.addBooleanProperty("Left Torque Mode", () -> leftLastTorque, null);
+    builder.addBooleanProperty("Middle Torque Mode", () -> middleLastTorque, null);
+    builder.addBooleanProperty("Right Torque Mode", () -> rightLastTorque, null);
+
+    builder.addBooleanProperty("Left At Goal", () -> leftAtGoal, null);
+    builder.addBooleanProperty("Middle At Goal", () -> middleAtGoal, null);
+    builder.addBooleanProperty("Right At Goal", () -> rightAtGoal, null);
+
+    builder.addBooleanProperty("At Goal", this::isAtGoal, null);
+    builder.addDoubleProperty("Ball Count", () -> ballCount, null);
     builder.addDoubleProperty(
         "Dashboard RPM", () -> dashboardTargetRPM, v -> dashboardTargetRPM = v);
-    builder.addStringProperty(
-        "Command",
-        () -> getCurrentCommand() != null ? getCurrentCommand().getName() : "null",
-        null);
-    builder.addBooleanProperty("At Setpoint", this::isVelocityWithinTolerance, null);
 
-    // --- Individual motor test toggles (checkbox = spin at TEST_RPM) ---
     builder.addBooleanProperty("Left Test Enable", () -> leftTestEnabled, v -> leftTestEnabled = v);
     builder.addBooleanProperty(
         "Middle Test Enable", () -> middleTestEnabled, v -> middleTestEnabled = v);
     builder.addBooleanProperty(
         "Right Test Enable", () -> rightTestEnabled, v -> rightTestEnabled = v);
-
-    // --- Per-motor live PIDF tuning ---
-    builder.addDoubleProperty("Left kP", () -> leftKP, v -> leftKP = v);
-    builder.addDoubleProperty("Left kI", () -> leftKI, v -> leftKI = v);
-    builder.addDoubleProperty("Left kD", () -> leftKD, v -> leftKD = v);
-    builder.addDoubleProperty("Left kV", () -> leftKV, v -> leftKV = v);
-
-    builder.addDoubleProperty("Middle kP", () -> middleKP, v -> middleKP = v);
-    builder.addDoubleProperty("Middle kI", () -> middleKI, v -> middleKI = v);
-    builder.addDoubleProperty("Middle kD", () -> middleKD, v -> middleKD = v);
-    builder.addDoubleProperty("Middle kV", () -> middleKV, v -> middleKV = v);
-
-    builder.addDoubleProperty("Right kP", () -> rightKP, v -> rightKP = v);
-    builder.addDoubleProperty("Right kI", () -> rightKI, v -> rightKI = v);
-    builder.addDoubleProperty("Right kD", () -> rightKD, v -> rightKD = v);
-    builder.addDoubleProperty("Right kV", () -> rightKV, v -> rightKV = v);
-  }
-
-  public LinearVelocity getExitVelocity() {
-    double wheelRadiusMeters = 0.05;
-    double wheelRPS = leftMotor.getVelocity().getValue().in(RotationsPerSecond);
-    double mps = 2.0 * Math.PI * wheelRadiusMeters * wheelRPS;
-    return Units.MetersPerSecond.of(mps);
   }
 }

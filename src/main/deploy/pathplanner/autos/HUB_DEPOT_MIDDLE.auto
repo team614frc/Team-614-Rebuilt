@@ -1,0 +1,37 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "HDM_PATH_1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "HDM_PATH_2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.475
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "HDM_PATH_3"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "MIDDLE_AUTOS",
+  "choreoAuto": false
+}

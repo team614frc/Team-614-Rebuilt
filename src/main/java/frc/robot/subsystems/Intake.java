@@ -31,7 +31,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.KrakenX60;
+import frc.robot.Constants.KrakenX44;
 import frc.robot.Ports;
 import org.littletonrobotics.junction.Logger;
 
@@ -40,10 +40,10 @@ public class Intake extends SubsystemBase {
   private static final Angle PIVOT_REDUCTION = Degrees.of(50.0);
   private static final double PIVOT_PERCENT_OUTPUT = 0.1;
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
-  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
-  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(6);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(65);
+  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(3.45);
   private static final AngularVelocity MAX_PIVOT_SPEED =
-      KrakenX60.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
+      KrakenX44.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
   private static final Angle POSITION_TOLERANCE = Degrees.of(5);
   private static final double kP = 300.0;
   private static final double kI = 0.0;
@@ -52,7 +52,7 @@ public class Intake extends SubsystemBase {
 
   public enum Speed {
     STOP(0.0),
-    INTAKE(0.8);
+    INTAKE(0.85);
 
     private final double percentOutput;
 
@@ -68,8 +68,8 @@ public class Intake extends SubsystemBase {
   public enum Position {
     HOMED(Degrees.of(110)),
     STOWED(Degrees.of(100)),
-    INTAKE(Degrees.of(-4)),
-    AGITATE(Degrees.of(25));
+    INTAKE(Degrees.of(-12)),
+    AGITATE(Degrees.of(27));
 
     private final Angle angle;
 
@@ -135,7 +135,7 @@ public class Intake extends SubsystemBase {
             .withMotorOutput(
                 new MotorOutputConfigs()
                     .withInverted(InvertedValue.Clockwise_Positive)
-                    .withNeutralMode(NeutralModeValue.Brake))
+                    .withNeutralMode(NeutralModeValue.Coast))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
@@ -172,6 +172,23 @@ public class Intake extends SubsystemBase {
         () -> set(Speed.STOP));
   }
 
+  public Command intakeAuto() {
+    return runOnce(
+        () -> {
+          set(Position.INTAKE);
+          set(Speed.INTAKE);
+        });
+  }
+
+  public void stop() {
+    set(Position.INTAKE);
+    set(Speed.STOP);
+  }
+
+  public Command stopCommand() {
+    return runOnce(this::stop);
+  }
+
   public Command agitateCommand() {
     return runOnce(() -> set(Speed.INTAKE))
         .andThen(
@@ -197,7 +214,7 @@ public class Intake extends SubsystemBase {
                 () -> {
                   pivotMotor.setPosition(Position.HOMED.angle());
                   isHomed = true;
-                  set(Position.INTAKE);
+                  set(Position.STOWED);
                 }))
         .unless(() -> isHomed)
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);

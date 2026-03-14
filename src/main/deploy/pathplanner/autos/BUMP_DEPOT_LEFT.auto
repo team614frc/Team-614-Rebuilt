@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Example Path"
+            "pathName": "BDL_1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BDL_2"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
-  "folder": null,
+  "resetOdom": false,
+  "folder": "LEFT_AUTOS",
   "choreoAuto": false
 }

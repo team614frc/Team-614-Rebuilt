@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -28,13 +29,15 @@ public class Feeder extends SubsystemBase {
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
   private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(50);
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
-  private static final double kP = 1.0;
-  private static final double kI = 0.0;
-  private static final double kD = 0.0;
-  private static final double kV = 0.1195;
+
+  // Default PIDF gains — adjustable live via SmartDashboard
+  private static final double DEFAULT_KP = 0.5;
+  private static final double DEFAULT_KI = 0.0;
+  private static final double DEFAULT_KD = 0.0;
+  private static final double DEFAULT_KV = 0.1195;
 
   public enum Speed {
-    FEED(RPM.of(5500));
+    FEED(RPM.of(6500)); // 5500
 
     private final AngularVelocity velocity;
 
@@ -50,6 +53,20 @@ public class Feeder extends SubsystemBase {
   private final TalonFX motor;
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
   private final VoltageOut voltageRequest = new VoltageOut(0);
+  private final NeutralOut neutralRequest = new NeutralOut();
+
+  // Live-tunable PIDF gains
+  private double kP = DEFAULT_KP;
+  private double kI = DEFAULT_KI;
+  private double kD = DEFAULT_KD;
+  private double kV = DEFAULT_KV;
+
+  // Track last-applied gains to avoid spamming CAN bus
+  private double[] lastApplied = {-1, -1, -1, -1}; // [kP, kI, kD, kV]
+
+  // SmartDashboard test toggle
+  private boolean testEnabled = false;
+  private double dashboardTargetRPM = Speed.FEED.angularVelocity().in(RPM);
 
   public Feeder() {
     motor = new TalonFX(Ports.kFeeder, Ports.kRoboRioCANBus);
@@ -66,7 +83,12 @@ public class Feeder extends SubsystemBase {
                     .withStatorCurrentLimitEnable(true)
                     .withSupplyCurrentLimit(SUPPLY_CURRENT_LIMIT)
                     .withSupplyCurrentLimitEnable(true))
-            .withSlot0(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD).withKV(kV));
+            .withSlot0(
+                new Slot0Configs()
+                    .withKP(DEFAULT_KP)
+                    .withKI(DEFAULT_KI)
+                    .withKD(DEFAULT_KD)
+                    .withKV(DEFAULT_KV));
 
     motor.getConfigurator().apply(config);
     SmartDashboard.putData(this);
@@ -80,23 +102,57 @@ public class Feeder extends SubsystemBase {
     motor.setControl(voltageRequest.withOutput(MAX_VOLTAGE.times(percentOutput)));
   }
 
+  public void feed() {
+    set(Speed.FEED);
+  }
+
+  public void stop() {
+    motor.setControl(neutralRequest);
+  }
+
+  public Command stopCommand() {
+    return runOnce(this::stop);
+  }
+
   public Command feedCommand() {
-    return startEnd(() -> set(Speed.FEED), () -> setPercentOutput(0));
+    return startEnd(this::feed, this::stop);
+  }
+
+  /** Applies updated Slot0 gains only when values have changed. */
+  private void applyGainsIfChanged() {
+    if (kP != lastApplied[0]
+        || kI != lastApplied[1]
+        || kD != lastApplied[2]
+        || kV != lastApplied[3]) {
+      motor.getConfigurator().apply(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD).withKV(kV));
+      lastApplied[0] = kP;
+      lastApplied[1] = kI;
+      lastApplied[2] = kD;
+      lastApplied[3] = kV;
+    }
   }
 
   @Override
   public void periodic() {
-    // Log all inputs
+    // Apply any gain changes from SmartDashboard
+    applyGainsIfChanged();
+
+    // Test mode: run at dashboard RPM when no command is scheduled
+    if (getCurrentCommand() == null) {
+      if (testEnabled) {
+        motor.setControl(velocityRequest.withVelocity(RPM.of(dashboardTargetRPM)));
+      } else {
+        motor.setControl(neutralRequest);
+      }
+    }
+
     Logger.recordOutput("Feeder/VelocityRPM", motor.getVelocity().getValue().in(RPM));
     Logger.recordOutput("Feeder/TargetVelocityRPM", velocityRequest.Velocity * 60.0);
     Logger.recordOutput("Feeder/StatorCurrentAmps", motor.getStatorCurrent().getValue().in(Amps));
     Logger.recordOutput("Feeder/SupplyCurrentAmps", motor.getSupplyCurrent().getValue().in(Amps));
     Logger.recordOutput("Feeder/AppliedVoltage", motor.getMotorVoltage().getValue().in(Volts));
     Logger.recordOutput("Feeder/TemperatureCelsius", motor.getDeviceTemp().getValue().in(Celsius));
-
-    // Log control state
-    boolean isVelocityMode = motor.getAppliedControl().getName().equals("VelocityVoltage");
-    Logger.recordOutput("Feeder/ControlMode", isVelocityMode ? "Velocity" : "Voltage");
+    Logger.recordOutput("Feeder/TestEnabled", testEnabled);
     Logger.recordOutput("Feeder/CommandActive", getCurrentCommand() != null);
     if (getCurrentCommand() != null) {
       Logger.recordOutput("Feeder/CommandName", getCurrentCommand().getName());
@@ -114,5 +170,16 @@ public class Feeder extends SubsystemBase {
         "Stator Current", () -> motor.getStatorCurrent().getValue().in(Amps), null);
     builder.addDoubleProperty(
         "Supply Current", () -> motor.getSupplyCurrent().getValue().in(Amps), null);
+
+    // Test controls
+    builder.addBooleanProperty("Test Enable", () -> testEnabled, v -> testEnabled = v);
+    builder.addDoubleProperty(
+        "Test Target RPM", () -> dashboardTargetRPM, v -> dashboardTargetRPM = v);
+
+    // Live PIDF tuning
+    builder.addDoubleProperty("kP", () -> kP, v -> kP = v);
+    builder.addDoubleProperty("kI", () -> kI, v -> kI = v);
+    builder.addDoubleProperty("kD", () -> kD, v -> kD = v);
+    builder.addDoubleProperty("kV", () -> kV, v -> kV = v);
   }
 }

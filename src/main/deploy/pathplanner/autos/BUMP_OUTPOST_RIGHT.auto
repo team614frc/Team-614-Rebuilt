@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BOR_1"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BOR_2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 6.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of BOR_2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BOR_3"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": "RIGHT_AUTOS",
+  "choreoAuto": false
+}

@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "HOM_PATH_1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "HOM_PATH_2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.475
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "HOM_PATH_3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "MIDDLE_AUTOS",
+  "choreoAuto": false
+}

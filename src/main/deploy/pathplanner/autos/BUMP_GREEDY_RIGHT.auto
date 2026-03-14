@@ -1,0 +1,85 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMB_SEND_1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBR_PATH_1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseRight"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.75
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBR_PATH_2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBR_PATH_4"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 8.25
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of BCLIMBR_PATH_5"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBR_PATH_5"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ResetPoseRight"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.75
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBR_PATH_6"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": "RIGHT_AUTOS",
+  "choreoAuto": false
+}
