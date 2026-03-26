@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -18,27 +17,23 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 import org.littletonrobotics.junction.Logger;
 
 public class Floor extends SubsystemBase {
-  private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
-  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(30);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(20);
 
-  private static final double FEED_RPM = 5900;
+  private static final double FEED_RPM = 3000; // 5500
 
-  private static final double KP = 0.5;
+  private static final double KP = 1.0;
   private static final double KI = 0.0;
   private static final double KD = 0.0;
-  private static final double KV =
-      MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
+  private static final double KV = 0.099;
 
   private static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(100);
 
@@ -74,6 +69,10 @@ public class Floor extends SubsystemBase {
 
   public void stop() {
     motor.setControl(voltageRequest.withOutput(0));
+  }
+
+  public Command stopCommand() {
+    return runOnce(this::stop);
   }
 
   public boolean isAtSetpoint() {

@@ -31,9 +31,12 @@ public class PrepareShotCommand extends Command {
                       .interpolate(startValue.hoodPosition, endValue.hoodPosition, t)));
 
   static {
-    distanceToShotMap.put(Inches.of(52.0), new Shot(2800, 0.19));
-    distanceToShotMap.put(Inches.of(114.4), new Shot(3275, 0.40));
-    distanceToShotMap.put(Inches.of(165.5), new Shot(3650, 0.48));
+    // Vision Distance in relation to HUB
+    distanceToShotMap.put(Inches.of(55), new Shot(3690, 0.10));
+    distanceToShotMap.put(Inches.of(90), new Shot(3900, 0.37));
+    distanceToShotMap.put(Inches.of(110), new Shot(4000, 0.475));
+    distanceToShotMap.put(Inches.of(132), new Shot(4100, 0.614));
+    distanceToShotMap.put(Inches.of(183), new Shot(4350, 0.74));
   }
 
   private final Shooter shooter;
@@ -70,7 +73,7 @@ public class PrepareShotCommand extends Command {
     return hoodReady && shooterReady;
   }
 
-  private Distance getDistanceToHub() {
+  public Distance getDistanceToHub() {
     final Translation2d robotPosition = robotPoseSupplier.get().getTranslation();
     final Translation2d hubPosition = Landmarks.hubPosition();
     return Meters.of(robotPosition.getDistance(hubPosition));

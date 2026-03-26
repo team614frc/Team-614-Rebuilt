@@ -13,20 +13,18 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivebaseConstants;
 import java.io.File;
 import java.util.Optional;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveControllerConfiguration;
 import swervelib.parser.SwerveDriveConfiguration;
@@ -38,18 +36,23 @@ public class SwerveSubsystem extends SubsystemBase {
 
   private final SwerveDrive swerveDrive;
 
+  // Optional rotation override (rad/sec) used to allow aiming while pathing
+  private Optional<Double> rotationOverrideRadPerSec = Optional.empty();
+
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
    *
    * @param directory Directory of swerve drive config files.
    */
   public SwerveSubsystem(File directory) {
-    // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being
+    // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
+    // objects being
     // created.
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
     try {
       swerveDrive = new SwerveParser(directory).createSwerveDrive(DrivebaseConstants.MAX_SPEED);
-      // Alternative method if you don't want to supply the conversion factor via JSON files.
+      // Alternative method if you don't want to supply the conversion factor via JSON
+      // files.
       // swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed,
       // angleConversionFactor, driveConversionFactor);
     } catch (Exception e) {
@@ -62,7 +65,7 @@ public class SwerveSubsystem extends SubsystemBase {
         true, true,
         0.1); // Correct for skew that gets worse as angular velocity increases. Start with a
     // coefficient of 0.1.
-    swerveDrive.setChassisDiscretization(true, 0.015);
+    swerveDrive.setChassisDiscretization(true, 0.02);
     setupPathPlanner();
   }
 
@@ -100,19 +103,31 @@ public class SwerveSubsystem extends SubsystemBase {
           this::getRobotVelocity,
           // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
           (speedsRobotRelative, moduleFeedForwards) -> {
+
+            // Apply rotation override while keeping PathPlanner translation
+            if (rotationOverrideRadPerSec.isPresent()) {
+              speedsRobotRelative =
+                  new ChassisSpeeds(
+                      speedsRobotRelative.vxMetersPerSecond,
+                      speedsRobotRelative.vyMetersPerSecond,
+                      rotationOverrideRadPerSec.get());
+            }
+
             if (enableFeedforward) {
               swerveDrive.drive(
                   speedsRobotRelative,
                   swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
                   moduleFeedForwards.linearForces());
             } else {
-              swerveDrive.setChassisSpeeds(speedsRobotRelative);
+              swerveDrive.drive(speedsRobotRelative);
             }
           },
-          // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally
+          // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also
+          // optionally
           // outputs individual module feedforwards
           new PPHolonomicDriveController(
-              // PPHolonomicController is the built in path following controller for holonomic drive
+              // PPHolonomicController is the built in path following controller for holonomic
+              // drive
               // trains
               new PIDConstants(5.0, 0.0, 0.0),
               // Translation PID constants
@@ -122,7 +137,8 @@ public class SwerveSubsystem extends SubsystemBase {
           config,
           // The robot configuration
           () -> {
-            // Boolean supplier that controls when the path will be mirrored for the red alliance
+            // Boolean supplier that controls when the path will be mirrored for the red
+            // alliance
             // This will flip the path being followed to the red side of the field.
             // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
@@ -153,7 +169,8 @@ public class SwerveSubsystem extends SubsystemBase {
    * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
    */
   public Command getAutonomousCommand(String pathName) {
-    // Create a path following command using AutoBuilder. This will also trigger event markers.
+    // Create a path following command using AutoBuilder. This will also trigger
+    // event markers.
     return new PathPlannerAuto(pathName);
   }
 
@@ -243,57 +260,64 @@ public class SwerveSubsystem extends SubsystemBase {
     return swerveDrive;
   }
 
-  @Override
-  public void periodic() {
-    Pose2d pose = getPose();
-    Logger.recordOutput("Swerve/Pose", pose);
-    Logger.recordOutput("Swerve/PoseX", pose.getX());
-    Logger.recordOutput("Swerve/PoseY", pose.getY());
-    Logger.recordOutput("Swerve/RotationDeg", pose.getRotation().getDegrees());
-
-    ChassisSpeeds speeds = getRobotVelocity();
-    Logger.recordOutput("Swerve/VelocityX", speeds.vxMetersPerSecond);
-    Logger.recordOutput("Swerve/VelocityY", speeds.vyMetersPerSecond);
-    Logger.recordOutput("Swerve/VelocityOmega", speeds.omegaRadiansPerSecond);
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    // THIS IS THE KEY FIX:
-    // In YAGSL simulation, the actual physics pose is stored in the SwerveDrive object
-    // We need to sync our odometry with the physics simulation pose
-
-    if (RobotBase.isSimulation()) {
-      // Get the actual simulated pose (where the robot model with colliders actually is)
-      Optional<Pose2d> simPoseOptional = swerveDrive.getSimulationDriveTrainPose();
-
-      // Check if the simulation pose is present
-      if (simPoseOptional.isPresent()) {
-        Pose2d simPose = simPoseOptional.get();
-
-        // Option 1: Use vision measurement to smoothly correct (RECOMMENDED)
-        // This simulates a "perfect vision system" that keeps odometry aligned with physics
-        addVisionMeasurement(simPose, Timer.getFPGATimestamp());
-
-        // Option 2: Force reset (more aggressive, but ensures perfect sync)
-        // Uncomment this if vision correction isn't strong enough
-        // resetOdometry(simPose);
-
-        // Debug output
-        Pose2d odometryPose = getPose();
-        double error = odometryPose.getTranslation().getDistance(simPose.getTranslation());
-        Logger.recordOutput("Sim Pose Error (m)", error);
-        Logger.recordOutput("Sim Physics X", simPose.getX());
-        Logger.recordOutput("Sim Physics Y", simPose.getY());
-        Logger.recordOutput("Odometry X", odometryPose.getX());
-        Logger.recordOutput("Odometry Y", odometryPose.getY());
-      }
-    }
-  }
-
   /** Smoothly correct odometry with vision (avoids jumps) */
   public void addVisionMeasurement(Pose2d visionPose, double timestampSeconds) {
     // YAGSL method: updates internal pose estimator with vision measurement
     swerveDrive.addVisionMeasurement(visionPose, timestampSeconds);
+  }
+
+  /**
+   * Gets the current field-relative velocity (x, y and omega) of the robot
+   *
+   * @return A ChassisSpeeds object of the current field-relative velocity
+   */
+  public ChassisSpeeds getFieldVelocity() {
+    return swerveDrive.getFieldVelocity();
+  }
+
+  /** Enable rotation override (rad/sec) */
+  public void setRotationOverride(double omegaRadPerSec) {
+    rotationOverrideRadPerSec = Optional.of(omegaRadPerSec);
+  }
+
+  /** Disable rotation override */
+  public void clearRotationOverride() {
+    rotationOverrideRadPerSec = Optional.empty();
+  }
+
+  public void addVisionMeasurement(
+      Pose2d visionPose,
+      double timestamp,
+      double xyStdDevMeters,
+      double xyStdDevMeters2,
+      double rotStdDevRadians) { // rename — no conversion needed
+
+    var stdDevs = VecBuilder.fill(xyStdDevMeters, xyStdDevMeters2, rotStdDevRadians);
+    swerveDrive.addVisionMeasurement(visionPose, timestamp, stdDevs);
+  }
+
+  /**
+   * Returns the robot's current pitch angle from the gyro. Used by VisionSubsystem to detect bump
+   * crossings and reduce odometry trust while wheels are potentially airborne.
+   *
+   * @return Pitch as a {@link Rotation2d} (positive = nose up)
+   */
+  public Rotation2d getPitch() {
+    return swerveDrive.getPitch();
+  }
+
+  /**
+   * Returns the robot's current roll angle from the gyro. Used by VisionSubsystem to detect bump
+   * crossings and reduce odometry trust while wheels are potentially airborne.
+   *
+   * @return Roll as a {@link Rotation2d} (positive = right side up)
+   */
+  public Rotation2d getRoll() {
+    return swerveDrive.getRoll();
+  }
+
+  /** Locks swerve wheels in an X pattern to resist pushing. */
+  public void lockWheels() {
+    swerveDrive.lockPose();
   }
 }

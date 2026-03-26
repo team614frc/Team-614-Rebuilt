@@ -1,0 +1,67 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBL_SEND_1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBLGREED_PATH_2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBLGREED_PATH_3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBLGREED_PATH_4"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.75
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBLGREED_PATH_2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBLGREED_PATH_5"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of BCLIMBLGREED_PATH_6"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.75
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": "LEFT_AUTOS",
+  "choreoAuto": false
+}
