@@ -16,12 +16,21 @@
     },
     {
       "anchor": {
+<<<<<<< HEAD
         "x": 3.094096601073345,
         "y": 4.0593381037567084
       },
       "prevControl": {
         "x": 2.932851633190199,
         "y": 3.8682882141143344
+=======
+        "x": 3.24,
+        "y": 4.024693181818182
+      },
+      "prevControl": {
+        "x": 3.078755032116854,
+        "y": 3.833643292175808
+>>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       },
       "nextControl": null,
       "isLocked": false,
@@ -36,6 +45,7 @@
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
+<<<<<<< HEAD
   "eventMarkers": [
     {
       "name": "Shoot",
@@ -44,6 +54,9 @@
       "command": null
     }
   ],
+=======
+  "eventMarkers": [],
+>>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
   "globalConstraints": {
     "maxVelocity": 2.5,
     "maxAcceleration": 3.0,

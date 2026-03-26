@@ -9,7 +9,11 @@
       "prevControl": null,
       "nextControl": {
         "x": 2.899391771019678,
+<<<<<<< HEAD
         "y": 1.3010196779964207
+=======
+        "y": 1.301019677996421
+>>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       },
       "isLocked": false,
       "linkedName": null
@@ -53,7 +57,11 @@
   "eventMarkers": [
     {
       "name": "IntakeEvent",
+<<<<<<< HEAD
       "waypointRelativePos": 0.5084745762711882,
+=======
+      "waypointRelativePos": 0.7966101694915247,
+>>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       "endWaypointRelativePos": null,
       "command": null
     }

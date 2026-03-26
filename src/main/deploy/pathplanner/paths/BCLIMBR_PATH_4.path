@@ -3,6 +3,7 @@
   "waypoints": [
     {
       "anchor": {
+<<<<<<< HEAD
         "x": 7.994,
         "y": 4.205
       },
@@ -10,6 +11,15 @@
       "nextControl": {
         "x": 7.069320214669052,
         "y": 2.1934168157423968
+=======
+        "x": 8.53,
+        "y": 3.556
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.751250447227192,
+        "y": 2.2581914132379244
+>>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       },
       "isLocked": false,
       "linkedName": null
@@ -20,8 +30,13 @@
         "y": 2.599
       },
       "prevControl": {
+<<<<<<< HEAD
         "x": 5.398103756708408,
         "y": 2.582826475849731
+=======
+        "x": 2.701136979469481,
+        "y": 2.5977652501655135
+>>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,7 +45,11 @@
   ],
   "rotationTargets": [
     {
+<<<<<<< HEAD
       "waypointRelativePos": 0.13101604278074833,
+=======
+      "waypointRelativePos": 0.11229946524064174,
+>>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       "rotationDegrees": 55.0
     }
   ],
@@ -39,7 +58,11 @@
   "eventMarkers": [
     {
       "name": "Shoot",
+<<<<<<< HEAD
       "waypointRelativePos": 1.0,
+=======
+      "waypointRelativePos": 0.7762711864406777,
+>>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       "endWaypointRelativePos": null,
       "command": null
     }

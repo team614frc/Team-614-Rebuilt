@@ -8,20 +8,34 @@
       },
       "prevControl": null,
       "nextControl": {
+<<<<<<< HEAD
         "x": 2.8669409660107332,
         "y": 5.324919499105545
+=======
+        "x": 1.4480921248918748,
+        "y": 3.7659736830667287
+>>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
+<<<<<<< HEAD
         "x": 0.741,
         "y": 5.973935599284436
       },
       "prevControl": {
         "x": 2.5095688729874777,
         "y": 6.055062611806797
+=======
+        "x": 1.228,
+        "y": 5.9577101967799635
+      },
+      "prevControl": {
+        "x": 1.956159090909091,
+        "y": 6.051232924052691
+>>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       },
       "nextControl": null,
       "isLocked": false,
@@ -29,6 +43,7 @@
     }
   ],
   "rotationTargets": [],
+<<<<<<< HEAD
   "constraintZones": [
     {
       "name": "Constraints Zone",
@@ -53,6 +68,11 @@
       "command": null
     }
   ],
+=======
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+>>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
   "globalConstraints": {
     "maxVelocity": 2.5,
     "maxAcceleration": 3.0,
@@ -63,7 +83,11 @@
   },
   "goalEndState": {
     "velocity": 0,
+<<<<<<< HEAD
     "rotation": 180.0
+=======
+    "rotation": 0.0
+>>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
   },
   "reversed": false,
   "folder": "HUB_DEPOT_MIDDLE",

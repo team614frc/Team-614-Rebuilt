@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.KrakenX60;
+import frc.robot.Constants.KrakenX44;
 import frc.robot.Ports;
 import org.littletonrobotics.junction.Logger;
 
@@ -42,7 +42,7 @@ public class Intake extends SubsystemBase {
   private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(55);
   private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(5.3);
   private static final AngularVelocity MAX_PIVOT_SPEED =
-      KrakenX60.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
+      KrakenX44.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
   private static final Angle POSITION_TOLERANCE = Degrees.of(5);
   private static final double kP = 950.0;
   private static final double kI = 0.0;
