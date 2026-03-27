@@ -270,7 +270,7 @@ public final class SubsystemCommands {
     return vision.rotateToTower(forwardInput, leftInput);
   }
 
-  // Uhhhh.. our robot goes vroom now so this doesn't really apply anymore, keeping this around in
+  // Uhhhh.. our robot goes vroom now, so this doesn't really apply anymore, keeping this around in
   // case if something catastrophically wrong will happeng
   public Command faceNearestBump() {
     return Commands.defer(

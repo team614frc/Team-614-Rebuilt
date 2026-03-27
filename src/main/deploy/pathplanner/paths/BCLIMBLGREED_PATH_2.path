@@ -4,39 +4,23 @@
     {
       "anchor": {
         "x": 3.062,
-<<<<<<< HEAD
         "y": 5.585
-=======
-        "y": 5.55
->>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       },
       "prevControl": null,
       "nextControl": {
         "x": 6.339303134518195,
-<<<<<<< HEAD
         "y": 5.585
-=======
-        "y": 5.55
->>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-<<<<<<< HEAD
         "x": 5.788,
         "y": 5.55
       },
       "prevControl": {
         "x": 3.126836125860635,
-=======
-        "x": 6.144,
-        "y": 5.55
-      },
-      "prevControl": {
-        "x": 3.482836125860635,
->>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
         "y": 5.55
       },
       "nextControl": null,

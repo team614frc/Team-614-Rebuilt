@@ -3,7 +3,6 @@
   "waypoints": [
     {
       "anchor": {
-<<<<<<< HEAD
         "x": 0.741,
         "y": 5.974
       },
@@ -11,15 +10,6 @@
       "nextControl": {
         "x": 1.6987119856887296,
         "y": 6.136189624329159
-=======
-        "x": 1.228,
-        "y": 5.958
-      },
-      "prevControl": null,
-      "nextControl": {
-        "x": 1.1470483005366723,
-        "y": 4.627227191413238
->>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       },
       "isLocked": false,
       "linkedName": null
@@ -30,20 +20,14 @@
         "y": 4.004
       },
       "prevControl": {
-<<<<<<< HEAD
         "x": 3.5362422691296853,
         "y": 3.986808150439747
-=======
-        "x": 3.5454906321451283,
-        "y": 4.073154952314469
->>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-<<<<<<< HEAD
   "rotationTargets": [
     {
       "waypointRelativePos": 0.20320855614973235,
@@ -64,12 +48,6 @@
       "command": null
     }
   ],
-=======
-  "rotationTargets": [],
-  "constraintZones": [],
-  "pointTowardsZones": [],
-  "eventMarkers": [],
->>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
   "globalConstraints": {
     "maxVelocity": 2.5,
     "maxAcceleration": 3.0,
@@ -80,21 +58,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-<<<<<<< HEAD
     "rotation": 0.0
-=======
-    "rotation": 180.0
->>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
   },
   "reversed": false,
   "folder": "HUB_DEPOT_MIDDLE",
   "idealStartingState": {
     "velocity": 0,
-<<<<<<< HEAD
     "rotation": 180.0
-=======
-    "rotation": 0.0
->>>>>>> 77852726d6257efbbbce40fb7fd51bea07d75678
   },
   "useDefaultConstraints": true
 }
