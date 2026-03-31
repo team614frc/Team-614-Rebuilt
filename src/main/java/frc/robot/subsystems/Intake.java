@@ -44,7 +44,7 @@ public class Intake extends SubsystemBase {
   private static final AngularVelocity MAX_PIVOT_SPEED =
       KrakenX44.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
   private static final Angle POSITION_TOLERANCE = Degrees.of(5);
-  private static final double kP = 950.0;
+  private static final double kP = 300.0;
   private static final double kI = 0.0;
   private static final double kD = 0.0;
   private static final double kV = 0.099;
@@ -67,7 +67,7 @@ public class Intake extends SubsystemBase {
   public enum Position {
     HOMED(Degrees.of(110)),
     STOWED(Degrees.of(100)),
-    INTAKE(Degrees.of(-16)),
+    INTAKE(Degrees.of(-17)),
     AGITATE(Degrees.of(23));
 
     private final Angle angle;
