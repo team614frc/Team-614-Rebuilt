@@ -44,27 +44,14 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /**
- * VisionSubsystem
+ * Vision
  *
  * <p>Keeps alignment command intact - Uses PhotonPoseEstimator per Photon docs/javadocs:
  * PhotonPoseEstimator(AprilTagFieldLayout, PoseStrategy, Transform3d) - Loops over
  * camera.getAllUnreadResults() and calls poseEstimator.update(result) - Stores latest Estimated
- * pose and timestamp; attempts to apply it to your SwerveSubsystem by reflection
- *
- * <p>Jitter fixes applied: - Removed duplicate getLatestResult() being added to
- * getAllUnreadResults() list - Per-camera rate limiting (front/rear no longer share a single fuse
- * timestamp) - Staleness guard: results older than 300ms are rejected - Rotation std devs heavily
- * increased to defer heading to gyro instead of vision
- *
- * <p>Bump crossing strategy (2026 field): The center bump causes wheel spin-up which corrupts
- * odometry. While the robot is in the bump zone, vision measurements are suppressed entirely and
- * the pose estimator relies on odometry only. Once the robot exits the bump zone and wheel speeds
- * stabilize, valid AprilTag readings are fused back in to correct any odometry drift accumulated
- * during the crossing. This mirrors the approach used by secretcitywildbots: "we use odometry
- * tracking and when we get valid position readings from the april tags we fuse it with our odometry
- * tracking."
+ * pose and timestamp; attempts to apply it to your Swerve by reflection
  */
-public class VisionSubsystem extends SubsystemBase {
+public class Vision extends SubsystemBase {
 
   private static final String CAMERA_NAME = "spatulas_eye";
   private static final String REAR_CAMERA_NAME = "spatulas_eye_back";
@@ -77,7 +64,7 @@ public class VisionSubsystem extends SubsystemBase {
   private boolean simEnabled = false;
   private AprilTagFieldLayout fieldLayout = null;
 
-  private final SwerveSubsystem drivebase;
+  private final Swerve drivebase;
 
   // Fields for PhotonPoseEstimator usage
   private final Transform3d robotToCamera;
@@ -144,7 +131,7 @@ public class VisionSubsystem extends SubsystemBase {
   /** True while the robot's X position overlaps any bump zone. */
   private boolean inBumpZone = false;
 
-  public VisionSubsystem(SwerveSubsystem drivebase) {
+  public Vision(Swerve drivebase) {
     this.drivebase = drivebase;
 
     // Load field layout
@@ -193,8 +180,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     } else {
       System.err.println("[Vision] fieldLayout null -> poseEstimator disabled");
-      throw new IllegalStateException(
-          "[VisionSubsystem] AprilTagFieldLayout required for pose estimator");
+      throw new IllegalStateException("[Vision] AprilTagFieldLayout required for pose estimator");
     }
 
     // Simulation setup

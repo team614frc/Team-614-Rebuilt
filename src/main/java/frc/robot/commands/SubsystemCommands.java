@@ -12,37 +12,36 @@ import frc.robot.subsystems.Hanger;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
-import frc.util.AllianceShiftMonitor;
+import frc.robot.subsystems.ShooterVisualizer;
+import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.Vision;
 import frc.util.ShuttleCalculator;
+
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 
 public final class SubsystemCommands {
-  private final SwerveSubsystem swerve;
+  private final Swerve swerve;
   private final Intake intake;
   private final Floor floor;
   private final Feeder feeder;
   private final Shooter shooter;
   private final Hood hood;
   private final Hanger hanger;
-  private final VisionSubsystem vision;
-  private final AllianceShiftMonitor shiftMonitor;
+  private final Vision vision;
 
   private final DoubleSupplier forwardInput;
   private final DoubleSupplier leftInput;
 
   public SubsystemCommands(
-      SwerveSubsystem swerve,
+      Swerve swerve,
       Intake intake,
       Floor floor,
       Feeder feeder,
       Shooter shooter,
       Hood hood,
       Hanger hanger,
-      VisionSubsystem vision,
-      AllianceShiftMonitor shiftMonitor,
+      Vision vision,
       DoubleSupplier forwardInput,
       DoubleSupplier leftInput) {
     this.swerve = swerve;
@@ -53,33 +52,20 @@ public final class SubsystemCommands {
     this.hood = hood;
     this.hanger = hanger;
     this.vision = vision;
-    this.shiftMonitor = shiftMonitor;
     this.forwardInput = forwardInput;
     this.leftInput = leftInput;
   }
 
   public SubsystemCommands(
-      SwerveSubsystem swerve,
+      Swerve swerve,
       Intake intake,
       Floor floor,
       Feeder feeder,
       Shooter shooter,
       Hood hood,
       Hanger hanger,
-      VisionSubsystem vision,
-      AllianceShiftMonitor shiftMonitor) {
-    this(
-        swerve,
-        intake,
-        floor,
-        feeder,
-        shooter,
-        hood,
-        hanger,
-        vision,
-        shiftMonitor,
-        () -> 0,
-        () -> 0);
+      Vision vision) {
+    this(swerve, intake, floor, feeder, shooter, hood, hanger, vision, () -> 0, () -> 0);
   }
 
   // Ooooooh... you like shooting fuel.. don't you?
@@ -89,8 +75,8 @@ public final class SubsystemCommands {
           // Fresh instance every time defer runs (i.e. every time the button is pressed).
           // Creating it outside defer caused WPILib to mark it as "composed" on the first
           // press and crash with IllegalArgumentException on every subsequent press.
-          final PrepareShotCommand prepareShotCommand =
-              new PrepareShotCommand(shooter, hood, () -> swerve.getPose());
+          final PrepareShot prepareShotCommand =
+              new PrepareShot(shooter, hood, () -> swerve.getPose());
 
           return Commands.parallel(
               // Branch 1: rotate drivetrain toward goal
@@ -113,8 +99,8 @@ public final class SubsystemCommands {
   public Command autoAimAndShoot() {
     return Commands.defer(
         () -> {
-          final PrepareShotCommand prepareShotCommand =
-              new PrepareShotCommand(shooter, hood, () -> swerve.getPose());
+          final PrepareShot prepareShotCommand =
+              new PrepareShot(shooter, hood, () -> swerve.getPose());
 
           return Commands.race(
                   // Race ends the whole thing once feed sequence completes
@@ -137,8 +123,8 @@ public final class SubsystemCommands {
   public Command autoAimAndShoot2() {
     return Commands.defer(
         () -> {
-          final PrepareShotCommand prepareShotCommand =
-              new PrepareShotCommand(shooter, hood, () -> swerve.getPose());
+          final PrepareShot prepareShotCommand =
+              new PrepareShot(shooter, hood, () -> swerve.getPose());
 
           return Commands.race(
                   // Race ends the whole thing once feed sequence completes
@@ -159,8 +145,8 @@ public final class SubsystemCommands {
   public Command autoAimAndShootHalfCycle() {
     return Commands.defer(
         () -> {
-          final PrepareShotCommand prepareShotCommand =
-              new PrepareShotCommand(shooter, hood, () -> swerve.getPose());
+          final PrepareShot prepareShotCommand =
+              new PrepareShot(shooter, hood, () -> swerve.getPose());
 
           return Commands.race(
                   // Race ends the whole thing once feed sequence completes
@@ -322,8 +308,8 @@ public final class SubsystemCommands {
   }
 
   public Command autoShoot() {
-    final PrepareShotCommand prepareShotCommand =
-        new PrepareShotCommand(shooter, hood, () -> swerve.getPose());
+    final PrepareShot prepareShotCommand =
+        new PrepareShot(shooter, hood, () -> swerve.getPose());
 
     return Commands.race(
             Commands.waitSeconds(0.20).andThen(prepareShotCommand),

@@ -1,6 +1,9 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -8,6 +11,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.Landmarks;
 import frc.util.FuelSim;
@@ -25,20 +29,21 @@ import org.littletonrobotics.junction.Logger;
 public class ShooterVisualizer {
 
   // Geometry (Meters)
-  private static final double SHOOTER_HEIGHT = 0.705;
-  private static final double SHOOTER_FORWARD_OFFSET = -0.3; // Shooter is behind robot center
-  private static final double SHOOTER_LATERAL_SPACING = 0.13;
+  private static final Distance SHOOTER_HEIGHT = Meters.of(0.705);
+  private static final Distance SHOOTER_FORWARD_OFFSET =
+      Meters.of(-0.3); // Shooter is behind robot center
+  private static final Distance SHOOTER_LATERAL_SPACING = Meters.of(0.13);
 
   private static final int MAX_FUEL_CAPACITY = 54;
 
   // Hood Angle Mapping
-  private static final double MIN_ANGLE_DEG = 42.0;
-  private static final double MAX_ANGLE_DEG = 65.0;
+  private static final Angle MIN_ANGLE = Degrees.of(42.0);
+  private static final Angle MAX_ANGLE = Degrees.of(65.0);
 
   // Shooter Speed Limits
   // ADJUSTED: Increased speeds to compensate for shooter being 0.3m behind center
-  private static final double MIN_SPEED = 6.5; // close shots (was 6.0)
-  private static final double MAX_SPEED = 10.0; // far shots (was 9.0)
+  private static final LinearVelocity MIN_SPEED = MetersPerSecond.of(6.5); // close shots (was 6.0)
+  private static final LinearVelocity MAX_SPEED = MetersPerSecond.of(10.0); // far shots (was 9.0)
 
   // Visual Randomness
   private static final double VELOCITY_REL_VARIATION = 0.05;
@@ -86,7 +91,8 @@ public class ShooterVisualizer {
 
     // Hood Normalization
     double hoodDeg = mapHoodAngleToDegrees(hoodAngle);
-    double hoodT = MathUtil.inverseInterpolate(MIN_ANGLE_DEG, MAX_ANGLE_DEG, hoodDeg);
+    double hoodT =
+        MathUtil.inverseInterpolate(MIN_ANGLE.in(Degrees), MAX_ANGLE.in(Degrees), hoodDeg);
 
     Logger.recordOutput("Sim/Hood_mapped_deg", hoodDeg);
     Logger.recordOutput("Sim/Hood_t", hoodT);
@@ -97,15 +103,21 @@ public class ShooterVisualizer {
 
     // ADJUSTED: Add offset distance since shooter is 0.3m behind robot center
     // This gives us the true distance from shooter to target
-    double effectiveDistance = distance + Math.abs(SHOOTER_FORWARD_OFFSET);
+    double effectiveDistance = distance + Math.abs(SHOOTER_FORWARD_OFFSET.in(Meters));
     double distanceFactor = Math.min(effectiveDistance / 8.5, 1.0); // 0 = close, 1 = far
 
     Logger.recordOutput("Sim/Distance_m", distance);
     Logger.recordOutput("Sim/Effective_Distance_m", effectiveDistance);
 
     // Base shooter speed (simulating real power adjustment)
-    double baseSpeed = MathUtil.clamp(shooterVel.in(MetersPerSecond), MIN_SPEED, MAX_SPEED);
-    baseSpeed = MathUtil.interpolate(MIN_SPEED, MAX_SPEED, distanceFactor);
+    double baseSpeed =
+        MathUtil.clamp(
+            shooterVel.in(MetersPerSecond),
+            MIN_SPEED.in(MetersPerSecond),
+            MAX_SPEED.in(MetersPerSecond));
+    baseSpeed =
+        MathUtil.interpolate(
+            MIN_SPEED.in(MetersPerSecond), MAX_SPEED.in(MetersPerSecond), distanceFactor);
 
     Logger.recordOutput("Sim/BaseSpeed_mps", baseSpeed);
 
@@ -126,7 +138,9 @@ public class ShooterVisualizer {
 
       int barrel = i % 3;
       double lateralOffset =
-          (barrel == 0) ? -SHOOTER_LATERAL_SPACING : (barrel == 2 ? SHOOTER_LATERAL_SPACING : 0.0);
+          (barrel == 0)
+              ? -SHOOTER_LATERAL_SPACING.in(Meters)
+              : (barrel == 2 ? SHOOTER_LATERAL_SPACING.in(Meters) : 0.0);
 
       double velMult = 1.0 + (Math.random() - 0.5) * 2.0 * VELOCITY_REL_VARIATION;
 
@@ -141,14 +155,14 @@ public class ShooterVisualizer {
 
       double spawnX =
           pose.getX()
-              + SHOOTER_FORWARD_OFFSET * heading.getCos()
+              + SHOOTER_FORWARD_OFFSET.in(Meters) * heading.getCos()
               - lateralOffset * heading.getSin();
       double spawnY =
           pose.getY()
-              + SHOOTER_FORWARD_OFFSET * heading.getSin()
+              + SHOOTER_FORWARD_OFFSET.in(Meters) * heading.getSin()
               + lateralOffset * heading.getCos();
 
-      Translation3d spawnPos = new Translation3d(spawnX, spawnY, SHOOTER_HEIGHT);
+      Translation3d spawnPos = new Translation3d(spawnX, spawnY, SHOOTER_HEIGHT.in(Meters));
       Translation3d spawnVel = new Translation3d(horizVec.getX(), horizVec.getY(), baseVert);
 
       FuelSim.getInstance().spawnFuel(spawnPos, spawnVel);
@@ -164,10 +178,10 @@ public class ShooterVisualizer {
     if (maybeDeg < 10.0) {
       double unit = hoodAngle.in(Rotations);
       double t = MathUtil.clamp(unit, 0.0, 1.0);
-      return MIN_ANGLE_DEG + t * (MAX_ANGLE_DEG - MIN_ANGLE_DEG);
+      return MAX_ANGLE.minus(MIN_ANGLE).times(t).plus(MIN_ANGLE).in(Degrees);
     }
 
-    return MathUtil.clamp(maybeDeg, MIN_ANGLE_DEG, MAX_ANGLE_DEG);
+    return MathUtil.clamp(maybeDeg, MIN_ANGLE.in(Degrees), MAX_ANGLE.in(Degrees));
   }
 
   // Utility
