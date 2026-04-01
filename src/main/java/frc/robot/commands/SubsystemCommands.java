@@ -12,11 +12,9 @@ import frc.robot.subsystems.Hanger;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.ShooterVisualizer;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
 import frc.util.ShuttleCalculator;
-
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 
@@ -308,8 +306,7 @@ public final class SubsystemCommands {
   }
 
   public Command autoShoot() {
-    final PrepareShot prepareShotCommand =
-        new PrepareShot(shooter, hood, () -> swerve.getPose());
+    final PrepareShot prepareShotCommand = new PrepareShot(shooter, hood, () -> swerve.getPose());
 
     return Commands.race(
             Commands.waitSeconds(0.20).andThen(prepareShotCommand),
