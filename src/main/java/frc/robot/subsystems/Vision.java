@@ -550,8 +550,12 @@ public class Vision extends SubsystemBase {
               Pose2d robotPose = drivebase.getPose();
               Optional<Translation2d> maybeCenter = getScoringCenter();
 
-              double vx = vxSupplier.getAsDouble();
-              double vy = vySupplier.getAsDouble();
+              boolean isBlue =
+                  DriverStation.getAlliance().map(a -> a == Alliance.Blue).orElse(false);
+              double allianceFlip = isBlue ? -1.0 : 1.0;
+
+              double vx = vxSupplier.getAsDouble() * DrivebaseConstants.MAX_SPEED * allianceFlip;
+              double vy = vySupplier.getAsDouble() * DrivebaseConstants.MAX_SPEED * allianceFlip;
 
               if (maybeCenter.isEmpty()) {
                 drivebase.drive(
@@ -563,7 +567,6 @@ public class Vision extends SubsystemBase {
               Translation2d center = maybeCenter.get();
               Translation2d toCenter = center.minus(robotPose.getTranslation());
 
-              // Front of robot (shooter) faces the goal — no heading flip needed
               Rotation2d desiredHeading =
                   new Rotation2d(Math.atan2(toCenter.getY(), toCenter.getX()));
 
@@ -592,8 +595,6 @@ public class Vision extends SubsystemBase {
 
               Logger.recordOutput("Vision/ScoringCenterErrorDeg", Math.toDegrees(headingError));
               Logger.recordOutput("Vision/Omega", omega);
-
-              // Log alignment details
               Logger.recordOutput("Vision/Alignment/Active", true);
               Logger.recordOutput("Vision/Alignment/HeadingErrorDeg", Math.toDegrees(headingError));
               Logger.recordOutput("Vision/Alignment/OmegaRadPerSec", omega);
@@ -667,8 +668,13 @@ public class Vision extends SubsystemBase {
             () -> {
               Pose2d robotPose = drivebase.getPose();
               Optional<Rotation2d> maybeHeading = getShuttleHeading();
-              double vx = vxSupplier.getAsDouble();
-              double vy = vySupplier.getAsDouble();
+
+              boolean isBlue =
+                  DriverStation.getAlliance().map(a -> a == Alliance.Blue).orElse(false);
+              double allianceFlip = isBlue ? -1.0 : 1.0;
+
+              double vx = vxSupplier.getAsDouble() * DrivebaseConstants.MAX_SPEED * allianceFlip;
+              double vy = vySupplier.getAsDouble() * DrivebaseConstants.MAX_SPEED * allianceFlip;
 
               if (maybeHeading.isEmpty()) {
                 drivebase.drive(
@@ -711,8 +717,13 @@ public class Vision extends SubsystemBase {
             () -> {
               Pose2d robotPose = drivebase.getPose();
               Optional<Rotation2d> maybeHeading = getShuttleHeading();
-              double vx = vxSupplier.getAsDouble() * DrivebaseConstants.MAX_SPEED;
-              double vy = vySupplier.getAsDouble() * DrivebaseConstants.MAX_SPEED;
+
+              boolean isBlue =
+                  DriverStation.getAlliance().map(a -> a == Alliance.Blue).orElse(false);
+              double allianceFlip = isBlue ? -1.0 : 1.0;
+
+              double vx = vxSupplier.getAsDouble() * DrivebaseConstants.MAX_SPEED * allianceFlip;
+              double vy = vySupplier.getAsDouble() * DrivebaseConstants.MAX_SPEED * allianceFlip;
 
               if (maybeHeading.isEmpty()) {
                 drivebase.drive(

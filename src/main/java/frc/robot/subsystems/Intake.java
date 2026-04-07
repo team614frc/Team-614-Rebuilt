@@ -39,8 +39,8 @@ public class Intake extends SubsystemBase {
   private static final Angle PIVOT_REDUCTION = Degrees.of(50.0);
   private static final double PIVOT_PERCENT_OUTPUT = 0.1;
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
-  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(55);
-  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(5.3);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(45);
+  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(4.5);
   private static final AngularVelocity MAX_PIVOT_SPEED =
       KrakenX44.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
   private static final Angle POSITION_TOLERANCE = Degrees.of(5);
@@ -51,6 +51,7 @@ public class Intake extends SubsystemBase {
 
   public enum Speed {
     STOP(0.0),
+    SHOOT(0.55),
     INTAKE(0.85);
 
     private final double percentOutput;
@@ -65,9 +66,9 @@ public class Intake extends SubsystemBase {
   }
 
   public enum Position {
-    HOMED(Degrees.of(110)),
+    HOMED(Degrees.of(106)),
     STOWED(Degrees.of(100)),
-    INTAKE(Degrees.of(-17)),
+    INTAKE(Degrees.of(-20)),
     AGITATE(Degrees.of(23));
 
     private final Angle angle;
@@ -189,7 +190,7 @@ public class Intake extends SubsystemBase {
   }
 
   public Command agitateCommand() {
-    return runOnce(() -> set(Speed.INTAKE))
+    return runOnce(() -> set(Speed.SHOOT))
         .andThen(
             Commands.sequence(
                     runOnce(() -> set(Position.AGITATE)),

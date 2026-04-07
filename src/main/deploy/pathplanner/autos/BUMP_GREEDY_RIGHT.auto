@@ -7,31 +7,49 @@
         {
           "type": "path",
           "data": {
-            "pathName": "BCLIMB_SEND_1"
+            "pathName": "BGR_1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BCLIMBR_PATH_1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BCLIMBRNICE_PATH_2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BCLIMBRNICE_PATH_3"
+            "pathName": "BGR_2"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 9.0
+            "waitTime": 0.3
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BGR_3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BGR_4"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 13.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BGR_6"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BGR_7"
           }
         }
       ]

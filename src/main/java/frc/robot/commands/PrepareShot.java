@@ -34,8 +34,8 @@ public class PrepareShot extends Command {
     // Vision Distance in relation to HUB
     distanceToShotMap.put(Inches.of(55), new Shot(3690, 0.10));
     distanceToShotMap.put(Inches.of(90), new Shot(3900, 0.37));
-    distanceToShotMap.put(Inches.of(110), new Shot(4000, 0.475));
-    distanceToShotMap.put(Inches.of(132), new Shot(4100, 0.614));
+    distanceToShotMap.put(Inches.of(110), new Shot(3900, 0.55));
+    distanceToShotMap.put(Inches.of(131), new Shot(3900, 0.7));
     distanceToShotMap.put(Inches.of(183), new Shot(4350, 0.74));
   }
 

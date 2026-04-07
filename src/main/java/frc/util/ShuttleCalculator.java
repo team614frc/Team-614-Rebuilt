@@ -18,11 +18,11 @@ public class ShuttleCalculator {
   static {
     // distance (m) → hood position
     // Closer = flatter arc; farther = higher arc
-    HOOD_TABLE.put(3.0, 0.72);
-    HOOD_TABLE.put(5.0, 0.72);
-    HOOD_TABLE.put(7.0, 0.72);
-    HOOD_TABLE.put(9.0, 0.72);
-    HOOD_TABLE.put(11.0, 0.72);
+    HOOD_TABLE.put(3.0, 0.76);
+    HOOD_TABLE.put(5.0, 0.76);
+    HOOD_TABLE.put(7.0, 0.76);
+    HOOD_TABLE.put(9.0, 0.76);
+    HOOD_TABLE.put(11.0, 0.76);
 
     // distance (m) → shooter RPM
     RPM_TABLE.put(3.0, 3900.0);

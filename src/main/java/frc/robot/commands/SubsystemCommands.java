@@ -220,31 +220,23 @@ public final class SubsystemCommands {
     return Commands.defer(
         () -> {
           double xInches = Units.metersToInches(swerve.getPose().getX());
-          double yInches = Units.metersToInches(swerve.getPose().getY());
           boolean isBlueAlliance =
               DriverStation.getAlliance().map(a -> a == DriverStation.Alliance.Blue).orElse(false);
 
-          final double FUNNEL_X_MIN = 265.0;
-          final double FUNNEL_X_MAX = 385.0;
-          final double FUNNEL_Y_MIN = 121.30;
-          final double FUNNEL_Y_MAX = 195.34;
+          // From the field diagram:
+          // Left wing:  x < 158.32 inches
+          // Right wing: x > 650.12 - 158.32 = 491.80 inches
+          final double WING_DEPTH_INCHES = 183;
+          final double FIELD_LENGTH_INCHES = 650.12;
 
-          boolean inFunnelZone =
-              xInches > FUNNEL_X_MIN
-                  && xInches < FUNNEL_X_MAX
-                  && yInches > FUNNEL_Y_MIN
-                  && yInches < FUNNEL_Y_MAX;
+          boolean inLeftWing = xInches < WING_DEPTH_INCHES;
+          boolean inRightWing = xInches > (FIELD_LENGTH_INCHES - WING_DEPTH_INCHES);
 
-          final double ALLIANCE_ZONE_DEPTH_INCHES = 158.32;
-          boolean inOwnAllianceZone =
-              isBlueAlliance
-                  ? xInches < ALLIANCE_ZONE_DEPTH_INCHES
-                  : xInches > (650.12 - ALLIANCE_ZONE_DEPTH_INCHES);
+          // Shoot if we're in either red zone (our own alliance wing)
+          // Shuttle if we're in the middle section between the two wings
+          boolean inShootingZone = isBlueAlliance ? inLeftWing : inRightWing;
 
-          if (inFunnelZone) {
-            return Commands.none();
-          }
-          return inOwnAllianceZone ? aimAndShoot() : shuttleFuel();
+          return inShootingZone ? aimAndShoot() : shuttleFuel();
         },
         Set.of(swerve, vision, shooter, hood, feeder, floor, intake));
   }

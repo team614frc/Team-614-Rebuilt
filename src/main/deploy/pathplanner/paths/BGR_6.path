@@ -3,47 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.264,
-        "y": 4.757
+        "x": 2.964,
+        "y": 2.599
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.12824686940966,
-        "y": 2.306994633273703
+        "x": 2.7398835302617655,
+        "y": 2.488221807235941
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.931842576028622,
+        "x": 5.804,
         "y": 2.453
       },
       "prevControl": {
-        "x": 7.34515205724508,
-        "y": 2.5990518783542043
+        "x": 5.559715339620259,
+        "y": 2.5061507733072106
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.24064171122994663,
-      "rotationDegrees": 55.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Shoot Once",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 3.0,
@@ -60,7 +48,7 @@
   "folder": "BUMP_CLIMB_RIGHT",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 55.0
   },
   "useDefaultConstraints": false
 }

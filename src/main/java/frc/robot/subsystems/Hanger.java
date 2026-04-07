@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.KrakenX44;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 import org.littletonrobotics.junction.Logger;
@@ -44,7 +45,7 @@ public class Hanger extends SubsystemBase {
   private static final double kI = 0.0;
   private static final double kD = 0.0;
   private static final double kV =
-      MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
+      MAX_VOLTAGE.in(Volts) / KrakenX44.kFreeSpeed.in(RotationsPerSecond);
 
   private static final double HOMING_PERCENT_OUTPUT = -0.05;
   private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(0.4);
