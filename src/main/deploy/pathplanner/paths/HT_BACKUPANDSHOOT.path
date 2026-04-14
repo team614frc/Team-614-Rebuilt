@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.771,
-        "y": 2.4530232558139526
+        "x": 3.4567159090909088,
+        "y": 3.7257954545454552
       },
       "prevControl": null,
       "nextControl": {
-        "x": 9.254467732992731,
-        "y": 3.457805196178091
+        "x": 3.8043837317644567,
+        "y": 3.738029483720689
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 8.208,
-        "y": 3.1486136363636366
+        "x": 2.56,
+        "y": 3.726
       },
       "prevControl": {
-        "x": 7.845834341386769,
-        "y": 3.046343289951529
+        "x": 2.238728597333393,
+        "y": 3.7210101307964933
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,14 +33,14 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "IntakeEvent",
-      "waypointRelativePos": 0.01077199281867146,
+      "name": "Climber Down",
+      "waypointRelativePos": 0.6071428571428571,
       "endWaypointRelativePos": null,
       "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 2.5,
+    "maxVelocity": 1.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -49,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 14.999999999999998
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "BUMP_CLIMB_RIGHT",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 55.0
+    "rotation": 0.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

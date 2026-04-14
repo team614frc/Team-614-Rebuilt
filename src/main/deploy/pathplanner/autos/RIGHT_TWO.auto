@@ -7,49 +7,55 @@
         {
           "type": "path",
           "data": {
-            "pathName": "BGR_1"
+            "pathName": "BCLIMB_SEND_1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BGR_2"
+            "pathName": "BCLIMBR_PATH_1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBR_PATH_2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBR_PATH_4"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.3
+            "waitTime": 5.35
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BGR_3"
+            "pathName": "BCLIMBR_PATH_1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BGR_4"
+            "pathName": "BCLIMBR_PATH_6"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBR_PATH_7"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 13.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BGR_6"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BGR_7"
+            "waitTime": 8.0
           }
         }
       ]

@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.221,
-        "y": 4.043
+        "x": 7.28,
+        "y": 4.238
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.955742397137747,
-        "y": 5.8279069767441865
+        "x": 6.3627045454545454,
+        "y": 6.288852272727273
       },
       "isLocked": false,
       "linkedName": null
@@ -20,8 +20,8 @@
         "y": 5.55
       },
       "prevControl": {
-        "x": 6.048307685192972,
-        "y": 5.549999999999999
+        "x": 6.631215909090908,
+        "y": 5.62225
       },
       "nextControl": null,
       "isLocked": false,
@@ -38,8 +38,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Shoot",
-      "waypointRelativePos": 0.9830508474576254,
+      "name": "Shoot Once",
+      "waypointRelativePos": 1.0,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -60,7 +60,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -55.0
+    "rotation": -90.0
   },
   "useDefaultConstraints": false
 }

@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.816,
-        "y": 5.341
+        "x": 8.136,
+        "y": 5.117
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.398103756708408,
-        "y": 5.633202146690519
+        "x": 5.94065909090909,
+        "y": 5.745931818181819
       },
       "isLocked": false,
       "linkedName": null
@@ -38,8 +38,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Shoot",
-      "waypointRelativePos": 0.9288135593220335,
+      "name": "TwoCycleShoot1",
+      "waypointRelativePos": 1.0,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -60,7 +60,7 @@
   "folder": "BUMP_CLIMB_LEFT",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": -14.999999999999998
   },
   "useDefaultConstraints": false
 }

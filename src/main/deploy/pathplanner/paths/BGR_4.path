@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.53,
-        "y": 3.556
+        "x": 8.105,
+        "y": 3.355
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.831914132379248,
-        "y": 2.1609660107334525
+        "x": 7.406914132379249,
+        "y": 1.9599660107334524
       },
       "isLocked": false,
       "linkedName": null
@@ -20,8 +20,8 @@
         "y": 2.599
       },
       "prevControl": {
-        "x": 2.701136979469481,
-        "y": 2.5977652501655135
+        "x": 2.7012962760381583,
+        "y": 2.5977659975971195
       },
       "nextControl": null,
       "isLocked": false,
@@ -38,7 +38,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Shoot Once",
+      "name": "Shoot",
       "waypointRelativePos": 1.0,
       "endWaypointRelativePos": null,
       "command": null

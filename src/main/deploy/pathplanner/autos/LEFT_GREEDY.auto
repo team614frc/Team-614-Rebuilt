@@ -17,21 +17,39 @@
           }
         },
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "BCLIMBLNICE_PATH_2"
+            "waitTime": 0.25
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BCLIMBLNICE_PATH_3"
+            "pathName": "Copy of BCLIM1CYCLE_PATH_3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of BCLIMBLGREED_PATH_4"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 5.0
+            "waitTime": 6.75
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBLGREED_PATH_2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBLGREED_PATH_5"
           }
         }
       ]

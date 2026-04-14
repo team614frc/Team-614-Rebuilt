@@ -27,7 +27,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Feeder extends SubsystemBase {
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
-  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(85);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(50);
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
 
   // Default PIDF gains — adjustable live via SmartDashboard

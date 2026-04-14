@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.771,
-        "y": 2.4530232558139526
+        "x": 5.788,
+        "y": 5.55
       },
       "prevControl": null,
       "nextControl": {
-        "x": 9.254467732992731,
-        "y": 3.457805196178091
+        "x": 8.239079545456322,
+        "y": 6.74569318182303
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 8.208,
-        "y": 3.1486136363636366
+        "x": 8.043,
+        "y": 4.447272727272727
       },
       "prevControl": {
-        "x": 7.845834341386769,
-        "y": 3.046343289951529
+        "x": 8.053659628067756,
+        "y": 4.697045368547662
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "IntakeEvent",
-      "waypointRelativePos": 0.01077199281867146,
+      "waypointRelativePos": 0.01077199281867148,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -49,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 14.999999999999998
+    "rotation": -90.0
   },
   "reversed": false,
-  "folder": "BUMP_CLIMB_RIGHT",
+  "folder": "BUMP_CLIMB_LEFT",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 55.0
+    "rotation": -55.0
   },
   "useDefaultConstraints": true
 }

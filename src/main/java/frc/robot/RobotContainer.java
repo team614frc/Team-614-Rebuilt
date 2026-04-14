@@ -226,6 +226,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake", intake.intakeAuto());
     new EventTrigger("Shoot").onTrue(subsystemCommands.autoAimAndShoot());
     new EventTrigger("Shoot2").onTrue(subsystemCommands.autoAimAndShoot2());
+    new EventTrigger("TwoCycleShoot1").onTrue(subsystemCommands.autoAimAndShootTwo1());
+    new EventTrigger("TwoCycleShoot2").onTrue(subsystemCommands.autoAimAndShootTwo2());
+    new EventTrigger("ShootTower").onTrue(subsystemCommands.autoAimAndShootHalfCycle());
     new EventTrigger("Shoot Once").onTrue(subsystemCommands.aimAndShoot());
     new EventTrigger("Climber Up").onTrue(hanger.positionCommand(Position.HANGING));
     new EventTrigger("Climber Down").onTrue(hanger.positionCommand(Position.HUNG));

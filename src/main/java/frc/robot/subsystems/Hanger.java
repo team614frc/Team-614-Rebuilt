@@ -40,7 +40,7 @@ import org.littletonrobotics.junction.Logger;
 public class Hanger extends SubsystemBase {
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(20);
-  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(40);
   private static final double kP = 10.0;
   private static final double kI = 0.0;
   private static final double kD = 0.0;
@@ -56,7 +56,7 @@ public class Hanger extends SubsystemBase {
   public enum Position {
     HOMED(Inches.of(0)),
     EXTEND_HOPPER(Inches.of(2)),
-    HANGING(Inches.of(5)),
+    HANGING(Inches.of(4.95)),
     HUNG(Inches.of(0.2));
 
     private final Distance distance;

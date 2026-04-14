@@ -19,37 +19,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "BCLIMBR_PATH_2"
+            "pathName": "B1CYCLE_PATH_2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BCLIMBR_PATH_4"
+            "pathName": "B1CYCLE_PATH_3"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.75
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BCLIMBR_PATH_1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BCLIMBR_PATH_6"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BCLIMBR_PATH_7"
+            "waitTime": 15.0
           }
         }
       ]

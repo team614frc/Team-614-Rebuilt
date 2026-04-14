@@ -116,6 +116,50 @@ public final class SubsystemCommands {
         Set.of(vision, shooter, hood, feeder, floor, intake));
   }
 
+  public Command autoAimAndShootTwo1() {
+    return Commands.defer(
+        () -> {
+          final PrepareShot prepareShotCommand =
+              new PrepareShot(shooter, hood, () -> swerve.getPose());
+
+          return Commands.race(
+                  // Race ends the whole thing once feed sequence completes
+                  Commands.sequence(
+                      Commands.waitUntil(
+                          () -> vision.isAimed() && prepareShotCommand.isReadyToShoot()),
+                      feed()),
+
+                  // Rotation + spinup run in parallel, get cancelled when feed finishes
+                  Commands.parallel(
+                      vision.rotateToAllianceTagWhileDriving(forwardInput, leftInput),
+                      Commands.waitSeconds(0.20).andThen(prepareShotCommand)))
+              .withTimeout(5.25); // safety fallback so auto never stalls
+        },
+        Set.of(vision, shooter, hood, feeder, floor, intake));
+  }
+
+  public Command autoAimAndShootTwo2() {
+    return Commands.defer(
+        () -> {
+          final PrepareShot prepareShotCommand =
+              new PrepareShot(shooter, hood, () -> swerve.getPose());
+
+          return Commands.race(
+                  // Race ends the whole thing once feed sequence completes
+                  Commands.sequence(
+                      Commands.waitUntil(
+                          () -> vision.isAimed() && prepareShotCommand.isReadyToShoot()),
+                      feed()),
+
+                  // Rotation + spinup run in parallel, get cancelled when feed finishes
+                  Commands.parallel(
+                      vision.rotateToAllianceTagWhileDriving(forwardInput, leftInput),
+                      Commands.waitSeconds(0.20).andThen(prepareShotCommand)))
+              .withTimeout(6.5); // safety fallback so auto never stalls
+        },
+        Set.of(vision, shooter, hood, feeder, floor, intake));
+  }
+
   // THIS IS JANKY. Don't know why the original autoAimAndShoot doesn't work when ran a second time
   // for auto, but this one does ¯\_(ツ)_/¯
   public Command autoAimAndShoot2() {
@@ -157,7 +201,7 @@ public final class SubsystemCommands {
                   Commands.parallel(
                       vision.rotateToAllianceTagWhileDriving(forwardInput, leftInput),
                       Commands.waitSeconds(0.20).andThen(prepareShotCommand)))
-              .withTimeout(7.5); // safety fallback so auto never stalls
+              .withTimeout(3); // safety fallback so auto never stalls
         },
         Set.of(vision, shooter, hood, feeder, floor, intake));
   }
@@ -206,9 +250,8 @@ public final class SubsystemCommands {
     return Commands.sequence(
         Commands.parallel(
             feeder.feedCommand(),
-            Commands.waitSeconds(0.35)
-                .andThen(floor.feedCommand())
-                .alongWith(intake.agitateCommand())));
+            Commands.waitSeconds(0.35).andThen(floor.feedCommand()),
+            Commands.waitSeconds(1.5).andThen(intake.agitateCommand())));
   }
 
   // I'm gonna remove this eventually since we never use it, but ya never know ig

@@ -7,37 +7,49 @@
         {
           "type": "path",
           "data": {
-            "pathName": "BCLIMB_SEND_1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BCLIMBR_PATH_1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BCLIMBRNICE_PATH_2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "BCLIMBRNICE_PATH_3"
+            "pathName": "HT_BACKUPANDSHOOT"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 9.0
+            "waitTime": 1.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of HT_BACKUPANDSHOOT"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of Copy of HT_BACKUPANDSHOOT"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "HT_ROTATEANDCLIMB"
           }
         }
       ]
     }
   },
   "resetOdom": false,
-  "folder": "RIGHT_AUTOS",
+  "folder": "MIDDLE_AUTOS",
   "choreoAuto": false
 }

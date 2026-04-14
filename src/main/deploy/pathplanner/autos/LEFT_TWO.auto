@@ -7,61 +7,61 @@
         {
           "type": "path",
           "data": {
-            "pathName": "BCLIMB_SEND_1"
+            "pathName": "BCLIMBL_SEND_1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BCLIMBR_PATH_1"
+            "pathName": "BCLIMBLGREED_PATH_2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "B2LEFTOVER_PATH_2"
+            "pathName": "BCLIMBLGREED_PATH_3"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "B2LEFTOVER_PATH_3"
+            "pathName": "BCLIMBLGREED_PATH_4"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.75
+            "waitTime": 5.35
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BCLIMBR_PATH_1"
+            "pathName": "BCLIMBLGREED_PATH_2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "B2LEFTOVER_PATH_6"
+            "pathName": "BCLIMBLGREED_PATH_5"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BCLIMBR_PATH_7"
+            "pathName": "Copy of BCLIMBLGREED_PATH_6"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 4.0
+            "waitTime": 8.0
           }
         }
       ]
     }
   },
   "resetOdom": false,
-  "folder": "RIGHT_AUTOS",
+  "folder": "LEFT_AUTOS",
   "choreoAuto": false
 }

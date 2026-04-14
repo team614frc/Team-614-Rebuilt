@@ -7,31 +7,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "BCLIMB_SEND_1"
+            "pathName": "BCLIMBL_SEND_1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BCLIMBR_PATH_1"
+            "pathName": "BCLIMBLGREED_PATH_2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "B1CYCLE_PATH_2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "B1CYCLE_PATH_3"
+            "pathName": "Copy of BMR_PATH_1"
           }
         }
       ]
     }
   },
   "resetOdom": false,
-  "folder": "RIGHT_AUTOS",
+  "folder": "LEFT_AUTOS",
   "choreoAuto": false
 }

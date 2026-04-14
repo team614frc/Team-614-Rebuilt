@@ -39,8 +39,8 @@ public class Intake extends SubsystemBase {
   private static final Angle PIVOT_REDUCTION = Degrees.of(50.0);
   private static final double PIVOT_PERCENT_OUTPUT = 0.1;
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
-  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(45);
-  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(4.5);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(35);
+  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(5.3);
   private static final AngularVelocity MAX_PIVOT_SPEED =
       KrakenX44.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
   private static final Angle POSITION_TOLERANCE = Degrees.of(5);

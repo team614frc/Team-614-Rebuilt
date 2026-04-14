@@ -142,7 +142,7 @@ public class Shooter extends SubsystemBase {
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(Amps.of(140))
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(Amps.of(70))
+                    .withSupplyCurrentLimit(Amps.of(55))
                     .withSupplyCurrentLimitEnable(true))
             .withTorqueCurrent(
                 new TorqueCurrentConfigs()
@@ -154,7 +154,7 @@ public class Shooter extends SubsystemBase {
                     .withKP(0.035)
                     .withKI(0.0)
                     .withKD(0.0)
-                    .withKV(0.0103)); // feedforward — tune: 0.12 is a starting point for Falcon
+                    .withKV(0.0103));
 
     motor.getConfigurator().apply(config);
 
