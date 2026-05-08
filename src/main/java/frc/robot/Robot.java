@@ -24,7 +24,16 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  */
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
-  private final RobotContainer m_robotContainer;
+  private RobotContainer m_robotContainer;
+
+  @Override
+  public void robotInit() {
+    // Instantiate our RobotContainer. This will perform all our button bindings,
+    // and put our
+    // autonomous chooser on the dashboard.
+    RobotController.setBrownoutVoltage(6.25);
+    m_robotContainer = new RobotContainer();
+  }
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -39,7 +48,7 @@ public class Robot extends LoggedRobot {
     switch (AdvantageKitConstants.currentMode) {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
-        Logger.addDataReceiver(new WPILOGWriter());
+        // Logger.addDataReceiver(new WPILOGWriter());
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
@@ -62,7 +71,6 @@ public class Robot extends LoggedRobot {
 
     // // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
     SmartDashboard.putData(CommandScheduler.getInstance());
     // RobotController.setBrownoutVoltage(Volts.of(6.1));
   }
@@ -83,7 +91,6 @@ public class Robot extends LoggedRobot {
     Logger.recordOutput("Robot/BatteryVoltage", RobotController.getBatteryVoltage());
     m_robotContainer.periodic();
     CommandScheduler.getInstance().run();
-    m_robotContainer.periodic();
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */

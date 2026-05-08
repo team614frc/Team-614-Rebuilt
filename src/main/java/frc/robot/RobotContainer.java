@@ -1,7 +1,15 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.events.EventTrigger;
+import com.pathplanner.lib.util.FlippingUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -16,6 +24,7 @@ import frc.robot.commands.SubsystemCommands;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Floor;
 import frc.robot.subsystems.Hanger;
+import frc.robot.subsystems.Hanger.Position;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
@@ -46,8 +55,6 @@ public class RobotContainer {
   // Shooter visualizer for simulation (only used in sim)
   private final ShooterVisualizer shooterVisualizer;
 
-  private final AllianceShiftMonitor shiftMonitor;
-
   // The driver's controller
   private final CommandXboxController driverXbox =
       new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
@@ -55,6 +62,8 @@ public class RobotContainer {
   // The operator's controller
   private final CommandXboxController codriverXbox =
       new CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT);
+
+  private final AllianceShiftMonitor shiftMonitor = new AllianceShiftMonitor(driverXbox);
 
   // The autonomous chooser
   private final SendableChooser<Command> autoChooser;
@@ -158,13 +167,14 @@ public class RobotContainer {
   public RobotContainer() {
     // Initialize shooter visualizer
     if (RobotBase.isSimulation()) {
-      shooterVisualizer =
-          new ShooterVisualizer(
-              () -> swerve.getPose(),
-              () -> hood.getAngle(),
-              () -> shooter.getExitVelocity() // already matches 3-param constructor
-              );
-      configureFuelSim();
+      // // shooterVisualizer =
+      //     new ShooterVisualizer(
+      //         () -> swerve.getPose(),
+      //         // () -> hood.getAngle(),
+      //         () -> shooter.getExitVelocity() // already matches 3-param constructor
+      //         );
+      // configureFuelSim();
+      shooterVisualizer = null;
     } else {
       shooterVisualizer = null;
     }
@@ -180,12 +190,53 @@ public class RobotContainer {
             hood,
             hanger,
             vision,
-            shooterVisualizer, // Now this is initialized!
             () -> driverXbox.getLeftY(),
             () -> driverXbox.getLeftX());
 
-    shiftMonitor = new AllianceShiftMonitor(driverXbox);
     DriverStation.silenceJoystickConnectionWarning(true);
+
+    NamedCommands.registerCommand(
+        "ResetPoseLeft",
+        Commands.runOnce(
+                () -> {
+                  Pose2d blueLeft = new Pose2d(5.852, 5.550, Rotation2d.fromDegrees(-55));
+                  Pose2d pose =
+                      DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
+                          ? FlippingUtil.flipFieldPose(blueLeft)
+                          : blueLeft;
+                  swerve.resetOdometry(pose);
+                })
+            .ignoringDisable(false)
+            .withName("ResetPoseLeft"));
+
+    NamedCommands.registerCommand(
+        "ResetPoseRight",
+        Commands.runOnce(
+                () -> {
+                  Pose2d blueRight = new Pose2d(5.852, 2.453, Rotation2d.fromDegrees(55));
+                  Pose2d pose =
+                      DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
+                          ? FlippingUtil.flipFieldPose(blueRight)
+                          : blueRight;
+                  swerve.resetOdometry(pose);
+                })
+            .ignoringDisable(false)
+            .withName("ResetPoseRight"));
+
+    NamedCommands.registerCommand("Intake", intake.intakeAuto());
+    new EventTrigger("Shoot").onTrue(subsystemCommands.autoAimAndShoot());
+    new EventTrigger("Shoot2").onTrue(subsystemCommands.autoAimAndShoot2());
+    new EventTrigger("TwoCycleShoot1").onTrue(subsystemCommands.autoAimAndShootTwo1());
+    new EventTrigger("TwoCycleShoot2").onTrue(subsystemCommands.autoAimAndShootTwo2());
+    new EventTrigger("ShootTower").onTrue(subsystemCommands.autoAimAndShootHalfCycle());
+    new EventTrigger("Shoot Once").onTrue(subsystemCommands.aimAndShoot());
+    new EventTrigger("Climber Up").onTrue(hanger.positionCommand(Position.HANGING));
+    new EventTrigger("Climber Down").onTrue(hanger.positionCommand(Position.HUNG));
+    new EventTrigger("Stop All").onTrue(subsystemCommands.stopAll());
+    new EventTrigger("IntakeEvent").onTrue(intake.intakeAuto());
+    new EventTrigger("StopIntake").onTrue(subsystemCommands.stopIntake());
+    NamedCommands.registerCommand(
+        "SnapshotPose", Commands.runOnce(() -> vision.snapshotPoseBeforeTurn()));
 
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
@@ -212,13 +263,25 @@ public class RobotContainer {
         .onTrue(intake.homingCommand())
         .onTrue(hanger.homingCommand());
 
-    driverXbox.rightTrigger().whileTrue(subsystemCommands.aimAndShoot());
-    driverXbox.rightBumper().whileTrue(subsystemCommands.shootManually());
     driverXbox.leftTrigger().whileTrue(intake.intakeCommand());
-    driverXbox.leftBumper().onTrue(intake.runOnce(() -> intake.set(Intake.Position.STOWED)));
+    driverXbox.rightTrigger().whileTrue(subsystemCommands.shootOrShuttle());
+    driverXbox.leftBumper().onTrue(hanger.positionCommand(Hanger.Position.HANGING));
+    driverXbox.rightBumper().onTrue(hanger.positionCommand(Hanger.Position.HUNG));
+    driverXbox.y().onTrue(intake.runOnce(() -> intake.set(Intake.Position.STOWED)));
+    driverXbox.b().whileTrue(subsystemCommands.alignTower());
+    driverXbox.start().onTrue(Commands.runOnce(swerve::zeroGyro));
+    driverXbox.a().whileTrue(subsystemCommands.shootManually());
+    driverXbox.x().whileTrue(subsystemCommands.unjamShooter());
 
-    driverXbox.povUp().onTrue(hanger.positionCommand(Hanger.Position.HANGING));
-    driverXbox.povDown().onTrue(hanger.positionCommand(Hanger.Position.HUNG));
+    codriverXbox.y().onTrue(intake.runOnce(() -> intake.set(Intake.Position.STOWED)));
+    codriverXbox.rightBumper().onTrue(feeder.feedCommand());
+    codriverXbox.leftBumper().onTrue(hood.positionCommand(0.1));
+    codriverXbox.leftTrigger().whileTrue(intake.intakeCommandNoPivot());
+    codriverXbox.rightTrigger().whileTrue(subsystemCommands.shootManually());
+    codriverXbox.a().onTrue(subsystemCommands.stopAll());
+    codriverXbox.b().whileTrue(subsystemCommands.unjamShooter());
+    codriverXbox.x().onTrue(intake.stopPivotCommand());
+    codriverXbox.start().onTrue(intake.homingCommand());
   }
 
   /**
@@ -232,8 +295,13 @@ public class RobotContainer {
   }
 
   public void periodic() {
-    shooterVisualizer.periodic();
     shiftMonitor.periodic();
+
+    // Distance to hub (same calculation as PrepareShotCommand)
+    Translation2d robotPosition = swerve.getPose().getTranslation();
+    Translation2d hubPosition = Landmarks.hubPosition();
+    double distanceInches = Units.metersToInches(robotPosition.getDistance(hubPosition));
+    SmartDashboard.putNumber("Distance to Hub (inches)", distanceInches);
   }
 
   /** Call from Robot.autonomousInit() */

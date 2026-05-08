@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "HT_BACKUPANDSHOOT"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of Copy of HT_BACKUPANDSHOOT"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of HT_BACKUPANDSHOOT"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.2
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "HT_ROTATEANDCLIMB"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": "MIDDLE_AUTOS",
+  "choreoAuto": false
+}

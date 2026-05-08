@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -31,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.KrakenX60;
+import frc.robot.Constants.KrakenX44;
 import frc.robot.Ports;
 import org.littletonrobotics.junction.Logger;
 
@@ -40,19 +39,20 @@ public class Intake extends SubsystemBase {
   private static final Angle PIVOT_REDUCTION = Degrees.of(50.0);
   private static final double PIVOT_PERCENT_OUTPUT = 0.1;
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
-  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
-  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(6);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(35);
+  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(5.3);
   private static final AngularVelocity MAX_PIVOT_SPEED =
-      KrakenX60.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
+      KrakenX44.kFreeSpeed.div(PIVOT_REDUCTION.in(Degrees));
   private static final Angle POSITION_TOLERANCE = Degrees.of(5);
   private static final double kP = 300.0;
   private static final double kI = 0.0;
   private static final double kD = 0.0;
-  private static final double kV = MAX_VOLTAGE.in(Volts) / MAX_PIVOT_SPEED.in(RotationsPerSecond);
+  private static final double kV = 0.099;
 
   public enum Speed {
     STOP(0.0),
-    INTAKE(0.8);
+    SHOOT(0.55),
+    INTAKE(0.85);
 
     private final double percentOutput;
 
@@ -66,10 +66,10 @@ public class Intake extends SubsystemBase {
   }
 
   public enum Position {
-    HOMED(Degrees.of(110)),
+    HOMED(Degrees.of(106)),
     STOWED(Degrees.of(100)),
-    INTAKE(Degrees.of(-4)),
-    AGITATE(Degrees.of(20));
+    INTAKE(Degrees.of(-20)),
+    AGITATE(Degrees.of(23));
 
     private final Angle angle;
 
@@ -90,7 +90,7 @@ public class Intake extends SubsystemBase {
   private boolean isHomed = false;
 
   public Intake() {
-    pivotMotor = new TalonFX(Ports.kIntakePivot, Ports.kCANivoreCANBus);
+    pivotMotor = new TalonFX(Ports.kIntakePivot, Ports.kRoboRioCANBus);
     rollerMotor = new TalonFX(Ports.kIntakeRollers, Ports.kRoboRioCANBus);
     configurePivotMotor();
     configureRollerMotor();
@@ -135,7 +135,7 @@ public class Intake extends SubsystemBase {
             .withMotorOutput(
                 new MotorOutputConfigs()
                     .withInverted(InvertedValue.Clockwise_Positive)
-                    .withNeutralMode(NeutralModeValue.Brake))
+                    .withNeutralMode(NeutralModeValue.Coast))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
@@ -172,8 +172,33 @@ public class Intake extends SubsystemBase {
         () -> set(Speed.STOP));
   }
 
+  public Command intakeAuto() {
+    return runOnce(
+        () -> {
+          set(Position.INTAKE);
+          set(Speed.INTAKE);
+        });
+  }
+
+  public Command intakeCommandNoPivot() {
+    return startEnd(
+        () -> {
+          set(Speed.INTAKE);
+        },
+        () -> set(Speed.STOP));
+  }
+
+  public void stop() {
+    set(Position.INTAKE);
+    set(Speed.STOP);
+  }
+
+  public Command stopCommand() {
+    return runOnce(this::stop);
+  }
+
   public Command agitateCommand() {
-    return runOnce(() -> set(Speed.INTAKE))
+    return runOnce(() -> set(Speed.SHOOT))
         .andThen(
             Commands.sequence(
                     runOnce(() -> set(Position.AGITATE)),
@@ -186,6 +211,10 @@ public class Intake extends SubsystemBase {
               set(Position.INTAKE);
               set(Speed.STOP);
             });
+  }
+
+  public Command rollCommand() {
+    return runOnce(() -> set(Speed.INTAKE)).handleInterrupt(() -> set(Speed.STOP));
   }
 
   public Command homingCommand() {
@@ -251,5 +280,14 @@ public class Intake extends SubsystemBase {
         "Pivot Supply Current", () -> pivotMotor.getSupplyCurrent().getValue().in(Amps), null);
     builder.addDoubleProperty(
         "Roller Supply Current", () -> rollerMotor.getSupplyCurrent().getValue().in(Amps), null);
+  }
+
+  public void stopPivot() {
+    pivotMotor.setControl(pivotVoltageRequest.withOutput(Volts.of(0)));
+    isHomed = false;
+  }
+
+  public Command stopPivotCommand() {
+    return runOnce(this::stopPivot);
   }
 }

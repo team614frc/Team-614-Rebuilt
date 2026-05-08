@@ -11,8 +11,8 @@ public class Landmarks {
   public static Translation2d hubPosition() {
     final Optional<Alliance> alliance = DriverStation.getAlliance();
     if (alliance.isPresent() && alliance.get() == Alliance.Blue) {
-      return new Translation2d(Inches.of(182.105), Inches.of(158.845));
+      return new Translation2d(Inches.of(181.156), Inches.of(158.32));
     }
-    return new Translation2d(Inches.of(469.115), Inches.of(158.845));
+    return new Translation2d(Inches.of(468.56), Inches.of(158.32));
   }
 }

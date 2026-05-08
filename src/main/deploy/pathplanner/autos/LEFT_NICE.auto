@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBL_SEND_1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBLGREED_PATH_2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of BCLIMBLGREED_PATH_2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBLNICE_PATH_2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BCLIMBLNICE_PATH_3"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 15.0
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": "LEFT_AUTOS",
+  "choreoAuto": false
+}

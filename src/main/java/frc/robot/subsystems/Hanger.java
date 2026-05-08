@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.KrakenX44;
 import frc.robot.Constants.KrakenX60;
 import frc.robot.Ports;
 import org.littletonrobotics.junction.Logger;
@@ -39,15 +40,15 @@ import org.littletonrobotics.junction.Logger;
 public class Hanger extends SubsystemBase {
   private static final Voltage MAX_VOLTAGE = Volts.of(12.0);
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(20);
-  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(70);
+  private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(40);
   private static final double kP = 10.0;
   private static final double kI = 0.0;
   private static final double kD = 0.0;
   private static final double kV =
-      MAX_VOLTAGE.in(Volts) / KrakenX60.kFreeSpeed.in(RotationsPerSecond);
+      MAX_VOLTAGE.in(Volts) / KrakenX44.kFreeSpeed.in(RotationsPerSecond);
 
   private static final double HOMING_PERCENT_OUTPUT = -0.05;
-  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(0.4);
+  private static final Current HOMING_CURRENT_THRESHOLD = Amps.of(0.35);
   private static final Per<DistanceUnit, AngleUnit> HANGER_EXTENSION_PER_MOTOR_ANGLE =
       Inches.of(6).div(Rotations.of(142));
   private static final Distance EXTENSION_TOLERANCE = Inches.of(1);
@@ -55,7 +56,7 @@ public class Hanger extends SubsystemBase {
   public enum Position {
     HOMED(Inches.of(0)),
     EXTEND_HOPPER(Inches.of(2)),
-    HANGING(Inches.of(6)),
+    HANGING(Inches.of(4.95)),
     HUNG(Inches.of(0.2));
 
     private final Distance distance;

@@ -1,6 +1,9 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.Feeder;
@@ -9,9 +12,9 @@ import frc.robot.subsystems.Hanger;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.ShooterVisualizer;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
+import frc.util.ShuttleCalculator;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 
@@ -24,7 +27,6 @@ public final class SubsystemCommands {
   private final Hood hood;
   private final Hanger hanger;
   private final Vision vision;
-  private final ShooterVisualizer shooterVisualizer;
 
   private final DoubleSupplier forwardInput;
   private final DoubleSupplier leftInput;
@@ -38,7 +40,6 @@ public final class SubsystemCommands {
       Hood hood,
       Hanger hanger,
       Vision vision,
-      ShooterVisualizer shooterVisualizer,
       DoubleSupplier forwardInput,
       DoubleSupplier leftInput) {
     this.swerve = swerve;
@@ -49,8 +50,6 @@ public final class SubsystemCommands {
     this.hood = hood;
     this.hanger = hanger;
     this.vision = vision;
-    this.shooterVisualizer = shooterVisualizer;
-
     this.forwardInput = forwardInput;
     this.leftInput = leftInput;
   }
@@ -64,58 +63,302 @@ public final class SubsystemCommands {
       Hood hood,
       Hanger hanger,
       Vision vision) {
-    this(swerve, intake, floor, feeder, shooter, hood, hanger, vision, null, () -> 0, () -> 0);
+    this(swerve, intake, floor, feeder, shooter, hood, hanger, vision, () -> 0, () -> 0);
   }
 
+  // Ooooooh... you like shooting fuel.. don't you?
   public Command aimAndShoot() {
     return Commands.defer(
         () -> {
-          final PrepareShot prepareShot = new PrepareShot(shooter, hood, () -> swerve.getPose());
+          // Fresh instance every time defer runs (i.e. every time the button is pressed).
+          // Creating it outside defer caused WPILib to mark it as "composed" on the first
+          // press and crash with IllegalArgumentException on every subsequent press.
+          final PrepareShot prepareShotCommand =
+              new PrepareShot(shooter, hood, () -> swerve.getPose());
 
           return Commands.parallel(
+              // Branch 1: rotate drivetrain toward goal
               vision.rotateToAllianceTagWhileDriving(forwardInput, leftInput),
-              Commands.waitSeconds(0.25).andThen(prepareShot),
+
+              // Branch 2: spin up flywheel + set hood angle.
+              // 0.20 s delay staggers power draw so drivetrain and shooter
+              // don't both slam the PDH at the same time.
+              Commands.waitSeconds(0.20).andThen(prepareShotCommand),
+
+              // Branch 3: wait until aimed AND shooter/hood at setpoint AND hub is active,
+              // THEN feed.
               Commands.sequence(
-                  Commands.waitUntil(
-                      () -> {
-                        boolean aimed = vision.isAimed();
-                        boolean ready = prepareShot.isReadyToShoot();
-                        return aimed && ready;
-                      }),
-                  // SIMULATION: Continuously fire while held
-                  // REAL ROBOT: Fire once with feed() command
-                  RobotBase.isSimulation()
-                      ? Commands.repeatingSequence(
-                          Commands.runOnce(
-                              () -> {
-                                if (shooterVisualizer != null) {
-                                  shooterVisualizer.launchFuel();
-                                  System.out.println(
-                                      "=== FIRED 3 BALLS, remaining: "
-                                          + shooterVisualizer.getFuelCount()
-                                          + " ===");
-                                }
-                              }),
-                          Commands.waitSeconds(0.3) // Fire 3 balls every 0.3 seconds
-                          )
-                      : Commands.sequence(
-                          Commands.runOnce(
-                              () -> System.out.println("=== WAIT COMPLETE - FEEDING ===")),
-                          feed())));
+                  Commands.waitUntil(() -> vision.isAimed() && prepareShotCommand.isReadyToShoot()),
+                  feed()));
         },
-        Set.of(vision, shooter, hood));
+        Set.of(swerve, vision, shooter, hood, feeder, floor, intake));
   }
 
+  public Command autoAimAndShoot() {
+    return Commands.defer(
+        () -> {
+          final PrepareShot prepareShotCommand =
+              new PrepareShot(shooter, hood, () -> swerve.getPose());
+
+          return Commands.race(
+                  // Race ends the whole thing once feed sequence completes
+                  Commands.sequence(
+                      Commands.waitUntil(
+                          () -> vision.isAimed() && prepareShotCommand.isReadyToShoot()),
+                      feed()),
+
+                  // Rotation + spinup run in parallel, get cancelled when feed finishes
+                  Commands.parallel(
+                      vision.rotateToAllianceTagWhileDriving(forwardInput, leftInput),
+                      Commands.waitSeconds(0.20).andThen(prepareShotCommand)))
+              .withTimeout(6.5); // safety fallback so auto never stalls
+        },
+        Set.of(vision, shooter, hood, feeder, floor, intake));
+  }
+
+  public Command autoAimAndShootTwo1() {
+    return Commands.defer(
+        () -> {
+          final PrepareShot prepareShotCommand =
+              new PrepareShot(shooter, hood, () -> swerve.getPose());
+
+          return Commands.race(
+                  // Race ends the whole thing once feed sequence completes
+                  Commands.sequence(
+                      Commands.waitUntil(
+                          () -> vision.isAimed() && prepareShotCommand.isReadyToShoot()),
+                      feed()),
+
+                  // Rotation + spinup run in parallel, get cancelled when feed finishes
+                  Commands.parallel(
+                      vision.rotateToAllianceTagWhileDriving(forwardInput, leftInput),
+                      Commands.waitSeconds(0.20).andThen(prepareShotCommand)))
+              .withTimeout(5.25); // safety fallback so auto never stalls
+        },
+        Set.of(vision, shooter, hood, feeder, floor, intake));
+  }
+
+  public Command autoAimAndShootTwo2() {
+    return Commands.defer(
+        () -> {
+          final PrepareShot prepareShotCommand =
+              new PrepareShot(shooter, hood, () -> swerve.getPose());
+
+          return Commands.race(
+                  // Race ends the whole thing once feed sequence completes
+                  Commands.sequence(
+                      Commands.waitUntil(
+                          () -> vision.isAimed() && prepareShotCommand.isReadyToShoot()),
+                      feed()),
+
+                  // Rotation + spinup run in parallel, get cancelled when feed finishes
+                  Commands.parallel(
+                      vision.rotateToAllianceTagWhileDriving(forwardInput, leftInput),
+                      Commands.waitSeconds(0.20).andThen(prepareShotCommand)))
+              .withTimeout(6.5); // safety fallback so auto never stalls
+        },
+        Set.of(vision, shooter, hood, feeder, floor, intake));
+  }
+
+  // THIS IS JANKY. Don't know why the original autoAimAndShoot doesn't work when ran a second time
+  // for auto, but this one does ¯\_(ツ)_/¯
+  public Command autoAimAndShoot2() {
+    return Commands.defer(
+        () -> {
+          final PrepareShot prepareShotCommand =
+              new PrepareShot(shooter, hood, () -> swerve.getPose());
+
+          return Commands.race(
+                  // Race ends the whole thing once feed sequence completes
+                  Commands.sequence(
+                      Commands.waitUntil(
+                          () -> vision.isAimed() && prepareShotCommand.isReadyToShoot()),
+                      feed()),
+
+                  // Rotation + spinup run in parallel, get cancelled when feed finishes
+                  Commands.parallel(
+                      vision.rotateToAllianceTagWhileDriving(forwardInput, leftInput),
+                      Commands.waitSeconds(0.20).andThen(prepareShotCommand)))
+              .withTimeout(5); // safety fallback so auto never stalls
+        },
+        Set.of(vision, shooter, hood, feeder, floor, intake));
+  }
+
+  public Command autoAimAndShootHalfCycle() {
+    return Commands.defer(
+        () -> {
+          final PrepareShot prepareShotCommand =
+              new PrepareShot(shooter, hood, () -> swerve.getPose());
+
+          return Commands.race(
+                  // Race ends the whole thing once feed sequence completes
+                  Commands.sequence(
+                      Commands.waitUntil(
+                          () -> vision.isAimed() && prepareShotCommand.isReadyToShoot()),
+                      feed()),
+
+                  // Rotation + spinup run in parallel, get cancelled when feed finishes
+                  Commands.parallel(
+                      vision.rotateToAllianceTagWhileDriving(forwardInput, leftInput),
+                      Commands.waitSeconds(0.20).andThen(prepareShotCommand)))
+              .withTimeout(3); // safety fallback so auto never stalls
+        },
+        Set.of(vision, shooter, hood, feeder, floor, intake));
+  }
+
+  private Command feedNoAgitate() {
+    return Commands.sequence(
+        Commands.parallel(
+            intake.rollCommand(),
+            feeder.feedCommand(),
+            floor.feedCommand())); // rollers spin, no pivot
+  }
+
+  public Command shuttleFuel() {
+    return Commands.defer(
+        () -> {
+          // Snapshot distance once when the command is composed
+          double distanceMeters = vision.getDistanceToAllianceWall().orElse(7.0);
+          double rpm = ShuttleCalculator.getShooterRPM(distanceMeters);
+          double hoodPos = ShuttleCalculator.getHoodPosition(distanceMeters);
+
+          return Commands.race(
+              // Branch 1: rotate to face alliance wall while driver can still translate
+              vision.rotateToShuttleHeadingWhileDriving(forwardInput, leftInput),
+
+              // Branch 2: spin up shooter + set hood, then wait until aimed, then feed
+              Commands.sequence(
+                  hood.positionCommand(hoodPos).alongWith(shooter.spinUpCommand(rpm)),
+                  Commands.waitUntil(() -> shooter.isVelocityWithinTolerance()),
+                  feed())); // feednoagitate() to revert
+        },
+        Set.of(swerve, vision, shooter, hood, feeder, floor, intake));
+  }
+
+  // If I had a nickel for every time we had to use this, I'd be rich.
   public Command shootManually() {
-    return shooter.dashboardSpinUpCommand().andThen(feed()).handleInterrupt(() -> shooter.stop());
+    return Commands.sequence(
+        shooter.dashboardSpinUpCommand(),
+        Commands.waitUntil(shooter::isVelocityWithinTolerance),
+        feed());
   }
 
+  /**
+   * Runs the full feed sequence:
+   *
+   * <p>1. Short settle delay — gives the flywheel a moment to recover from any load spike before
+   * the ball enters.
+   *
+   * <p>2. Feeder motor spins up to FEED speed.
+   *
+   * <p>3. After 0.35 s (once the ball is committed to the feeder) the floor and intake agitate in
+   * parallel to push the next game piece forward.
+   */
   private Command feed() {
     return Commands.sequence(
-        Commands.waitSeconds(0.25),
         Commands.parallel(
             feeder.feedCommand(),
-            Commands.waitSeconds(0.125)
-                .andThen(floor.feedCommand().alongWith(intake.agitateCommand()))));
+            Commands.waitSeconds(0.1)
+                .andThen(floor.feedCommand())
+                .alongWith(intake.agitateCommand())));
+  }
+
+  // I'm gonna remove this eventually since we never use it, but ya never know ig
+  public Command hoodUp() {
+    return hood.positionCommand(0.7);
+  }
+
+  public Command shootOrShuttle() {
+    return Commands.defer(
+        () -> {
+          double xInches = Units.metersToInches(swerve.getPose().getX());
+          boolean isBlueAlliance =
+              DriverStation.getAlliance().map(a -> a == DriverStation.Alliance.Blue).orElse(false);
+
+          // From the field diagram:
+          // Left wing:  x < 158.32 inches
+          // Right wing: x > 650.12 - 158.32 = 491.80 inches
+          final double WING_DEPTH_INCHES = 183;
+          final double FIELD_LENGTH_INCHES = 650.12;
+
+          boolean inLeftWing = xInches < WING_DEPTH_INCHES;
+          boolean inRightWing = xInches > (FIELD_LENGTH_INCHES - WING_DEPTH_INCHES);
+
+          // Shoot if we're in either red zone (our own alliance wing)
+          // Shuttle if we're in the middle section between the two wings
+          boolean inShootingZone = isBlueAlliance ? inLeftWing : inRightWing;
+
+          return inShootingZone ? aimAndShoot() : shuttleFuel();
+        },
+        Set.of(swerve, vision, shooter, hood, feeder, floor, intake));
+  }
+
+  // As requested by driver, front of robot faces tower. (Also prevents driver diff)
+  public Command alignTower() {
+    return vision.rotateToTower(forwardInput, leftInput);
+  }
+
+  // Uhhhh.. our robot goes vroom now, so this doesn't really apply anymore, keeping this around in
+  // case if something catastrophically wrong will happeng
+  public Command faceNearestBump() {
+    return Commands.defer(
+        () -> {
+          double currentDeg = swerve.getHeading().getDegrees();
+          double[] bumpAngles = {45.0, 135.0, 225.0, 315.0};
+          double nearest = bumpAngles[0];
+          double minDiff = Double.MAX_VALUE;
+
+          boolean isBlueAlliance =
+              DriverStation.getAlliance().map(a -> a == DriverStation.Alliance.Blue).orElse(false);
+
+          for (double angle : bumpAngles) {
+            double adjustedAngle =
+                isBlueAlliance ? MathUtil.inputModulus(angle + 180.0, 0, 360) : angle;
+
+            double diff = Math.abs(MathUtil.inputModulus(currentDeg - adjustedAngle, -180, 180));
+            if (diff < minDiff) {
+              minDiff = diff;
+              nearest = adjustedAngle;
+            }
+          }
+
+          return vision.rotateToHeadingWhileDriving(
+              forwardInput, leftInput, Rotation2d.fromDegrees(nearest));
+        },
+        Set.of(swerve, vision));
+  }
+
+  /** Force-feeds without any vision or shooter readiness check — unjams feeder. */
+  public Command manualFeed() {
+    return Commands.parallel(feeder.feedCommand(), floor.feedCommand());
+  }
+
+  /** Kills shooter and feeder immediately. */
+  public Command stopAll() {
+    return Commands.parallel(
+            shooter.stopCommand(), feeder.stopCommand(), floor.stopCommand(), intake.stopCommand())
+        .ignoringDisable(true);
+  }
+
+  public Command stopIntake() {
+    return Commands.parallel(intake.stopCommand());
+  }
+
+  public Command unjam() {
+    return Commands.parallel(
+        shooter.punchThroughCommand(), feeder.feedCommand(), floor.feedCommand());
+  }
+
+  public Command unjamShooter() {
+    return Commands.parallel(shooter.unjamShooter(), feeder.unfeedCommand());
+  }
+
+  public Command autoShoot() {
+    final PrepareShot prepareShotCommand = new PrepareShot(shooter, hood, () -> swerve.getPose());
+
+    return Commands.race(
+            Commands.waitSeconds(0.20).andThen(prepareShotCommand),
+            Commands.sequence(Commands.waitUntil(prepareShotCommand::isReadyToShoot), feed()))
+        .withTimeout(6.0);
   }
 }
