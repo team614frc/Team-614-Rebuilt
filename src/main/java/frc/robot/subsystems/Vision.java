@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -25,6 +27,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.VisionConstants;
@@ -136,7 +139,7 @@ public class Vision extends SubsystemBase {
 
     // Load field layout
     try {
-      fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
+      fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
     } catch (Exception ex) {
       System.err.println("[Vision] Could not load AprilTagFieldLayout: " + ex.getMessage());
       fieldLayout = null;
@@ -907,5 +910,33 @@ public class Vision extends SubsystemBase {
               drivebase.drive(new ChassisSpeeds(0, 0, 0));
               Logger.recordOutput("Climb/Active", false);
             });
+  }
+
+  public Command pathfindToClimb() {
+    Optional<Pose2d> maybeTarget = getClimbTargetPose();
+    if (maybeTarget.isEmpty()) return Commands.none();
+
+    return AutoBuilder.pathfindToPose(
+        maybeTarget.get(),
+        new PathConstraints(
+            2.0, // max velocity m/s — slow for precision
+            2.0, // max accel
+            Units.degreesToRadians(360),
+            Units.degreesToRadians(540)),
+        0.0 // goal end velocity
+        );
+  }
+
+  // In Vision.java
+  private Pose2d lastTrustedPose = null;
+
+  public void snapshotPoseBeforeTurn() {
+    // Call this via a NamedCommand right before the 180° rotation begins
+    Pose2d current = drivebase.getPose();
+    lastTrustedPose = current;
+    // Force-reset odometry to the vision-confirmed pose so drift starts from truth
+    if (lastEstimatedPose.isPresent()) {
+      drivebase.resetOdometry(lastEstimatedPose.get());
+    }
   }
 }

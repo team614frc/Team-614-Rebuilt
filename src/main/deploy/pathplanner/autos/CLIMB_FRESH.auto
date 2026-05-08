@@ -1,0 +1,37 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CLIMB_FRESH1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SnapshotPose"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CLIMB_FRESH2"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "MIDDLE_AUTOS",
+  "choreoAuto": false
+}

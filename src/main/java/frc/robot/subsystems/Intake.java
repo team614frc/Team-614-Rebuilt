@@ -180,6 +180,14 @@ public class Intake extends SubsystemBase {
         });
   }
 
+  public Command intakeCommandNoPivot() {
+    return startEnd(
+        () -> {
+          set(Speed.INTAKE);
+        },
+        () -> set(Speed.STOP));
+  }
+
   public void stop() {
     set(Position.INTAKE);
     set(Speed.STOP);
@@ -203,6 +211,10 @@ public class Intake extends SubsystemBase {
               set(Position.INTAKE);
               set(Speed.STOP);
             });
+  }
+
+  public Command rollCommand() {
+    return runOnce(() -> set(Speed.INTAKE)).handleInterrupt(() -> set(Speed.STOP));
   }
 
   public Command homingCommand() {

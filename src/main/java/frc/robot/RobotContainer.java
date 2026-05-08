@@ -234,6 +234,9 @@ public class RobotContainer {
     new EventTrigger("Climber Down").onTrue(hanger.positionCommand(Position.HUNG));
     new EventTrigger("Stop All").onTrue(subsystemCommands.stopAll());
     new EventTrigger("IntakeEvent").onTrue(intake.intakeAuto());
+    new EventTrigger("StopIntake").onTrue(subsystemCommands.stopIntake());
+    NamedCommands.registerCommand(
+        "SnapshotPose", Commands.runOnce(() -> vision.snapshotPoseBeforeTurn()));
 
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
@@ -273,7 +276,7 @@ public class RobotContainer {
     codriverXbox.y().onTrue(intake.runOnce(() -> intake.set(Intake.Position.STOWED)));
     codriverXbox.rightBumper().onTrue(feeder.feedCommand());
     codriverXbox.leftBumper().onTrue(hood.positionCommand(0.1));
-    codriverXbox.leftTrigger().whileTrue(subsystemCommands.manualFeed());
+    codriverXbox.leftTrigger().whileTrue(intake.intakeCommandNoPivot());
     codriverXbox.rightTrigger().whileTrue(subsystemCommands.shootManually());
     codriverXbox.a().onTrue(subsystemCommands.stopAll());
     codriverXbox.b().whileTrue(subsystemCommands.unjamShooter());

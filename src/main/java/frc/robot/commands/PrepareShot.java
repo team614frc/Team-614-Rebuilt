@@ -37,11 +37,18 @@ public class PrepareShot extends Command {
     // distanceToShotMap.put(Inches.of(110), new Shot(3900, 0.55));
     // distanceToShotMap.put(Inches.of(131), new Shot(3900, 0.7));
     // distanceToShotMap.put(Inches.of(183), new Shot(4350, 0.74));
-    distanceToShotMap.put(Inches.of(55), new Shot(3900, 0.10));
-    distanceToShotMap.put(Inches.of(90), new Shot(4050, 0.37));
-    distanceToShotMap.put(Inches.of(110), new Shot(4050, 0.55));
-    distanceToShotMap.put(Inches.of(131), new Shot(4050, 0.7));
-    distanceToShotMap.put(Inches.of(183), new Shot(4500, 0.74));
+
+    // distanceToShotMap.put(Inches.of(55), new Shot(3900, 0.10));
+    // distanceToShotMap.put(Inches.of(90), new Shot(4050, 0.37));
+    // distanceToShotMap.put(Inches.of(110), new Shot(4050, 0.55));
+    // distanceToShotMap.put(Inches.of(131), new Shot(4050, 0.7));
+    // distanceToShotMap.put(Inches.of(183), new Shot(4500, 0.74));
+
+    distanceToShotMap.put(Inches.of(55), new Shot(3690, 0.10));
+    distanceToShotMap.put(Inches.of(90), new Shot(3950, 0.37));
+    distanceToShotMap.put(Inches.of(110), new Shot(3950, 0.55));
+    distanceToShotMap.put(Inches.of(131), new Shot(3950d, 0.7));
+    distanceToShotMap.put(Inches.of(183), new Shot(4425, 0.74));
   }
 
   private final Shooter shooter;

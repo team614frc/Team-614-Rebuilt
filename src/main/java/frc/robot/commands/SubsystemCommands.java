@@ -206,6 +206,14 @@ public final class SubsystemCommands {
         Set.of(vision, shooter, hood, feeder, floor, intake));
   }
 
+  private Command feedNoAgitate() {
+    return Commands.sequence(
+        Commands.parallel(
+            intake.rollCommand(),
+            feeder.feedCommand(),
+            floor.feedCommand())); // rollers spin, no pivot
+  }
+
   public Command shuttleFuel() {
     return Commands.defer(
         () -> {
@@ -222,7 +230,7 @@ public final class SubsystemCommands {
               Commands.sequence(
                   hood.positionCommand(hoodPos).alongWith(shooter.spinUpCommand(rpm)),
                   Commands.waitUntil(() -> shooter.isVelocityWithinTolerance()),
-                  feed()));
+                  feed())); // feednoagitate() to revert
         },
         Set.of(swerve, vision, shooter, hood, feeder, floor, intake));
   }
@@ -250,8 +258,9 @@ public final class SubsystemCommands {
     return Commands.sequence(
         Commands.parallel(
             feeder.feedCommand(),
-            Commands.waitSeconds(0.35).andThen(floor.feedCommand()),
-            Commands.waitSeconds(1.5).andThen(intake.agitateCommand())));
+            Commands.waitSeconds(0.1)
+                .andThen(floor.feedCommand())
+                .alongWith(intake.agitateCommand())));
   }
 
   // I'm gonna remove this eventually since we never use it, but ya never know ig
@@ -329,6 +338,10 @@ public final class SubsystemCommands {
     return Commands.parallel(
             shooter.stopCommand(), feeder.stopCommand(), floor.stopCommand(), intake.stopCommand())
         .ignoringDisable(true);
+  }
+
+  public Command stopIntake() {
+    return Commands.parallel(intake.stopCommand());
   }
 
   public Command unjam() {

@@ -221,11 +221,11 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isAtGoal() {
-    return leftAtGoal && middleAtGoal && rightAtGoal;
+    return leftAtGoal || middleAtGoal || rightAtGoal;
   }
 
   public boolean isVelocityWithinTolerance() {
-    return leftLastTorque && middleLastTorque && rightLastTorque;
+    return leftLastTorque || middleLastTorque || rightLastTorque;
   }
 
   public long getBallCount() {

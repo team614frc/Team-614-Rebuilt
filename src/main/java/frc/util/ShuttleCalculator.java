@@ -25,11 +25,11 @@ public class ShuttleCalculator {
     HOOD_TABLE.put(11.0, 0.76);
 
     // distance (m) → shooter RPM
-    RPM_TABLE.put(3.0, 3900.0);
-    RPM_TABLE.put(5.0, 4500.0);
+    RPM_TABLE.put(3.0, 3300.0);
+    RPM_TABLE.put(5.0, 3700.0);
     RPM_TABLE.put(7.0, 4600.0);
-    RPM_TABLE.put(9.0, 4700.0);
-    RPM_TABLE.put(11.0, 5000.0);
+    RPM_TABLE.put(9.0, 5800.0);
+    RPM_TABLE.put(11.0, 5800.0);
   }
 
   private ShuttleCalculator() {}

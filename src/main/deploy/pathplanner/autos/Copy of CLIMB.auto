@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "HT_BACKUPANDSHOOT"
+            "pathName": "CLIMB_FRESH1"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 2.5
+            "waitTime": 2.25
           }
         },
         {
@@ -25,7 +25,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.5
+            "waitTime": 2.0
           }
         },
         {
@@ -37,25 +37,19 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.2
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
+            "waitTime": 3.5
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "HT_ROTATEANDCLIMB"
+            "pathName": "CLIMB_FRESH2"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": "MIDDLE_AUTOS",
   "choreoAuto": false
 }

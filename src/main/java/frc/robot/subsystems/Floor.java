@@ -28,7 +28,7 @@ public class Floor extends SubsystemBase {
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(120);
   private static final Current SUPPLY_CURRENT_LIMIT = Amps.of(20);
 
-  private static final double FEED_RPM = 3000; // 5500
+  private static final double FEED_RPM = 3500; // 5500
 
   private static final double KP = 1.0;
   private static final double KI = 0.0;
