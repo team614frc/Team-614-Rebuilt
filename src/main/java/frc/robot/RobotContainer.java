@@ -63,6 +63,10 @@ public class RobotContainer {
   private final CommandXboxController codriverXbox =
       new CommandXboxController(OperatorConstants.OPERATOR_CONTROLLER_PORT);
 
+  // The outreach controller
+  private final CommandXboxController outreachXbox =
+      new CommandXboxController(OperatorConstants.OUTREACH_CONTROLLER_PORT);
+
   private final AllianceShiftMonitor shiftMonitor = new AllianceShiftMonitor(driverXbox);
 
   // The autonomous chooser
@@ -282,6 +286,10 @@ public class RobotContainer {
     codriverXbox.b().whileTrue(subsystemCommands.unjamShooter());
     codriverXbox.x().onTrue(intake.stopPivotCommand());
     codriverXbox.start().onTrue(intake.homingCommand());
+
+    outreachXbox.rightTrigger().whileTrue(subsystemCommands.shootOrShuttle());
+    outreachXbox.leftTrigger().whileTrue(intake.intakeCommand());
+    outreachXbox.start().onTrue(Commands.runOnce(swerve::zeroGyro));
   }
 
   /**
