@@ -1,9 +1,12 @@
 package frc.robot;
 
+import java.io.File;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 import com.pathplanner.lib.util.FlippingUtil;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -33,7 +36,6 @@ import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Vision;
 import frc.util.AllianceShiftMonitor;
 import frc.util.FuelSim;
-import java.io.File;
 import swervelib.SwerveInputStream;
 
 /**
@@ -91,6 +93,17 @@ public class RobotContainer {
           .deadband(OperatorConstants.DEADBAND)
           .scaleTranslation(0.95)
           .allianceRelativeControl(true);
+
+          //Outreach drive input stream (for outreach controller)
+          SwerveInputStream outreachDrive =
+    SwerveInputStream.of(
+            swerve.getSwerveDrive(),
+            () -> -outreachXbox.getLeftY(),
+            () -> -outreachXbox.getLeftX())
+        .withControllerRotationAxis(() -> -outreachXbox.getRightX())
+        .deadband(OperatorConstants.DEADBAND)
+        .scaleTranslation(0.5)
+        .allianceRelativeControl(true);
 
   private final SubsystemCommands subsystemCommands;
 
@@ -261,6 +274,9 @@ public class RobotContainer {
   private void configureBindings() {
     Command driveFieldOrientedAnglularVelocity = swerve.driveFieldOriented(driveAngularVelocity);
     swerve.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+
+    outreachXbox.rightStick().whileTrue(
+    swerve.driveFieldOriented(outreachDrive));
 
     RobotModeTriggers.autonomous()
         .or(RobotModeTriggers.teleop())
