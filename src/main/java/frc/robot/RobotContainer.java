@@ -92,17 +92,6 @@ public class RobotContainer {
           .scaleTranslation(0.95)
           .allianceRelativeControl(true);
 
-  // Outreach drive input stream (for outreach controller)
-  SwerveInputStream outreachDriveAngularVelocity =
-      SwerveInputStream.of(
-              swerve.getSwerveDrive(),
-              () -> -outreachXbox.getLeftY(),
-              () -> -outreachXbox.getLeftX())
-          .withControllerRotationAxis(() -> -outreachXbox.getRightX())
-          .deadband(OperatorConstants.DEADBAND)
-          .scaleTranslation(0.5)
-          .allianceRelativeControl(true);
-
   private final SubsystemCommands subsystemCommands;
 
   private void configureFuelSim() {
@@ -270,20 +259,8 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    if (driverXbox.isConnected()) {
     Command driveFieldOrientedAnglularVelocity = swerve.driveFieldOriented(driveAngularVelocity);
     swerve.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-
-    swerve.setDefaultCommand(
-        Commands.run(
-            () -> {
-              if (driverXbox.isConnected()) {
-                swerve.driveFieldOriented(driveAngularVelocity).execute();
-              } else {
-                swerve.driveFieldOriented(outreachDriveAngularVelocity).execute();
-              }
-            },
-            swerve));
 
     RobotModeTriggers.autonomous()
         .or(RobotModeTriggers.teleop())

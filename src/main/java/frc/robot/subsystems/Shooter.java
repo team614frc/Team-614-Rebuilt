@@ -60,8 +60,6 @@ public class Shooter extends SubsystemBase {
   private final VelocityDutyCycle middleIdleRequest = new VelocityDutyCycle(0).withSlot(1);
   private final VelocityDutyCycle rightIdleRequest = new VelocityDutyCycle(0).withSlot(1);
 
-  private static final double IDLE_RPM = 2000.0;
-
   private final VelocityTorqueCurrentFOC leftTorqueRequest =
       new VelocityTorqueCurrentFOC(0).withSlot(0);
   private final VelocityTorqueCurrentFOC middleTorqueRequest =
@@ -277,7 +275,7 @@ public class Shooter extends SubsystemBase {
     if (leftTargetRPM == 0) {
       leftTorqueDebouncer.calculate(false);
       leftAtGoalDebouncer.calculate(false);
-      leftMotor.setControl(leftIdleRequest.withVelocity(RPM.of(IDLE_RPM))); // gentle PID idle
+      leftMotor.setControl(neutralRequest); // gentle PID idle
       leftLastTorque = false;
       leftAtGoal = false;
     } else {
@@ -297,7 +295,7 @@ public class Shooter extends SubsystemBase {
     if (middleTargetRPM == 0) {
       middleTorqueDebouncer.calculate(false);
       middleAtGoalDebouncer.calculate(false);
-      middleMotor.setControl(middleIdleRequest.withVelocity(RPM.of(IDLE_RPM)));
+      middleMotor.setControl(neutralRequest);
       middleLastTorque = false;
       middleAtGoal = false;
     } else {
@@ -317,7 +315,7 @@ public class Shooter extends SubsystemBase {
     if (rightTargetRPM == 0) {
       rightTorqueDebouncer.calculate(false);
       rightAtGoalDebouncer.calculate(false);
-      rightMotor.setControl(rightIdleRequest.withVelocity(RPM.of(IDLE_RPM)));
+      rightMotor.setControl(neutralRequest);
       rightLastTorque = false;
       rightAtGoal = false;
     } else {
