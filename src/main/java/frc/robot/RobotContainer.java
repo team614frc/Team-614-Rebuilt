@@ -287,7 +287,7 @@ public class RobotContainer {
     codriverXbox.x().onTrue(intake.stopPivotCommand());
     codriverXbox.start().onTrue(intake.homingCommand());
 
-    outreachXbox.rightTrigger().whileTrue(subsystemCommands.shootOrShuttle());
+    outreachXbox.rightTrigger().whileTrue(subsystemCommands.shootManually());
     outreachXbox.leftTrigger().whileTrue(intake.intakeCommand());
     outreachXbox.start().onTrue(Commands.runOnce(swerve::zeroGyro));
   }
